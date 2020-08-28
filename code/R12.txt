@@ -1,0 +1,249 @@
+					R12
+
+				  Distances and 
+				k-Means Clustering
+
+# Alternative Distance Measures
+
+
+x1 <- c(1, 2, 3, 4, 7, 8, 10)
+x2 <- c(8, 2, 3, 1, 11, 8, 10)
+X <- cbind(x1, x2)
+plot(X, pch=16)
+identify(X, labels=1:7)
+
+X
+dist(X)		# default - Euclidean (2 norm)
+sqrt((1-2)^2+(8-2)^2)	# d(1,2)
+
+dist(X, method="manhattan")	# 1 norm
+abs(1-2)+abs(8-2)	# d(1,2)
+
+dist(X, method="maximum")	# sup (infinity) norm
+max(abs(1-2),abs(8-2))	# d(1,2)
+
+dist(X, method="minkowski", p = 3)	# 3 norm
+(abs(1-2)^3+abs(8-2)^3)^(1/3)	# d(1,2)
+
+
+pairs(swiss, pch=16)
+swiss.d2 <- dist(scale(swiss))
+swiss.hc.c2 <- hclust(swiss.d2, method="complete")
+plot(swiss.hc.c2)
+pairs(swiss, pch=16, col=cutree(swiss.hc.c2, 4))
+
+swiss.d1 <- dist(scale(swiss), "manhattan")
+swiss.hc.c1 <- hclust(swiss.d1, method="complete")
+plot(swiss.hc.c1)
+pairs(swiss, pch=16, col=cutree(swiss.hc.c1, 4))
+
+swiss.pca <- prcomp(swiss, scale=T)
+pairs(swiss.pca$x, pch=16, col=cutree(swiss.hc.c1, 4))
+rgl.clear()
+rgl.spheres(swiss.pca$x[,1],swiss.pca$x[,2],swiss.pca$x[,3],
+	radius=.1, color=cutree(swiss.hc.c1,4))
+
+
+swiss.dsup <- dist(scale(swiss), "maximum")
+swiss.hc.csup <- hclust(swiss.d1, method="complete")
+plot(swiss.hc.csup)
+pairs(swiss, pch=16, col=cutree(swiss.hc.csup, 4))
+
+pairs(swiss.pca$x, pch=16, col=cutree(swiss.hc.csup, 4))
+rgl.clear()
+rgl.spheres(swiss.pca$x[,1],swiss.pca$x[,2],swiss.pca$x[,3],
+	radius=.1, color=cutree(swiss.hc.csup,4))
+
+# Compare assignments from different distances
+
+table(data.frame(c2=cutree(swiss.hc.c2,4),c1=cutree(swiss.hc.c1,4)))
+
+
+# Natural Modality: Bimodal vs Unimodal
+
+library(MASS)
+mu1 <- c(3,3)
+mu2 <- c(6,6)
+Sigma1 <- matrix(c(1,0,0,1),nrow=2)
+bimodal <- rbind(mvrnorm(25,mu=mu1,Sigma=Sigma1),mvrnorm(25,mu=mu2,Sigma=Sigma1))
+plot(bimodal, pch=16)
+
+mu3 <- c(4.5, 4.5)
+Sigma2 <- matrix(c(2.25,1.5,1.5,2.25),nrow=2)
+unimodal <- mvrnorm(50, mu=mu3, Sigma=Sigma2)
+plot(unimodal, pch=16)
+
+
+bim.d2 <- dist(bimodal)
+unim.d2 <- dist(unimodal)
+
+plot(hclust(bim.d2, method="complete"))
+plot(hclust(unim.d2, method="complete"))
+
+plot(hclust(bim.d2, method="single"))
+plot(hclust(unim.d2, method="single"))
+
+plot(hclust(bim.d2, method="ward"))
+plot(hclust(unim.d2, method="ward"))
+
+
+bim.d1 <- dist(bimodal, "manhattan")
+unim.d1 <- dist(unimodal, "manhattan")
+
+plot(hclust(bim.d1, method="complete"))
+plot(hclust(unim.d1, method="complete"))
+
+plot(hclust(bim.d1, method="single"))
+plot(hclust(unim.d1, method="single"))
+
+plot(hclust(bim.d1, method="ward"))
+plot(hclust(unim.d1, method="ward"))
+
+
+# Kth Nearest Neighbor Density Distance
+
+source("F:/S5600/knn.dist.txt")
+
+bim.dk.10 <- knn.dist(bimodal, 10)
+unim.dk.10 <- knn.dist(unimodal, 10)
+
+plot(hclust(bim.dk.10, method="single"))
+plot(hclust(unim.dk.10, method="single"))
+
+
+bim.dk.5 <- knn.dist(bimodal, 5)
+unim.dk.5 <- knn.dist(unimodal, 5)
+
+plot(hclust(bim.dk.5, method="single"))
+plot(hclust(unim.dk.5, method="single"))
+
+
+# K Means Clustering
+
+x1 <- c(1, 2, 3, 4, 7, 8, 10)
+x2 <- c(8, 2, 3, 1, 11, 8, 10)
+X <- cbind(x1, x2)
+plot(X, pch=16)
+identify(X, labels=1:7)
+
+
+X.km <- kmeans(X,2)
+
+X.km
+
+points(X,pch=16, col=X.km$cluster)
+points(X.km$centers, col=1:2, pch=3)
+
+
+
+plot(unimodal, pch=16)
+uni.3m1 <- kmeans(unimodal,3)	# Random starts - 
+uni.3m2 <- kmeans(unimodal,3)	# different answers
+
+points(unimodal, pch=21, col=uni.3m1$cluster, bg=uni.3m2$cluster)
+
+table(data.frame(km1=uni.3m1$cluster,km2=uni.3m2$cluster))
+
+
+swiss.4m1 <- kmeans(scale(swiss), 4)
+pairs(swiss, pch=16, col=swiss.4m1$cluster)
+
+rgl.clear()
+rgl.spheres(swiss.pca$x[,1],swiss.pca$x[,2],swiss.pca$x[,3],
+	radius=.1, color=swiss.4m1$cluster)
+
+swiss.4m1$withinss
+sum(swiss.4m1$withinss)
+
+swiss.4m2 <- kmeans(scale(swiss), 4)
+pairs(swiss, pch=21, col=swiss.4m1$cluster, bg=swiss.4m2$cluster)
+
+table(data.frame(km1=swiss.4m1$cluster,km2=swiss.4m2$cluster))
+
+
+rgl.clear()
+rgl.spheres(swiss.pca$x[,1],swiss.pca$x[,2],swiss.pca$x[,3],
+	radius=.1, color=swiss.4m2$cluster)
+
+swiss.4m2$withinss
+sum(swiss.4m2$withinss)
+
+swiss.4m <- kmeans(scale(swiss), 4, nstart=25)
+	# 25 random starts, keep the best
+
+sum(swiss.4m$withinss)
+pairs(swiss, pch=16, col=swiss.4m$cluster)
+rgl.clear()
+rgl.spheres(swiss.pca$x[,1],swiss.pca$x[,2],swiss.pca$x[,3],
+	radius=.1, color=swiss.4m$cluster)
+
+# Number of clusters?  "Pseudo-F" Statistic
+
+source("E:/S5600/pseudoF.txt")
+
+pseudoF(scale(swiss), 2:6)
+
+swiss.3m <- kmeans(scale(swiss), 3)
+sum(swiss.3m$withinss)
+
+pairs(swiss, pch=16, col=swiss.3m$cluster)
+
+rgl.clear()
+rgl.spheres(swiss.pca$x[,1],swiss.pca$x[,2],swiss.pca$x[,3],
+	radius=.1, color=swiss.3m$cluster)
+
+# Compare to hierarchical results
+
+swiss.hc.w <- hclust(dist(scale(swiss)), "ward")
+plot(swiss.hc.w)
+
+table(data.frame(km3=swiss.3m$cluster,hc3=cutree(swiss.hc.w,3)))
+
+# Interpretations
+
+pairs(swiss.3m$centers, pch=16, col=1:3)
+swiss.3m$centers
+
+# Predictions
+
+bim.2m <- kmeans(bimodal, 2)
+
+plot(bimodal, pch=16, col = bim.2m$cluster)
+points(bim.2m$centers, pch=3, col=1:2)
+
+points(unimodal, col=3)
+
+source("E:/S5600/predict.kmeans.txt")
+
+pred.uni.bim <- predict.kmeans(bim.2m, unimodal)
+pred.uni.bim
+
+points(unimodal, col=pred.uni.bim)
+
+# Validation
+
+iris0 <- iris[,1:4]
+
+s <- sample(150, 75)
+
+iris1 <- iris0[s,]	# Calibration Set
+
+iris2 <- iris0[-s,]	# Validation Set
+
+pseudoF(iris1, 2:6)
+
+iris1.3m <- kmeans(iris1, 3, 25)
+pairs(iris1.3m, pch=16, col=iris1.3m$cluster)
+
+pred.iris2.iris1 <- predict.kmeans(iris1.3m, iris2)
+iris2.3m <- kmeans(iris2, 3, 25)
+
+pairs(iris2, pch=21, col=iris2.3m$cluster, bg=pred.iris2.iris1)
+
+table(data.frame(S1=pred.iris2.iris1,S2=iris2.3m$cluster))
+
+iris1.2m <- kmeans(iris1, 2, 25)
+pred.iris2.iris1 <- predict.kmeans(iris1.2m, iris2)
+iris2.2m <- kmeans(iris2, 2, 25)
+pairs(iris2, pch=21, col=iris2.2m$cluster, bg=pred.iris2.iris1)
+table(data.frame(S1=pred.iris2.iris1,S2=iris2.2m$cluster))

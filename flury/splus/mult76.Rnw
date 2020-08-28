@@ -1,0 +1,163 @@
+
+S-PLUS instructions for Section 7.6
+***********************************
+
+last updated: june 17, 1997
+
+
+This unit illustrates the computations needed in logistic regression.
+Since simple logistic regression is a special case of multiple logistic
+regression, no instructions are given for Section 7.5. However, it is
+a very good exercise for the student who is not familiar with numerical
+maximization techniques to program the Newton-Raphson algorithm for
+the simple logistic regression model and to test the program using
+Example 7.5.4; the formulas needed are (11), (12), (13), and (18) from
+Section 7.5. Here we will use the more convenient matrix notation
+of equations (13) to (20) of Section 7.6. The procedure LOGISTIC
+given below requires as input the design matrix X, the vector of
+observed frequencies y, and a vector M whose entries are the numbers
+of trials associated with the observed frequencies y. The procedure
+automatically initializes the parameter vector beta and does the
+Newton-Raphson iterations until a convergence criterion is met. Here,
+the convergence criterion is that the parameter values differ by
+at most 10^(-20) in two successive iterations. The procedure returns
+a vector beta (estimated coefficients), the estimated covariance
+matrix of the parameter estimates, (i.e., the inverse of the
+information function evaluated at the maximum), the deviance of the
+fitted model, and a vector prob (the estimated success probabilities).
+
+Here are some remarks on the LOGISTIC procedure.
+
+1. The procedure displays the current value of the parameter vector
+   as well as the current value of the log-likelihood function (7) in
+   each iteration, producing results like those displayed in Table 7.6.2.
+   If you don't want to see the protocol of the Newton-Raphson algorithm,
+   just delete the proper line in the procedure, or comment it out.
+
+2. In equation (16), a diagonal matrix W is defined. For the actual
+   computations it is faster to use a vector (called Wvect in the
+   program) because the diagonal matrix W will be large when N is large.
+
+3. As mentioned in the text following equation (23), there will be a
+   difficulty in the computation of the deviance when some of the
+   observed frequencies are zero, or equal to the number of trials.
+   Therefore the expression "z log(z)" is computed as "log(z^z)", which
+   works because S-PLUS assigns the value 1 to the expression 0^0.
+
+Before starting any calculations, store the procedure in a file and
+execute the file, or put it into a library. For illustration, we
+show how to generate the numerical results of Example 7.6.1
+(vasoconstriction data). First read the data file:
+
+> rawdat <- matrix(scan("c:\\multidat\\tab76_1.dat"), ncol = 3, byrow = T)
+
+Next, generate the design matrix. If you want the logistic regression
+model to contain an intercept (which will usually be the case), you
+need to remember to make the first column of the design matrix a
+vector of 1's. The two regressor variables in the example are the
+first two columns of Table 7.6.1; therefore, the design matrix can
+be constructed as
+
+> X <- cbind(matrix(1,39,1),rawdat[, 1:2])
+
+Successes and failures are coded as 1 and 0 in the third column of
+Table 7.6.1; thus define
+
+> y <- rawdat[, 3]
+
+Finally, we need a vector whose entries are the numbers of trials
+associated with each of the 39 observations; in this example there
+is one trial per observation, and therefore the vector M is most
+easily defined by
+
+> M <- matrix(1, 39, 1)
+
+Now invoke the logistic procedure:
+
+> results <- logistic(X, y, M)
+
+Unless you have deleted the line in the logistic procedure which
+produces a protocol of the Newton-Raphson algorithm, you should
+see the result of Table 7.6.2 on the screen.
+
+Display the results, i.e, the values of beta, Sigma, deviance, and prob.
+The procedure returns the estimated covariance matrix (called Sigma)
+rather than individual standard errors of the parameter estimates.
+However, standard errors and Wald-statistics are easily computed by
+
+> stderr <- sqrt(diag(results$Sigma))
+> wald <- results$beta / stderr
+
+You may want to display the results in form of a table similar to
+those given in Examples 7.6.3 to 7.6.5:
+
+> tab <- cbind(results$beta, stderr, wald)
+> tab
+
+Hopefully you are impressed by the speed of the algorithm. It is
+instructive (and fun) to "watch" the protocol of the Newton-Raphson
+algorithm in a case where convergence is not reached, such as
+Example 7.5.5.
+
+
+*****************************  CUT HERE  ***********************************  
+
+logistic <- function(X, y, M)
+{
+#  procedure logistic
+#  procedure logistic
+
+# input:        X   design matrix, with N rows, assumed to have full
+#                   column rank. Note: If you want the model to contain
+#                   an intercept term, the first column of X should be
+#                   a vector of 1's.
+#               y   N-vector, numbers of successes
+#               M   N-vector, numbers of trials
+
+# output:       beta   estimated logistic regression coefficients
+#               Sigma   estimated covariance matrix of the parameter
+#               estimates
+#               deviance   deviance of the fitted model
+#               prob   N-vector of estimated success probabilities
+N <- dim(X)[1]                                     # number of observations
+eps <- 10^(-10)                                 # set convergence criterion
+dif <- 1                               # initial test value for convergence
+beta <- matrix(0, dim(X)[2], 1)               # initialize parameter vector
+it <- 0                                 # initialize counter for iterations
+while (dif > eps)                      # start iterations of Newton-Raphson
+{
+prob <- exp(X %*% beta) / (1 + exp(X %*% beta))      # update probabilities
+loglik <- apply(y * log(prob) + (M-y) * log(1-prob), 2, sum)
+                                         # evaluate log-likelihood function
+
+#  comment next 2 lines out if you don't want a protocol of the algorithm    
+cat(format(c(it, t(beta), loglik), justify = "right"),
+fill = 60)		  # display values of parameters and log-likelihood
+
+it <- it + 1                                   # increase iteration counter
+betaold <- beta                       # store old value of parameter vector
+e <- M * prob                              # estimated expected frequencies
+score <- t(X) %*% (y-e)                                    # score function
+Wvect <- M * prob * (1-prob)                         # diagonal of matrix W
+info <- t(X) %*% cbind(Wvect * X[,1], Wvect * X[,2], Wvect * X[,3])
+						     # information function
+
+beta <- beta + solve(info) %*% score                          # update beta
+dif <- max(abs(beta-betaold))             # max. difference between old and
+                                                     # new parameter values
+}                                                       # end of iterations
+Sigma <- solve(info)                          # estimated covariance matrix
+lmax <- sum(log((y/M)^y) + log( ((M-y)/M)^(M-y)))                # value of
+                              # log-likelihood function for saturated model
+
+deviance <- 2 * (lmax - loglik)                                  # deviance
+results <- list("beta" = beta, "Sigma" = Sigma, "deviance" = deviance,
+"prob" = prob)
+results
+}
+#  end of procedure LOGISTIC 
+#  end of procedure LOGISTIC  
+
+*******************************  CUT HERE  *********************************
+
+

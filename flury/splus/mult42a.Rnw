@@ -1,0 +1,118 @@
+
+S-PLUS instructions for Chapter 4.2, part A (plug--in estimates)
+****************************************************************
+
+last updated: june 18, 1997
+
+
+This unit discusses the computation of mean vectors and covariance matrices.
+We will again use the midge data for illustration. We will use the notation
+of formulas (16) to (19), where D is the data matrix. To begin, read
+the data and do the calculations for group Af. To begin, read the data and
+do the calculations for group Af. For numerical convenience, the raw data is
+multiplied by 100. 
+
+> rawdat <- matrix(scan("c:\\multidat\\tab1_1.dat"), ncol = 3, byrow = T)
+> D <- 100 * rawdat[1:9, 2:3]
+> N <- dim(D)[1]
+
+To compute the mean vector, we define a column vector of ones and then use
+(17):
+
+> onesN <- rep(1, N)
+< xbar <- t(D) %*% onesN / N
+
+This would actually be easier using the S-PLUS function apply:
+
+> xbar <- apply(Af, 2, sum) / N
+
+or, equivalently,
+
+> xbar <- apply(Af, 2, mean)
+
+The mean-centered data matrix is 
+
+> Dc <- D - onesN %*% t(xbar)
+
+and the plug-in estimate (and normal theory maximum likelihood estimate) of
+the covariance matrix is
+
+> SP <- t(Dc) %*% Dc / N
+
+For the unbiased estimate, use
+
+> S <- t(Dc) %*% Dc / (N-1)
+
+Here is an alternative way to compute a covariance matrix. In S-PLUS you can
+subtract a (1 by p) vector from an (N by p) matrix using the "sweep"
+function; the subtraction is done for each row of the matrix. That is, you
+can compute the centered data matrix as
+
+> Dc <- sweep(D, 2, xbar)
+
+and the plug-in estimate of the covariance matrix as
+
+> SP <- t(Dc) %*% Dc / N
+
+For the unbiased version we can use
+
+> SP <- t(Dc) %*% Dc / (N-1)
+
+However, it will be more convenient to use the inbuilt S-PLUS function cov
+to achieve the same result:
+
+> S <- var(D)
+
+If you wish to use the S-PLUS function var to compute the plug-in (or normal
+theory maximum likelihood) estimate of a covariance matrix, use
+
+> SP = (N-1) * var(D) / N
+
+(note that to multiply a matrix by a scalar you need to use "*" instead of
+"%*%"). To compute a correlation matrix according to equation (13), we
+could use the following commands. (Look into Help for any command you do not
+understand, and explain why this method would work. Display intermediate
+results to understand the calculations).
+
+> std <- sqrt(diag(S))
+> Shalfinv <- diag(1 / std, nrow = length(std))
+> R <- Shalfinv %*% S %*% Shalfinv
+
+A more elegant version is as follows:
+
+> std <- sqrt(diag(S))
+> R <- S / (std %*% t(std))
+
+To understand why this works, you need to know that the "diag" function of
+S-PLUS (unlike the "diag" operator in the book) returns a column vector
+containing the diagonal entries of a matrix, and "/" is an
+element-by-element division of two matrices. It is again more convenient to
+use S-PLUS functions: to compute a correlation matrix from the data matrix D
+use (as we have seen already in chapter 1)
+
+> R <- cor(D)
+
+Finally, let us see how a pooled sample covariance matrix (as in equation
+(15)) can be computed. This is fairly simple and requires no
+explanation. At the same time, the following sequence of commands computes
+and displays the groupwise mean vectors, covariance matrices, correlation
+matrices, and the correlation matrix associated with the pooled sample
+covariance matrix. Assume that we start all over, i.e., first read the raw
+data file.
+
+> Af <- 100 * rawdat[1:9, 2:3]
+> N1 <- 9
+> Apf <- 100 * rawdat[10:15, 2:3]
+> N2 <- 6
+> xbar1 <- apply(Af, 2, mean)
+> xbar1
+> S1 <- var(Af)
+> S1
+> cor(Af)
+> xbar2 <- apply(Apf, 2, mean)
+> xbar2
+> S2 <- var(Apf)
+> S2
+> cor(Apf)
+> Spool <- ((N1-1) * S1 + (N2-1) * S2 ) / (N1+N2-2)
+> Spool

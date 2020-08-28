@@ -1,0 +1,214 @@
+
+
+\section{Preliminaries and exploratory data analysis}
+
+Consider some data from Manly (you will need to get the file from the portal), OR try this with an example from Johnson and Wichern.   A link to their data is given in the portal.
+
+\begin{Schunk}
+\begin{Sinput}
+> econ.df <- read.csv("econ.csv", row.names = 1)
+> econ <- econ.df[, -10]
+> econ.cor <- cor(econ)
+> econ.ev <- eigen(econ.cor)
+\end{Sinput}
+\end{Schunk}
+
+\section{PRINCIPAL COMPONENT EXTRACTION}
+
+Extracts loadings, uniqueness and residuals for 4 factors based on principal component extraction.
+
+\begin{Schunk}
+\begin{Sinput}
+> loadings4 <- matrix(0, 9, 4)
+> for (i in 1:4) {
++     loadings4[, i] <- sqrt(econ.ev$values[i]) * econ.ev$vectors[, 
++         i]
++ }
+> LLt <- loadings4 %*% t(loadings4)
+> unique <- diag(econ.cor - LLt)
+> error <- econ.cor - (LLt + unique)
+\end{Sinput}
+\end{Schunk}
+
+\begin{itemize}
+  \item Now consider how to amend this code to give you a two or three factor solution.
+\end{itemize}
+    
+    
+\subsection{RESULTS FROM PRINCIPAL COMPONENT EXTRACTION}
+
+The following labels the loadings for ease of use
+
+\begin{Schunk}
+\begin{Sinput}
+> row.names(loadings4) <- row.names(econ.cor)
+\end{Sinput}
+\end{Schunk}
+The following gives us the values
+
+\begin{Schunk}
+\begin{Sinput}
+> loadings4
+> unique
+> error
+\end{Sinput}
+\end{Schunk}
+
+The following extracts the eigenvalues, and then calculates the proportion and cumulative proportion of variance explained by each component (for 9 variables)
+
+
+\begin{Schunk}
+\begin{Sinput}
+> econ.ev$values
+> econ.ev$values/0.09
+> cumsum(econ.ev$values/0.09)
+\end{Sinput}
+\end{Schunk}
+
+The following calculates the communalities
+
+\begin{Schunk}
+\begin{Sinput}
+> apply(loadings4^2, 1, sum)
+\end{Sinput}
+\end{Schunk}
+
+The following carries out a rotation (you should also consider promax rotation)
+
+\begin{Schunk}
+\begin{Sinput}
+> varimax(loadings4)
+\end{Sinput}
+\end{Schunk}
+
+\section{PRINCIPAL FACTORING WITH ITERATION}
+
+This is rather crude code, but it lets you see what's going on (i.e. try this once and then forget it)
+
+Firstly, an initial estimate of the uniquenesses (can you explain what's going on here?)
+
+
+\begin{Schunk}
+\begin{Sinput}
+> r2s <- vector("numeric", 9)
+> for (i in 1:9) {
++     y <- econ[, i]
++     x <- econ[, -i]
++     mod <- lm(y ~ as.matrix(x))
++     r2s[i] <- summary(mod)$r.squared
++ }
+> unique <- diag(1 - r2s)
+> diag(unique)
+\end{Sinput}
+\end{Schunk}
+
+
+The following step requires to be repeated until the values of the uniquenesses and the loadings converge (10 - 20 runs will do for now).   Type this code in a text editor and paste it all in as one (when you have it working).
+
+
+\begin{Schunk}
+\begin{Sinput}
+> new <- econ.cor - unique
+> new.ev <- eigen(new)
+> loadings4pf <- matrix(0, 9, 4)
+> for (i in 1:4) {
++     loadings4pf[, i] <- sqrt(new.ev$values[i]) * new.ev$vectors[, 
++         i]
++ }
+> LLt <- loadings4pf %*% t(loadings4pf)
+> unique.f <- econ.cor - LLt
+> diag(unique) <- diag(unique.f)
+> diag(unique)
+> loadings4pf
+\end{Sinput}
+\end{Schunk}
+
+Repeat that until you get convergence in the loadings estimates.   If
+you get convergence in the loadings estimates (one of the pitfalls of
+this technique)
+
+
+\section{MAXIMUM LIKELIHOOD SOLUTION}
+
+For our purposes, we will trust R to do the optimisation.  In other
+words, to carry out the analysis we need one line of code!!!!!!!!!!!!)
+
+\begin{Schunk}
+\begin{Sinput}
+> econ.fact <- factanal(econ, factors = 4, rotation = "none")
+> econ.fact
+\end{Sinput}
+\end{Schunk}
+
+Extract the loadings, calculate the uniquenesses, calculate the residuals
+
+\begin{Schunk}
+\begin{Sinput}
+> loadml <- loadings(econ.fact)
+> loadml
+> class(loadml) <- "matrix"
+> uniqueml <- econ.fact$uniquenesses
+> resid <- econ.cor - (loadml %*% t(loadml) + diag(uniqueml))
+> resid
+\end{Sinput}
+\end{Schunk}
+
+Calculate the communalities
+
+\begin{Schunk}
+\begin{Sinput}
+> apply(loadml^2, 1, sum)
+\end{Sinput}
+\end{Schunk}
+
+\section{PLOTTING THE ROTATIONS}
+
+In case it helps, you could try plotting the rotations (the code here
+illustrates the pcfa method), with numbers
+for the unrotated loadings and letters for the rotated loadings.
+
+\begin{Schunk}
+\begin{Sinput}
+> plot(loadings4[, c(1:2)], pch = as.character(c(1:9)), xlab = expression(paste(gamma, 
++     "1")), ylab = expression(paste(gamma, "2")), main = "First and second loadings", 
++     xlim = c(-1, 1), ylim = c(-1, 1))
+> points(varimax(loadings4)$loadings[, c(1:2)], pch = letters[c(1:9)], 
++     col = "red")
+> abline(h = 0)
+> abline(v = 0)
+\end{Sinput}
+\end{Schunk}
+\includegraphics{week11fa-plotloadings}
+
+
+\begin{itemize}
+\item Do this for maximum likelihood method
+\end{itemize}
+
+
+\begin{itemize}
+  \item How do you interpret the loadings??????
+    \end{itemize}
+
+
+
+
+\section{Summary}
+
+\fbox{\parbox[c]{0.9\textwidth}{\color{blue}
+We have left factor analysis until last - you should be very clear that despite some superficial similarities it is a very different technique to p.c.a.   By the end of this week we should:
+
+\begin{itemize}
+\item Understand the role of factor analysis as a means of explaining the relationships between variables in a given dataset
+\item Be able to interpret the results (loadings) of a particular factor analysis, aided or not by rotations
+\item To explain the difference between p.c.a. based and maximum likelihood based methods of factor analysis
+  \item To interpret the ``signficance'' of solutions of different size, and to justify the use of a particular size solution in all cases
+ \end{itemize}
+
+
+
+}}
+
+
+
+

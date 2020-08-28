@@ -1,0 +1,496 @@
+\chapter{Extensions to Principal Component Methods}
+
+
+Gnanadesikan's Generalised PCA
+
+X <- iris[,-5]
+
+
+X[,5] <- X[,1]^2
+X[,6] <- X[,2]^2
+X[,7] <- X[,3]^2
+X[,8] <- X[,4]^2
+
+X[,9] <- X[,2] * X[,1]
+X[,10] <- X[,3] * X[,1]
+X[,11] <- X[,4] * X[,1]
+X[,12] <- X[,3] * X[,2]
+X[,13] <- X[,4] * X[,2]
+X[,14] <- X[,4] * X[,3]
+
+p <- prcomp(X, scale = TRUE)
+
+plot(p$x[,1], p$x[,2], col = as.numeric(iris[,5]))
+plot(p)
+
+
+## acpgen
+
+Another form of generalised PCA 
+
+Assume $\boldsymbol{X}_{i}; (i = 1, \ldots, n)$ are a sample from a p-dimensional distribution. 
+
+To simplify,$X_{i}$ are centered. 
+
+Let $S_{n}$ be an estimator of the variance downweighting
+observations with large distance from zero. Then, the empirical variance of
+the $S^{-1/2}_{n}X_{i}$ is close to $I_{p}$ when there are no outliers, it is distored in the direction of outliers if any are present.   
+
+Empirical variance of $S^{-1/2}_{n}X_{i}$ is given by 
+
+\begin{displaymath}
+\frac{1}{n} \sum_{i=1}^{n} (S^{-1/2}_{n}X_{i})(S^{-1/2}_{n}X_{i})^{T} = S^{-1/2}_{n} V_{n} S^{-1/2}_{n}
+\end{displaymath}
+
+where $V_{n}$ denotes the usual empirical variance of the observations.   If we now carry out eigenanalysis of $S^{-1/2}_{n} V_{n} S^{-1/2}_{n}$ we seek eigenvalues$\lambda$ of $V_{n} S^{-1}_{n}$ associated with the eigenvectors $e = S^{-1/2}_{n} a$.   $e$ is $S^{-1/2}_{n} $ normed, i.e. e^{T} S^{-1/2}_{n} e = 1$.
+
+
+$S^{-1}_{n}$-orthogonal abscissa of the projection of $x_{i}$ onto $e_{i}$ are the same as the projection of $x_{i}$ onto $a_{i}$; given by $x_{i} S^{-1/2}_{n}$.
+
+
+
+\cite{Caussinus+etal:2003} propose:
+
+\begin{displaymath}
+\label{apcgen}
+\frac{  \sum_{i=1}^{n} exp \left( -\frac{\beta}{2} || \boldsymbol{x}_{i} - \boldsymbol{\bar{x}} ||^{2}_{V_{n}^{-1} \right) (\boldsymbol{x}_{i} - \boldsymbol{\bar{x}} )(\boldsymbol{x}_{i} - \boldsymbol{\bar{x}} )^{T} }
+{\sum_{i=1}^{n} exp \left( -\frac{\beta}{2} || \boldsymbol{x}_{i} - \boldsymbol{\bar{x}} ||^{2}_{V_{n}^{-1} \right) }
+\end{displaymath}
+
+$\beta$ is a scalar value close to zero, typically 0.05.   The aim is to find $q < p$ which explain all the interesting variation, i.e. non random normal noise departures from the null model.   Asymptotic results are given in the paper.
+
+
+library(amap)
+X <- iris[,-5]
+p <- acpgen(X,h1=1,h2=1/sqrt(2), scores = TRUE)
+
+
+plot(p,main='ACP Iris data') ## the biplot
+
+plot(p$scores[,1], p$scores[,2], col = as.numeric(iris[,5]), center = TRUE, reduce  TRUE)
+
+
+
+
+\section{Kernel Based Methods}
+
+\cite{Schoelkopf+etal:1998} made proposals for the use of kernels in eigen analysis which can be used as a form of non-linear principal component analysis.   This method has been made available within the \verb+kernlab+ library \cite{Karatzoglou+etal:2005} in \textbf{R}.
+   
+Any kernel  function which computes a dot product between two vectors can be used, these are either specified by the name of a user defined function or by using one of the inbuilt kernel functions which include \verb+rbfdot+, a Gaussian radial basis kernel function and  \verb+laplacedot+, a Laplacian kernel function.   These  both require the inverse kernel width \verb+sigma+ to be specified by \verb+par = list(sigma)+.  Other kernels include \verb+polydot+, a polynomial kernel function requiring the parameters \verb+kpar = list(degree, scale, offset)+; \verb+vanilladot+,a linear kernel function; \verb+tanhdot+, a hyperbolic tangent kernel function which requires \verb+kpar = list(scale, offset)+ to be set; \verb+besseldot+, a Bessel kernel function requiring  \verb+kpar = list(sigma, order, degree)+ to be set.
+
+A couple of points need to be noted.   \verb+features+ specifies the number of features to be retained, as  kernel method these aren't the same as the conventional form of principal components.   The default value of \verb+0+ therefore produces rather a large number of components, which can be limited by an argument to \verb+th+, set by default to 0.0001.   Again, this can't be considered in the same way as for say, the Kaiser criterion. 
+
+
+
+
+
+Consider an example with Fisher's Iris data.   We extract two principal components (\verb+features=2+), and select a Gaussian kernel with an inverse kernel width of 0.2
+
+\begin{verbatim}
+\library(kernlab)
+data(iris)
+test <- sample(1:150,20)
+
+kpc <- kpca(~.,data=iris[-test,-5],
+    kernel="rbfdot", kpar=list(sigma=0.2), features=2)
+pc <- prcomp(~.,data=iris[-test,-5] )
+
+par(mfrow = c(1,2))
+plot(pc$x[,1], pc$x[,2], col = as.integer(iris[-test,5]), 
+    xlab="1st Principal Component",ylab="2nd Principal Component",
+    main = "Conventional pca")
+
+emb <- predict(pc, iris[test, -5])
+points(emb,pch=as.numeric(iris[test,5]))
+
+plot(rotated(kpc), col=as.integer(iris[-test,5]),
+    xlab="1st Principal Component",ylab="2nd Principal Component",
+    main = "Kernel PCA")
+
+emb <- predict(kpc,iris[test,-5])
+points(emb,pch=as.numeric(iris[test,5]))
+\end{verbatim}
+
+It should be noted that the \verb+kernlab+ package has been set out following S4 classes.   Therefore, whilst it is possible to extract eigenvalues from conventional principal components using \verb+pc$sdev^2+ (note that, as implied by its name, \verb+sdev+ returns the square roots of the eigenvalues), when using \verb+kernlab+ the extractor functons have to be used.   Therefore, \verb+eig(kpc)+ will give the eigenvalues from the kernel based decomposition.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width = 0.8\textwidth]{images/kernelpca}
+\caption{Projection from conventional and kernal pca}
+\label{kernpca}
+\end{center}
+\end{figure}
+
+
+
+
+
+\section{Principal Curves}
+
+\section{Common Principal Components}
+
+
+
+Compare Covariance Matrices using Flury's Hierarchy of Tests (V0.96)
+   Analysis of file: iris.dat
+
+*** Test for Equality Among the Matrices ***
+Criterion for Equality: -1463.90524
+Number of parameters (Equality): 10
+
+Likelihood ratio test chi-square for H0-equality versus:
+   Proportionality:  34.343 (df =  2, p = 0.0000)
+   Common PC      :  82.753 (df =  8, p = 0.0000)
+   CPC(2)         :  95.381 (df = 10, p = 0.0000)
+   CPC(1)         : 103.924 (df = 14, p = 0.0000)
+   Unrelated      : 146.664 (df = 20, p = 0.0000)
+
+Eigenvalues of Best Pooled Covariance Matrix:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+            0.055352   0.086183   0.022364    0.44357 
+
+
+Eigenvectors for Best Pooled Covariance Matrix:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+Sepal.Length    -0.63238  -0.056086   -0.22951   -0.73775 
+Sepal.Width     0.18057    0.87323    0.31953   -0.32057 
+Petal.Length     0.58182   -0.45883    0.35042   -0.57285 
+Petal.Width     0.47851    0.15425   -0.84996   -0.15748 
+
+
+Best Pooled Covariance Matrix:
+          Sepal.Length Sepal.Width Petal.Length Petal.Width 
+Sepal.Length     0.26501   0.092721    0.16751   0.038401 
+Sepal.Width    0.092721    0.11539   0.055244    0.03271 
+Petal.Length     0.16751   0.055244    0.18519   0.042665 
+Petal.Width    0.038401    0.03271   0.042665   0.041882 
+
+
+*** Test for Proportionality Among the Matrices ***
+Criterion for Proportionality: -1498.24784
+Number of parameters (Proportionality): 12
+
+Likelihood ratio test chi-square for H0-proportionality versus:
+   Common PC      :  48.411 (df =  6, p = 0.0000)
+   CPC(2)         :  61.038 (df =  8, p = 0.0000)
+   CPC(1)         :  69.582 (df = 12, p = 0.0000)
+   Unrelated      : 112.321 (df = 18, p = 0.0000)
+
+Eigenvalues for Proportional Matrix:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+            0.058793   0.034501   0.012305    0.25358 
+
+
+Eigenvectors for Proportional Matrix:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+Sepal.Length   -0.028986    0.64882   -0.17315   -0.74042 
+Sepal.Width     0.81495   -0.35078    0.23828   -0.39501 
+Petal.Length     -0.5788   -0.52891    0.33881   -0.52005 
+Petal.Width   0.0034663   -0.41982   -0.89356   -0.15905 
+
+
+Proportionality constant for setosa: 1.000000
+Maximum likelihood estimate of setosa (proportionality):
+          Sepal.Length Sepal.Width Petal.Length Petal.Width 
+Sepal.Length     0.15396   0.064417   0.086067   0.022362 
+Sepal.Width    0.064417   0.083558   0.031755   0.018558 
+Petal.Length    0.086067   0.031755   0.099341   0.024792 
+Petal.Width    0.022362   0.018558   0.024792   0.022321 
+
+
+Proportionality constant for versicolor: 1.486395
+Maximum likelihood estimate of versicolor (proportionality):
+          Sepal.Length Sepal.Width Petal.Length Petal.Width 
+Sepal.Length     0.22884    0.09575    0.12793   0.033239 
+Sepal.Width     0.09575     0.1242     0.0472   0.027585 
+Petal.Length     0.12793     0.0472    0.14766    0.03685 
+Petal.Width    0.033239   0.027585    0.03685   0.033178 
+
+
+Proportionality constant for : 2.552988
+Maximum likelihood estimate of  (proportionality):
+          Sepal.Length Sepal.Width Petal.Length Petal.Width 
+Sepal.Length     0.39306    0.16446    0.21973   0.057091 
+Sepal.Width     0.16446    0.21332   0.081069   0.047379 
+Petal.Length     0.21973   0.081069    0.25362   0.063293 
+Petal.Width    0.057091   0.047379   0.063293   0.056985 
+
+
+*** Test for Common Principal Components Among the Matrices ***
+Criterion for CPC: -1546.65852
+Number of parameters (CPC): 18
+
+Likelihood ratio test chi-square for H0-CPC versus:
+   CPC(2)         :  12.627 (df =  2, p = 0.0018)
+   CPC(1)         :  21.171 (df =  6, p = 0.0017)
+   Unrelated      :  63.910 (df = 12, p = 0.0000)
+
+Eigenvalues for CPC Matrices:
+setosa:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+             0.14644    0.12507   0.027526   0.010169 
+versicolor:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+              0.4846   0.055394   0.074689   0.010139 
+:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+             0.69223   0.075367   0.067125   0.053641 
+
+Eigenvectors for CPC Matrix:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+Sepal.Length     0.73665   -0.16397   -0.64707    0.10841 
+Sepal.Width     0.24679   -0.83461    0.46552   -0.16068 
+Petal.Length     0.60475    0.52211    0.50024   -0.33384 
+Petal.Width     0.17527   0.062841    0.33816    0.92249 
+
+
+Maximum likelihood estimate of setosa (CPC):
+          Sepal.Length Sepal.Width Petal.Length Petal.Width 
+Sepal.Length    0.094476   0.035269   0.045254   0.012612 
+Sepal.Width    0.035269    0.10226  -0.025687  0.0026007 
+Petal.Length    0.045254  -0.025687   0.095671    0.02115 
+Petal.Width    0.012612  0.0026007    0.02115   0.016793 
+
+
+Maximum likelihood estimate of versicolor (CPC):
+          Sepal.Length Sepal.Width Petal.Length Petal.Width 
+Sepal.Length     0.29585   0.073004     0.1866   0.046667 
+Sepal.Width    0.073004   0.084547   0.066122    0.02831 
+Petal.Length      0.1866   0.066122    0.21215   0.062693 
+Petal.Width    0.046667    0.02831   0.062693   0.032274 
+
+
+Maximum likelihood estimate of  (CPC):
+          Sepal.Length Sepal.Width Petal.Length Petal.Width 
+Sepal.Length     0.40641      0.115    0.27826   0.079275 
+Sepal.Width       0.115    0.11059   0.088979   0.028605 
+Petal.Length     0.27826   0.088979    0.29648    0.07068 
+Petal.Width    0.079275   0.028605    0.07068   0.074885 
+
+
+*** Test for Common Principal Components Among Matrices ***
+*** Test for 2-Common Principal Components ***
+Criterion for CPC(2): -1559.28578
+Number of parameters [CPC(2)]: 20
+
+Likelihood ratio test chi-square for H0-CPC(2) versus:
+   CPC(1)         :   8.544 (df =  4, p = 0.0736)
+   Unrelated      :  51.283 (df = 10, p = 0.0000)
+
+Eigenvalues for CPC(2) Matrices:
+setosa:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+             0.14639     0.1244   0.029259  0.0091596 
+versicolor:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+              0.4855   0.054974   0.074366  0.0099855 
+:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+             0.69162   0.072491   0.089155   0.035102 
+
+Eigenvectors of setosa [CPC(2)]:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+Sepal.Length     0.72754   -0.22162   -0.64733  -0.050379 
+Sepal.Width     0.25387   -0.78872    0.55846  -0.039958 
+Petal.Length     0.61142    0.56797    0.50913   -0.21061 
+Petal.Width     0.17999   0.078875   0.099371    0.97545 
+
+
+Eigenvectors of versicolor [CPC(2)]:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+Sepal.Length     0.72754   -0.22162   -0.63672     0.1271 
+Sepal.Width     0.25387   -0.78872    0.52668   -0.18995 
+Petal.Length     0.61142    0.56797    0.43292   -0.34082 
+Petal.Width     0.17999   0.078875    0.36025    0.91192 
+
+
+Eigenvectors of  [CPC(2)]:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+Sepal.Length     0.72754   -0.22162   -0.46268    0.45552 
+Sepal.Width     0.25387   -0.78872     0.3362   -0.44771 
+Petal.Length     0.61142    0.56797    0.17504   -0.52243 
+Petal.Width     0.17999   0.078875    0.80141    0.56491 
+
+
+Maximum likelihood estimate of setosa [CPC(2)]:
+          Sepal.Length Sepal.Width Petal.Length Petal.Width 
+Sepal.Length    0.095878   0.038222   0.039913   0.014662 
+Sepal.Width    0.038222    0.09596  -0.024608 0.00021648 
+Petal.Length    0.039913  -0.024608    0.10285   0.021281 
+Petal.Width    0.014662 0.00021648   0.021281    0.01452 
+
+
+Maximum likelihood estimate of versicolor [CPC(2)]:
+          Sepal.Length Sepal.Width Petal.Length Petal.Width 
+Sepal.Length     0.28999     0.0741    0.18812   0.046714 
+Sepal.Width      0.0741   0.086477   0.068335   0.031144 
+Petal.Length     0.18812   0.068335    0.21433   0.064385 
+Petal.Width    0.046714   0.031144   0.064385   0.034025 
+
+
+Maximum likelihood estimate of  [CPC(2)]:
+          Sepal.Length Sepal.Width Petal.Length Petal.Width 
+Sepal.Length     0.39602    0.11938    0.28296   0.065273 
+Sepal.Width     0.11938    0.10678   0.088336   0.042235 
+Petal.Length     0.28296   0.088336    0.29425   0.081506 
+Petal.Width    0.065273   0.042235   0.081506   0.091319 
+
+
+*** Test for 1-Common Principal Component ***
+Criterion for CPC(1): -1567.82944
+Number of parameters [CPC(1)]: 24
+
+Likelihood ratio test chi-square for H0-CPC(1) versus:
+   Unrelated      :  42.739 (df =  6, p = 0.0000)
+
+Eigenvalues for CPC(1) Matrices:
+setosa:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+             0.14629    0.12517   0.028695  0.0090477 
+versicolor:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+             0.48519   0.054906   0.074625   0.010108 
+:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+             0.69234    0.10947   0.052298   0.034267 
+
+Eigenvectors of setosa [CPC(1)]:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+Sepal.Length     0.72582   -0.17319   -0.66507  -0.029575 
+Sepal.Width     0.25559   -0.82945    0.49604  -0.024911 
+Petal.Length     0.61642    0.52319    0.54623   -0.21893 
+Petal.Width     0.16697   0.091037    0.11516    0.97497 
+
+
+Eigenvectors of versicolor [CPC(1)]:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+Sepal.Length     0.72582   -0.29638   -0.60748     0.1277 
+Sepal.Width     0.25559   -0.71643    0.60598   -0.23278 
+Petal.Length     0.61642    0.62809    0.36662   -0.30186 
+Petal.Width     0.16697   0.066266    0.35964    0.91563 
+
+
+Eigenvectors of  [CPC(1)]:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+Sepal.Length     0.72582    0.21814   -0.53572    0.37229 
+Sepal.Width     0.25559   -0.73243   -0.32701    -0.5397 
+Petal.Length     0.61642    0.21184    0.65057   -0.38975 
+Petal.Width     0.16697   -0.60916    0.42758     0.6467 
+
+
+Maximum likelihood estimate of setosa [CPC(1)]:
+          Sepal.Length Sepal.Width Petal.Length Petal.Width 
+Sepal.Length    0.093524    0.03566   0.043746   0.013297 
+Sepal.Width     0.03566    0.10274  -0.023445  -0.001789 
+Petal.Length    0.043746  -0.023445   0.098845   0.020892 
+Petal.Width    0.013297  -0.001789   0.020892   0.014097 
+
+
+Maximum likelihood estimate of versicolor [CPC(1)]:
+          Sepal.Length Sepal.Width Petal.Length Petal.Width 
+Sepal.Length     0.28813   0.073896    0.18985   0.042599 
+Sepal.Width    0.073896   0.087829   0.069024   0.032208 
+Petal.Length     0.18985   0.069024    0.21697   0.059267 
+Petal.Width    0.042599   0.032208   0.059267   0.031894 
+
+
+Maximum likelihood estimate of  [CPC(1)]:
+          Sepal.Length Sepal.Width Petal.Length Petal.Width 
+Sepal.Length      0.3897    0.11323    0.29162   0.065628 
+Sepal.Width     0.11323    0.11953   0.088176   0.059114 
+Petal.Length     0.29162   0.088176    0.29532   0.063042 
+Petal.Width    0.065628   0.059114   0.063042   0.083814 
+
+
+*** Principal Component Analysis of Each Matrix Separately ***
+
+Eigenstructure of setosa:
+Eigenvalues:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+            0.026796   0.036919  0.0090332    0.23646 
+
+Eigenvectors:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+Sepal.Length     0.43996    0.59788   0.036077   -0.66908 
+Sepal.Width    -0.27461   -0.62067    0.01955   -0.73415 
+Petal.Length    -0.83245    0.49006     0.2399  -0.096544 
+Petal.Width    -0.19507    0.13094   -0.96993  -0.063564 
+
+
+Eigenstructure of versicolor:
+Eigenvalues:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+            0.054776   0.072384  0.0097903    0.48787 
+
+Eigenvectors:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+Sepal.Length     0.26508    0.66909   -0.10228   -0.68672 
+Sepal.Width     0.72962   -0.56747    0.22892   -0.30535 
+Petal.Length    -0.62716   -0.34333    0.31597   -0.62366 
+Petal.Width   -0.063661    -0.3353   -0.91504   -0.21498 
+
+
+Eigenstructure of :
+Eigenvalues:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+            0.052295   0.034266    0.10655    0.69525 
+
+Eigenvectors:
+            Vector 1   Vector 2   Vector 3   Vector 4 
+Sepal.Length     0.53445    0.37141    0.16526   -0.74102 
+Sepal.Width     0.32537   -0.54068   -0.74864   -0.20329 
+Petal.Length    -0.65152   -0.39059    0.16943   -0.62789 
+Petal.Width    -0.42897    0.64587   -0.61929   -0.12377 
+
+
+*** Flury Decomposition of Chi Square ***
+    (Step-up & model building approaches)
+
+_______Model______
+Higher       Lower   Chi Sqr  df   p-val   CS/df   AIC
+--------------------------------------------------------
+Equality   Proport    34.343   2  0.0000  17.171 146.664
+Proport    CPC        48.411   6  0.0000   8.068 116.321
+CPC        CPC(2)     12.627   2  0.0018   6.314  79.910
+CPC(2)     CPC(1)      8.544   4  0.0736   2.136  71.283
+CPC(1)     Unrelated  42.739   6  0.0000   7.123  70.739
+Unrelated   ---                                   40.000
+
+
+*** Test against Unrelated/Arbitrary Structure ***
+    (Jump-up approach)
+
+_______Model______
+Higher       Lower   Chi Sqr  df   p-val
+-----------------------------------------
+Equality  Unrelated   146.664  20  0.0000
+Proport   Unrelated   112.321  18  0.0000
+CPC       Unrelated    63.910  12  0.0000
+CPC(2)    Unrelated    51.283  10  0.0000
+CPC(1)    Unrelated    42.739   6  0.0000
+
+
+
+
+
+
+
+
+
+library(grid)
+ pltSplomT(USArrests,mainL="",hist="b",adjust=0.4,cex.diag = 0.7)
+library(cwhplot)
+
+
+
+
+
+
+
+
+
+
+%%% Local Variables: ***
+%%% mode:latex ***
+%%% TeX-master: "../book.tex"  ***
+%%% End: ***

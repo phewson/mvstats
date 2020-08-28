@@ -1,0 +1,66 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,graphicx}
+\usepackage{../setspace}
+\addtolength{\textwidth}{1.5in}
+\addtolength{\hoffset}{-1in}
+\addtolength{\textheight}{1.5in}
+\addtolength{\voffset}{-1in}
+
+\title{STAT3401: Lab exercises concerning measures of distance}
+\author{Paul Hewson}
+\date{11th January 2007}
+\usepackage{/usr/share/R/share/texmf/Sweave}
+\begin{document}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{12pt}
+\sffamily
+\maketitle
+
+
+\section{Mahalanobis distance and multivariate normality}
+
+\begin{Schunk}
+\begin{Sinput}
+> USA.mah.dist <- mahalanobis(USArrests, center = mean(USArrests), 
++     cov = var(USArrests))
+> hist(USA.mah.dist, freq = FALSE)
+> curve(dchisq(x, df = 4), add = TRUE, col = "red")
+\end{Sinput}
+\end{Schunk}
+
+or consider $qq$ plots:
+
+\begin{Schunk}
+\begin{Sinput}
+> n <- 50
+> p <- 4
+> qqplot(USA.mah.dist, qchisq(ppoints(n), p))
+\end{Sinput}
+\end{Schunk}
+
+
+\begin{itemize}
+\item Do you think that the USArrests data can be considered to be multivariate normal.   If so, repeat this with some other data, such as the simulated multivariate normal data you generated in week 1, or any other data we have met (e.g. iris data).
+\item For any data you consider, compare your findings on multivariate normality with what you find when examining univariate normality of either the margins or the linear combinations
+\end{itemize}
+
+More advanced work: there are some who think that a beta distribution should be used.   There is a function \texttt{qqbetaM} in a file in the portal.   Copy this into your workspace, \texttt{source} the function and see whether you think it makes a difference.     
+
+\begin{Schunk}
+\begin{Sinput}
+> source("qqbetaM.R")
+> qqbetaM(USA.mah.dist, 4)
+\end{Sinput}
+\end{Schunk}
+
+Compare the qqplots you obtain from this function with qqplots from the $\chi^{2}$ based quantiles.   Do you have any data where your impression of normality may be altered by a change in the comparison?   From your reading material, when might it matter whether you use a beta distribution or a $\chi^{2}$?
+
+\section{Gower's distance}
+
+This is quite an important exercise!   Make sure you are happy calculating Gower's distance.  Use the \texttt{class07.csv} data in the portal, and calculate the distance between a few individuals by hand.   Then use \texttt{daisy} in \texttt{library(cluster)} to calcuate it in R (it's a slightly fiddly function to use). 
+
+
+
+\end{document}
+
+

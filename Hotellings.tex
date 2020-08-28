@@ -1,0 +1,57 @@
+\documentclass[a4,10pt]{book}
+\addtolength{\textwidth}{1in}
+\addtolength{\hoffset}{-0.5in}
+\addtolength{\textheight}{1in}
+\addtolength{\voffset}{-0.5in}
+\usepackage{natbib}
+\usepackage{setspace}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{mathrsfs}
+\usepackage{makeidx}
+\usepackage{color}
+
+\newtheorem{definition}[section]{Definition}
+\newtheorem{theorem}[section]{Theorem}
+\renewcommand{\textfraction}{0.05}
+\makeindex
+\title{Hotelling's T$^{2}$}
+\author{Paul J. Hewson}
+\onehalfspacing
+%\address{ School of Mathematics and Statistics, University of Plymouth, Drake Circus, Plymouth PL4 8AA, UK}
+%\email{paul.hewson@plymouth.ac.uk}
+
+\begin{document}
+\frontmatter
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{12pt}
+
+\newcommand{\R}{\textbf{\color{blue}{R}\ }}
+\pagestyle{fancy}
+\lhead{Hotellings}
+\chead{}
+\rhead{}
+\lfoot{}
+\cfoot{\copyright Paul Hewson}
+\rfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\sffamily
+\maketitle
+
+\mainmatter
+
+\include{chapters/CompMeans}
+
+
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliographystyle{chicago}
+\bibliography{refs/mvmbib,refs/glmm}
+
+%\printindex
+
+
+\end{document}

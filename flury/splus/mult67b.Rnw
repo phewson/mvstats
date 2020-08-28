@@ -1,0 +1,68 @@
+
+S-PLUS instructions for Section 6.7, part B (bootstrap test)
+************************************************************
+
+last updated: june 18, 1997
+
+
+The bootstrap as a method for computing standard errors of parameter
+estimates has been illustrated before in Section 4.2. The program
+attached here does the computations for the bootstrap test of
+Exameple 6.7.5 and requires little extra explanation. The computation
+of the ASL (achieved significance level) towards the end of the program
+is particularly nifty; explain why it works. Also, if you would like to
+initialize the random number generator with a seed of your choice, see
+the explanations in the S-PLUS instructions for Section 6.7, part 1.
+
+*******************************  CUT HERE  *******************************
+
+nboot <- 10000				      # number of bootstrap samples
+X <- matrix(scan("c:\\multidat\\tab62_1.dat"), ncol = 4, byrow =T)
+							    # read raw data
+
+Y <- cbind((X[, 1] - X[, 3]),(X[, 2] - X[, 4]))       # transform to Y-data
+mu0 <- c(rep(0, 2))				 # hypothetical mean vector
+
+N <- dim(Y)[1]					   # number of observations
+p <- dim(Y)[2]  	      			      # number of variables
+ybar <- apply(Y, 2, mean)			      # compute mean vector	
+S <- var(Y)						# covariance matrix
+di <- ybar - mu0
+d <- sqrt(t(di) %*% solve(S) %*% di)       # multivariate standard distance
+t2 <- N * d^2                                          # T-square statistic
+fobs <- (N-p) * t2 / (p * (N-1))              # F-value for observed sample
+
+cat("means: ", ybar,"\n")
+cat("covariance matrix: \n", format(S), fill = 40)                # display
+cat("std.dist: ", d, "\n")                                       # original
+cat("T-square: ", t2, "\n")                                       # results 
+cat("F: ", fobs, "\n")
+cat("parametric p-value: ", 1-pf(fobs, p, N-p), "\n")
+
+Z <- Y - ybar                             # data matrix Z for bootstrapping
+cat("Z-data for bootstrapping:", "\n")
+cbind(rep(1:N, length = N), Z)
+
+fboot <- c(rep(0, nboot))                    # vector for bootstrap results
+
+iboot <- 1 					     # start bootstrap loop
+while (iboot <= nboot){              
+cat("iboot=", iboot, "\n")                       # display iteration number
+sel <- floor(runif(N, min = 0, max = 1) * N) + 1
+						# items in bootstrap sample
+
+Zstar <- Z[sel,]                                  # choose bootstrap sample
+zbar <- apply(Zstar, 2, mean)                    # mean vector of bootstrap sample
+S <- var(Zstar)                     # covariance matrix of bootstrap sample
+di <- zbar - mu0                                     # standard distance of
+d <- sqrt(t(di) %*% solve(S) %*% di)                     # bootstrap sample    
+fstat <- (N - p) * N * d^2 / (p * (N - 1))    # F-value of bootstrap sample
+fboot[iboot] <- fstat                                       # store F-value
+
+iboot <- iboot + 1				    
+}						    # end of bootstrap loop
+
+aslboot <- sum(fboot >= fobs)/nboot                           # compute ASL
+cat("ASLboot= ", aslboot, "\n")                               # display ASL
+
+*******************************  CUT HERE  ******************************* 

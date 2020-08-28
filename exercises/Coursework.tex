@@ -1,0 +1,214 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb}
+\addtolength{\textwidth}{1.5in}
+\addtolength{\hoffset}{-1in}
+\addtolength{\textheight}{1.5in}
+\addtolength{\voffset}{-1in}
+
+\title{STAT3401 (Multivariate Methods) Coursework}
+\author{To be submitted by 9am, Monday 7th November 2005}
+\date{}
+\begin{document}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{12pt}
+\sffamily
+\maketitle
+
+
+\textbf{Please read the following notes before attempting the coursework:}
+
+\begin{enumerate}
+
+\item You should attempt all exercises
+\item \textbf{The first section is intended to be completed individually.   Students suspected of copying from others will be penalised}
+\item The deadline for this coursework is 9am Monday 7th November, and is to be submitted to the office in 2-5 Kirkby Place.   If you have problems getting to the University by 9am you should hand it in the previous week.   Posting through the letter box is done at your own risk.
+\item A late piece of coursework will receive no marks unless accompanied by an acceptable Extenuating Circumstances Form.
+\item Please show all workings, if you have checked your calculations with a computer include all relevant computer output.
+\item This coursework accounts for 15\% of your final mark on this module
+\end{enumerate}
+
+
+\textbf{Learning outcomes of this coursework:}
+
+Distance and covariance matrices, matrix manipulation and linear combinations form the basis of most multivariate techniques.   Understanding how these work provides a good foundation for learning about various multivariate techniques.   By the end of this coursework you should have gained experience in:
+
+\begin{itemize}
+\item Producing an exploratory data analysis in relation to multivariate data
+\item Conducting eigen analysis of covariance, correlation and partitioned matrices
+\item Exploring a number of properties of these matrices and decompositions
+\item Constructing your own distance matrix
+\end{itemize}
+
+
+\section{Matrix operations - Individual work}
+
+The first part of the coursework is to be completed individually.   It is intended to consolidate your ability to deal with matrices and will provide the foundation for later work in the term looking at specific multivariate techniques.   
+
+\subsection{Introductory Exercise - 5 marks}
+
+Consider the following three matrices:
+
+
+\begin{displaymath}
+\boldsymbol{A} = \left( \begin{array}{ll} 4 & 4 \\ 4 & 4\end{array} \right), 
+\boldsymbol{B} = \left( \begin{array}{ll} 4 & 4.001 \\ 4.001 & 4.002 \end{array} \right),
+\boldsymbol{C} = \left( \begin{array}{ll} 4 & 4.001 \\ 4.001 & 4.002001 \end{array} \right)
+\end{displaymath}
+
+You will notice that the matrices are very similar, and that the differences could easily be lost in rounding.
+
+\begin{itemize}
+\item Find the determininants of the three matrices, i.e. $|\boldsymbol{A}|, |\boldsymbol{B}|, |\boldsymbol{C}|$.
+
+\item Where possible, find the inverse of these matrices, i.e. $\boldsymbol{A}^{-1}, \boldsymbol{B}^{-1}, \boldsymbol{C}^{-1}$ (an inverse might not exist for every matrix).
+
+\item Comment on the sensitivity of the inverses to small differences between the three matrices $\boldsymbol{A}$,  $\boldsymbol{B}$ and  $\boldsymbol{C}$.
+
+\end{itemize}
+
+
+\subsection{Hotelling's data on reading and writing}
+
+The next part of the coursework is based upon Hotelling (1935), and are measures of reading speed $x_{1}$, reading power $x_{2}$, arithmetic speed $x_{3}$ and arithmetic power $x_{4}$ observed on 140 children.   You each have been given your own set of data in the student portal (called yourname.csv, placed in the coursework folder) which are similar to Hotelling's data, but not identical. 
+
+\subsubsection{Exploratory data analysis - 25 marks}
+
+\begin{itemize}
+\item You are to present a suitable exploratory data analysis of these data, including whatever figures and tables you think are informative.   This should not take more than four pages of A4.
+\end{itemize}
+
+
+%sigma <- matrix(c(1.0, 0.6328, 0.2412, 0.0586, 0.6328,1,-0.0553, 0.0655, 
+%0.2412, -0.0553, 1, 0.4248, 0.0586, 0.0655, 0.4248, 1),4,4)
+%var <- c(5,2,3,1)
+%spot <- mvrnorm(140, mu = c(40,55,63,62), Sigma = sigma * outer(var,var))
+%cor(spot)
+%var(spot)
+%spot <- as.data.frame(spot)
+%names(spot) <- c("ReadSpeed", "ReadPower", "ArithSpeed", "ArithPower")
+%write.table(spot, "u:/teaching/mvm/hotelling.csv", sep = ",", col.names =TRUE)
+
+\subsubsection{Matrix Operations on the covariance and correlation matrices - 25 marks}
+
+This part of the coursework allows us to revise the matrix operations which underly principal components, a topic we will look at later this term.   Whilst you can use a computer to help you with the calculations, you are to include sufficient workings in your coursework to indicate that you understand the derivations of the various answers.
+
+\begin{itemize}
+\item Estimate the covariance $\boldsymbol{\hat{\Sigma}}$ and the correlation $\boldsymbol{R}$ matrices for your data.
+
+\item For both the covariance matrix $\boldsymbol{\hat{\Sigma}}$ and the correlation matrix $\boldsymbol{R}$ , find the associated eigenvalues $\lambda_{1} > \lambda_{2} > \lambda_{3}  > \lambda_{4}$ and the corresponding eigenvectors $\boldsymbol{a_{1}}, \boldsymbol{a_{2}}, \boldsymbol{a_{3}}, \boldsymbol{a_{4}}$.  \textbf{Comment on noteworthy differences between the two eigen decompositions}.
+
+\item Find $trace(\boldsymbol{\hat{\Sigma}})$and $trace(\boldsymbol{R})$.   What is the sum of the eigenvalues from the two decompositions, and how do these compare with the traces of the respective covariance and correlation matrices?   \textbf{What information does the trace of the covariance matrix contain?}
+
+
+\item Find the determinant of $\boldsymbol{\hat{\Sigma}}$  (i.e. $|\boldsymbol{\hat{\Sigma}}|$).   How does this compare with the product of the eigenvalues obtained from the covariance matrix (i.e. $\prod_{i=1}^{4} \lambda_{i}$).
+
+\item Use the first two eigenvectors ($\boldsymbol{a_{1}}$ and $\boldsymbol{a_{2}}$ corresponding to the two largest eigenvalues) to derive the linear combinations $z_{1}$ and $z_{2}$ as follows:
+
+\begin{displaymath}
+z_{1i} = \boldsymbol{a_{1}}^{T}\boldsymbol{x} = a_{11}x_{1i} + a_{21}x_{2i} + a_{31}x_{3i} + a_{41}x_{4i}  
+\end{displaymath}
+
+\begin{displaymath}
+z_{2i} = \boldsymbol{a_{2}}^{T}\boldsymbol{x} = a_{12}x_{1i} + a_{22}x_{2i} + a_{32}x_{3i} + a_{42}x_{4i} 
+\end{displaymath}
+
+\item The eigenvalues provide information on the variation that is captured by each of these linear combinations.   Therefore $\frac{\lambda_{i}}{\Sigma_{i=4}^{4} \lambda_{i}}$ gives an indication as to the total proportion of variation ``explained'' by each linear combination.   \textbf{What is the total proportion of variation explained by the two linear combinations $\boldsymbol{z_{1}}$ and $\boldsymbol{z_{2}}$?   Produce a plot which you feel depicts the proportion of variation ``explained'' by each of the four linear combinations.}
+
+\item One of the goals of this kind of analysis is that these linear combinations explain the data in two dimensions almost as well as having to work in four dimensions.   Produce a scatter plot of $z_{1}$ against $z_{2}$.   \textbf{How does this compare with a full $4 \times 4$ pairwise scatter plot?}
+
+\end{itemize}
+
+\subsubsection{Matrix operations on the partitioned correlation matrix - 25 marks}
+
+This part of the coursework revises those matrix operations which underly a technique called canonical correlation, which we will study in more detail next term.
+
+The correlation matrix obtained from Hotelling's original data is given below.  We have seen how it is possible to partition a matrix.   Consider partitioning the $4 \times 4$ correlation matrix $\boldsymbol{R}$ into four $2 \times 2$ sub-matrices: 
+
+\begin{displaymath}
+\boldsymbol{R} = \left( \begin{array}{l|l} \boldsymbol{R_{11}} & \boldsymbol{R_{12}} \\ \hline    \boldsymbol{R_{21}} & \boldsymbol{R_{22}} \end{array} \right) = 
+\left( \begin{array}{ll|ll} 1.0 & 0.6328 & 0.2412 & 0.0586 \\
+0.6328 & 1.0 & -0.553 & 0.0655 \\
+\hline
+0.2412 & -0.553 & 1.0 & 0.4248 \\
+0.0586 & 0.0655 & 0.4248 & 1.0
+\end{array} \right)
+\end{displaymath}
+
+
+So for example 
+
+\begin{displaymath}
+\boldsymbol{R_{11}} = \left( \begin{array}{ll} 1.0 & 0.6328\\
+0.6328 & 1.0 
+\end{array} 
+\right)
+\end{displaymath}
+
+
+
+The object of Hotelling's analysis was to see whether there was some kind of correlation between the two measures (speed and power) recorded on reading, and the two measures (speed and power) recorded on arithmetic.   
+
+
+One way of conducting such an analysis is to carry out an eigen decomposition of a $2 \times 2$ matrix formed from the various sub-matrices.   Your coursework is to demonstrate that you can carry out these matrix operations, which are detailed below.   You are to show all workings, although you are obviously free to check each stage with a computer.
+
+
+%\subsection{Tasks}
+
+You are to use the \emph{correlation matrix you obtained from your own data} set.
+
+\begin{itemize}
+
+\item Find the matrix $\boldsymbol{A}$, where:
+
+\begin{displaymath}
+\boldsymbol{A} = \boldsymbol{R_{12}^{-1}R_{21}^{T}R_{11}^{-1}R_{21}}
+\end{displaymath}
+
+\item For matrix $\boldsymbol{A}$, find the associated eigenvalues $\lambda_{1} > \lambda_{2}$ and the corresponding eigenvectors $\boldsymbol{b_{1}}, \boldsymbol{b_{2}}$.   
+
+We will find out later that these eigenvalues are the squares of the correlation between the linear combinations we identify, and that $\boldsymbol{b}$ are the loadings on the second set of variables.
+
+\item We now need to find the coefficients for the first set of variables (reading).   Find 
+$a_{1} = \boldsymbol{R_{11}^{-1} R_{21} b_{1}}$ and $a_{2} = \boldsymbol{R_{11}^{-1} R_{21} b_{2}}$.   Again, show your workings.
+
+\item Similar to a previous exercise, find the linear combinations:
+
+\begin{displaymath}
+u_{1i}  = a_{11}x_{1i} + a_{21}x_{2i}   
+\end{displaymath}
+
+\begin{displaymath}
+v_{1i} =  b_{12}x_{3i} + b_{22}x_{4i}  
+\end{displaymath}
+
+and produce a scatterplot of $u_{1}$ against $v_{1}$.
+
+
+\item Estimate the correlation between $u_{1}$ and both $x_{1}$ and $x_{2}$.   Also estimate the correlation between $v_{1}$ and both $x_{3}$ and $x_{4}$.   \textbf{Do you think $u_{1}$ and $v_{1}$ provide an adequate representation of their two respective observed variables?}
+
+
+\end{itemize}
+
+
+
+\section{Distances and similarities - Group work - 20 marks}
+
+This part of the coursework may be completed as part of a group.   You are to work in groups of no more than five.   I will be happy to provide \emph{appropriate} assistance (for example if you need help finding the numbers in various languages).
+
+We are going to investigate the relationship between languages (for example Italian and French are thought to belong to one family of languages, English and German to another, Polish and Czech to another).   In order to do this, we need to devise some way of measuring similarities or differences between languages.   To ensure this is a feasible task, you are to consider the numbers $1$ to $10$ in seven or eight different languages (any languages will do).
+
+You are to devise a scheme for measuring either the similarity OR the difference between corresponding numbers in different languages.   You may use any method you choose, for example you could award a point for similarity if two languages have the same number of syllables, another point if they have a similar vowel sound.   Equally, you may decide to make a more subjective assessment on a scale of 1 to 10 as to whether the numbers sound alike.   You may also wish to split the job, so that each member of the group works with two numbers.
+
+\subsection{Tasks}
+
+\begin{itemize}
+\item Produce a similarity (or distance) matrix for each number showing how similar or different your eight languages are.  \textbf{You are to explain your methodology in no more than five sentences.}
+
+\item Produce a single similarity (or distance) matrix for all ten numbers.   You are required to consider different methods of pooling results.   For example, if a number shows a lot of variability should you standardise the measures before you pool them?   If you split the task among your group, did some members get better results and should you produce a weighted sum to reflect this?   \textbf{You are to explain your method of pooling results, and to identify at least two advantages and two disadvantages of that particular method.} 
+\end{itemize}
+
+As you may have guessed, we will use these distance matrices next term when we consider cluster analysis.
+
+
+
+\end{document} 

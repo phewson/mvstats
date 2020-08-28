@@ -1,0 +1,3 @@
+dot <- mahalanobis(USArrests, center = mean(USArrests), cov = var(USArrests))
+
+qqplot(dot, rf(50,3,3))

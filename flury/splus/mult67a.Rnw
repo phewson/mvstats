@@ -1,0 +1,85 @@
+
+GAUSS instructions for Section 6.7, part A (randomization test)
+***************************************************************
+
+last updated: june 18, 1997
+
+
+Example 6.7.2 computes the randomization distribution of the multivariate
+standard distance in the vole example. Because a loop is involved, we
+give a self-documented S-PLUS program which you can put into a file and
+execute. The program uses the procedure LDA from Section 5.4; you should
+run LDA before executing this file, or append LDA to the file. The sorted
+values of the randomization distribution are written in a file called 
+PERM.OUT. If your computer is slow you might initially want to try it out
+with a smaller value of nperm (number of permutations).
+
+Using the LDA procedure constitutes a bit of overkill because the procedure
+calculates many things that are not needed in the current context, e.g.,
+normal theory posterior probabilities and predicted group membership
+for all observations. However, convenience is more important for our
+current purposes than speed.
+
+The technique used is as follows. For each iteration in the randomization
+procedure, a vector of random numbers of length N is created using the
+RUNIF function. The function SORT then creates another vector of length
+N containing the ranks of the random numbers, that is, a random permutation
+of the integers from 1 to N. The data file is then copied into a new
+datafile with rows permuted, and the multivariate standard distance is
+computed for the permuted data, treating the first N1 observations as
+group 1, and the last N2 observations as group 2. Alternatively, one
+might use a random permutation of the vector x of group labels, and
+leave the order of the data unchanged.
+
+From the ordered vector of nperm standard distances it is easy to
+find cutoffs for the randomization test. For instance, if you want the
+95-th percentile of the randomization distribution, type
+
+> ind <- floor(0.95 * nperm)
+> dperm[ind]
+
+To produce a histogram of the randomization distribution, you can add
+graphing statements directly at the end of this program, or read the
+data from the output file perm.out, using any software that can process
+ASCII files.
+
+Every time you run this program you will get somewhat different results
+because the random number generator starts with a random initialization
+chosen by S-PLUS. For testing a program you may prefer to be able to
+reproduce results; putting the command
+
+> set.seed(n)
+
+at the beginning of the program will have the desired effect (n must be a
+number between 1 and 1000).
+
+******************************  CUT HERE  *******************************
+
+rawdat <- matrix(scan("c:\\multidat\\tab54_1.dat"), ncol = 9, byrow = T)
+						     # read data from file
+
+Y <- rawdat[, 2:9]                          # variables for discrimination
+x <- rawdat[, 1]                                              # group code
+Y <- Y[x != 0,]			     # choose only classified observations
+x <- x[x != 0]			     # choose only classified observations
+N <- dim(Y)[1]			       # number of classified observations
+
+nperm <- 1000				      # set number of permutations
+dperm <- c(rep(0, nperm))	   # vector for randomization distribution
+i <- 1 				    # loop over randomizations starts here
+while (i <= nperm){
+cat("i =", i, "\n")                                # display running index
+u <- runif(N, min = 0, max = 1)        # create vector of N random numbers
+index <- order(u)                        # compute ranks of random numbers
+YY <- Y[index,]               # sort data matrix according to random ranks
+
+results <- LDA(YY, x, 0)			      # call LDA procedure
+
+dperm[i] <- results$d      # store standard distance of i-th randomization
+i <- i + 1
+}					       # end of randomization loop
+dperm <- sort(dperm)                               # sort the vector dperm
+cat(format(dperm, justify = "right"), file = "perm.out",
+	fill = 15)				   # write results in file
+
+*******************************  CUT HERE  *******************************

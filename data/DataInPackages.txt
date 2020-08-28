@@ -1,0 +1,6 @@
+
+
+
+sca pitpropC: Correlation matrix from Jeffers (1967) n = 180, p = 13, strength of pitprops cut from home-grown timber.
+sca hearlossC: Jackson (1991) Chapter 5 Correlation matrix, n = 100 males aged 39, p = 8 (left and right decibel loss at 500Hz, 1000Hz, 2000Hz and 4000Hz). 
+sca reflexesC Correlation matrix from Jolliffe (2002, p.58). n = 143, p = 10 reflexes action, left and right triceps, biceps, wrists, knees and ankles

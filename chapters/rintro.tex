@@ -1,0 +1,126 @@
+\chapter{Some R features}
+
+Most of our work in this module will use R software, although we will spend time considering the output of other programs.   R is useful because it lets us work through the various calculations, in addition to having commands for specific analyses.
+
+It is rather useful to save your work somewhere you can find it again later.   Create a subfolder in the u: drive called \texttt{STAT3401} and store all your work for this module in there.   R uses a working directory - it is not always in a sensible place.   You will have to set the working directory once you have opened R each time you run a session.   
+
+\begin{itemize}
+\item[] FILE --- CHANGE DIR --[USE DIALOG BOX]
+\item[] OR
+\item[] \texttt{> setwd("u:/STAT3401")}
+\end{itemize}
+
+Make sure you either use the module portal shortcut, or set the working directory \emph{each and every time} you use R.
+
+\emph{Also, you should note that R is case sensitive, therefore R and r are different.}
+
+There is some supplementary R code available in the module portal (mvmmisc.R).   You need to copy this file into your working directory, and load it into R.   It will provide a few additional functions that are not currently available within R.
+
+\begin{verbatim}
+> source("mvmmisc.R")
+\end{verbatim}
+
+
+\subsection{Getting help}
+
+R has an extensive help system.   If you know what you're looking for.   The following commands give you the help page for a particular function:
+
+\begin{verbatim}
+> help(seq)
+> ?seq
+\end{verbatim}
+
+
+
+If you've a vague idea, \texttt{apropos} will prompt you for other terms that might be relevant, have a look at \texttt{apropos(seq)}.
+
+
+\texttt{help.search()} (note the quotation marks) will do a search for any help files containing the word you are looking for, have a look at \texttt{help.search(``seq'')}
+
+
+And finally, typing \texttt{help.start()} will open up a web-browser interface to the R help system.
+
+
+\subsection{Tidying objects}
+
+In a while, we'll look at creating objects within R.   All these objects get stored in your workspace in one file called \texttt{.Rdata}.   If you don't take care, this will soon use up all your available file space.   R will only ask you if you want to save your workspace at the end of any session.   If you want to save any work in the meantime, type \texttt{save.image()} at intervals.
+
+Type \texttt{objects()} to get a list of any objects that are stored in your workspace.   
+
+If you wish to remove an objects, called spot, type \texttt{rm(spot)}.
+
+You can quit R by typing \texttt{q()}, and you will be prompted as to whether you wish to save your workspace.   If you say yes, all your work that session will be saved.   If you say no, R will save the workspace you started the session with.
+
+\subsection{R as an interactive calculator}
+
+
+At it's simplest, R just works in interactive mode - you type in a command, it gives you an answer:
+
+\begin{verbatim}
+> 2 + 3
+> 2 - 3
+> 2 * 3
+> 2/3
+> 2^3
+\end{verbatim}
+
+You might like to check that the operator precedence works correctly.
+
+\begin{verbatim}
+> 4^2 - 3 * 2
+> (4^2) - (3 * 2)
+> -2 - -3
+> -2 - -3
+> 1 - 6 + 4
+> 2^-3
+\end{verbatim}
+
+
+
+R has a fairly full range of mathematical functions, e.g.
+
+\begin{verbatim}
+> log(100)
+> log(100, base = 10)
+> log(100, b = 10)
+\end{verbatim}
+
+If you're not sure what's going on here, type \texttt{?log} to check.
+
+\subsection{Data objects}
+
+R stores data in a range of objects.   For example:
+
+\begin{verbatim}
+> x <- 1
+\end{verbatim}
+
+The less than, and the minus sign used together create an ``assignment operator'', we have assigned the value of 1 to x.   If we store our workspace, R will remember that x has a value of 1.   This isn't terribly interesting, in practice we need to store rather more useful information.   If we enter:
+
+\begin{verbatim}
+> x <- c(5.4, 5.7, 3.8, 4.1, 4.4, 6.1, 9.8)
+> names <- c("Suttons", "Bass", "Boddingtons", "Courage", 
+      "Stella", "Fosters", "Teignworthy")
+\end{verbatim}
+
+we have a range of values for x and a set of names.   We can store these data together in a data frame, called spot:
+
+\begin{verbatim}
+> spot <- data.frame(x, names)
+> spot
+> spot$x
+> spot$names
+> barplot(spot$x, names.arg = as.character(spot$names))
+\end{verbatim}
+
+Having created the data frame, we can extract individual columns using the dollar sign between the name of the data frame and the name of the column.
+
+In practice, we will either use data which is already available within R as a data frame, or we will load data from Excel type csv files (comma separated value) - where it will be imported as a data frame.   The rather useful thing about R is that we can have as many of these data frames in our workspace as we want - but watch your housekeeping!
+
+Data can also be stored in matrices (arrays) as well as lists in R.   We will look much harder at matrices next week!
+
+
+%%% Local Variables: ***
+%%% mode:latex ***
+%%% TeX-master: "book.tex"  ***
+%%% End: ***

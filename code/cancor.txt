@@ -1,0 +1,17 @@
+ pop <- LifeCycleSavings[, 2:3]
+     oec <- LifeCycleSavings[, -(2:3)]
+     cancor(pop, oec)
+ 
+
+X <- LifeCycleSavings[,c(2,3,1,4,5)]
+R11 <- cor(X)[1:2,1:2]
+R22 <- cor(X)[(3:5),3:5]
+R12 <- cor(X)[(1:2),3:5]
+R21 <- cor(X)[(3:5),1:2]
+
+
+A <- solve(R22) %*% R21 %*% solve(R11) %*% R12
+eigen(A)
+sqrt(eigen(A)$values)
+
+solve(R11) %*% R12 %*% eigen(A)$vectors

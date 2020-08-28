@@ -1,0 +1,150 @@
+
+
+\section{Computer exercises for the lab}
+
+This week is a good time for
+\begin{itemize}
+\item[(a)] making sure you are comfortable with the mathematics behind matrices as well as:
+\item[(b)] making sure you are comfortable with the matrix operators in R.   
+\item[(c)]  Check that you are very very sure you can subscript R matrices, i.e. use things such as \text{[,1]} to select column 1, \text{[,-1]} to select everything \emph{except} column 1, and \text{[,2:3]} to select columns 2 and 3.
+\end{itemize}
+
+Although we will use in built multivariate analysis functions in R, you should consider checking you understand the techniques by using R as a matrix calculator.
+  
+\begin{enumerate}
+
+\item Find (where possible) the determinants and the inverse of the following matrices:
+
+$C_{1} = \left[ \begin {array}{cc} 4& 4\\\noalign{\medskip} 4& 4\end {array} \right]$, $C_{2} = \left[ \begin {array}{cc} 4& 4.001\\\noalign{\medskip} 4.001& 4.002\end {array} \right]$ and $C_{3} = \left[ \begin {array}{cc} 4& 4.001\\\noalign{\medskip} 4.001& 4.002001\end {array} \right] $
+
+Very briefly comment on the magnitude of the difference between $C_{2}^{-1}$ and  $C_{3}^{-1}$ given the only difference between $C_{2}$ and $C_{2}$ amounts to a difference of $0.000001$ in the bottom right position.
+
+<<inversions, fig = FALSE, echo = TRUE, results = hide>>=
+A <- matrix(c(4,4,4,4),2,2)
+A
+det(A)
+try(solve(A))
+B <- matrix(c(4,4.001,4.001,4.002),2,2)
+B
+det(B)
+solve(B)
+C <- matrix(c(4,4.001,4.001,4.002001),2,2)
+C
+det(C)
+solve(C)
+
+@ 
+
+
+\begin{itemize}
+  \item What's going on here?
+\end{itemize}
+
+\textit{Note that A is singular, the determinant is zero and it can't be inverted.   Also note that the inverses of B and C are very very different - but this is something of a pathological example}
+
+
+\item Matrix partitioning.   Consider Sterling's financial data held in the R object LifeCycleSavings (see \verb+?LifeCycleSavings+).   To make life a little easier, reorder the columns using \texttt{X <- LifeCycleSavings[,c(2,3,1,4,5)]}.
+  
+
+\begin{itemize}
+\item Find the correlation matrix of \texttt{X} (longhand, using the centering matrix), call this matrix \texttt{R}
+
+
+<<sterling, fig =FALSE, echo = TRUE, results = hide>>=
+data(LifeCycleSavings)
+X <- LifeCycleSavings[,c(2,3,1,4,5)]
+R <- cor(X)
+R 
+
+@ 
+
+
+\item Partition \textit{R = cov(X)} following the scheme below such that $\boldsymbol{R_{11}}$ is a $2 \times 2$ matrix containing the covariance of \texttt{pop15} and \texttt{pop75}, and $\boldsymbol{R_{22}}$ contains the covariance of \texttt{sr}, \texttt{dpi} and \texttt{ddpi}
+
+\begin{displaymath}
+\boldsymbol{R} = \left( \begin{array}{l|l} \boldsymbol{R_{11}} & \boldsymbol{R_{12}} \\ \hline    \boldsymbol{R_{21}} & \boldsymbol{R_{22}} \end{array} \right) 
+\end{displaymath}
+
+You should find for example that  $\boldsymbol{R_{11}}$ is given by:
+ % latex table generated in R 2.3.1 by xtable 1.3-2 package
+% Wed Nov 15 22:15:30 2006
+\begin{table}[ht]
+\begin{center}
+\begin{tabular}{rrr}
+\hline
+ & pop15 & pop75 \\
+\hline
+pop15 & 83.75 & $-$10.73 \\
+pop75 & $-$10.73 & 1.67 \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+<<r11, fig = FALSE, results = hide, echo = TRUE>>=
+R11 <- R[1:2,1:2]
+R12 <- R[1:2,3:5]
+R21 <- R[3:5,1:2]
+R22 <- R[3:5,3:5]
+R11
+R22
+R21
+R12
+t(R21)
+
+@ 
+
+
+\item Find the matrix $\boldsymbol{A}$, where:
+
+\begin{displaymath}
+\boldsymbol{A} = \boldsymbol{R_{22}^{-1}R_{21}R_{11}^{-1}R_{12}}
+\end{displaymath}
+
+
+
+<<findA, fig = FALSE, results = hide, echo = TRUE>>=
+
+A <- solve(R22) %*% R21 %*% solve(R11) %*% R12
+
+
+@ 
+
+
+%\begin{itemize}
+
+\item Are $\boldsymbol{A}$ and $\boldsymbol{B}$ symmetric?   What is the difference between symmetric and asymmetric matrices in terms of their eigenvalues and eigenvectors?\\
+\textit{Note that they are both asymmetric matrices, it just so happens for these particular matrices that the eigenvalues are positive and the eigenvectors are real.   This isn't always the case for asymmetric matrices!}
+
+\item Find the eigenvalues and eigenvectors of $\boldsymbol{A}$ and $\boldsymbol{B}$ then find the square roots of the eigenvalues.   
+
+
+<<eigen, fig = FALSE, results = hide, echo = TRUE>>=
+eigen(B)
+sqrt(eigen(A)$values)
+sqrt(eigen(B)$values)
+
+@ 
+
+
+\item Do you notice any similarities between the first two eigenvalues from either matrix?\\
+\textit{Note that the square roots of the eigen values are identical.}
+\end{itemize}
+
+\item Revisit the \texttt{wines} data in the \texttt{Flury} package.   Consider only Y1, Y5, Y6, Y8 and Y9, use matrix algebra to find the means, correlation and covariance of these data.   Compare the eigenvalues and eigenvectors, and the determinants and inverse you get from the covariance matrix and the correlation matrix.\\
+
+
+  
+  
+\end{enumerate} 
+
+
+\section{Summary of week 2}
+
+\fbox{\parbox[c]{0.9\textwidth}{\color{blue}
+    
+\begin{itemize}
+\item We have revised, and are comfortable with matrix multiplication, matrix inverse, (normalised) eigenvalues and eigenvectors.  We can center and scale matrices.  We can do this by hand and in R.
+\item We are also comfortable using R as a matrix calculator if and when we wish.
+\end{itemize}
+}}

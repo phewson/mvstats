@@ -1,0 +1,132 @@
+S-PLUS instructions for the Appendix
+************************************
+
+last updated: june 18, 1997
+
+
+Most of the matrix calculations described in the appendix are directly
+available as S-PLUS commands. Two exceptions are the symmetric square root
+of a positive definite symmetric (pds) matrix, and the simultaneous
+spectral decomposition of two symmetric matrices. Two pertinent procedures
+are attached.
+
+Procedure pdsroot uses the spectral decomposition of a single pds
+matrix A to compute its square root using equation (25) from Appendix A.7.
+Procedure simdiag2 gives the simultaneous decomposition of two symmetric
+matrices W and A, where W is assumed pds. It invokes the pdsroot procedure.
+It is recommended that you extract the two procedures into a file that you
+can run prior to any call to pdsroot or simdiag2, or better, that you
+put the two procedures into a library. Try it out with the following
+sequence of S-PLUS commands.
+
+Define a pds matrix W and a symmetric matrix A by typing
+
+> W <- matrix(c(2, 1, 1, 2), ncol = 2)
+> A <- matrix(c(3, -4, -4, 2), ncol = 2)
+
+Find the square root of W by
+
+> rootW <- pdsroot(W)
+> rootW
+
+and verify the result by
+
+> rootW %*% rootW
+
+This should reproduce the matrix W. The inverse of the square root of A
+is then obtained by
+
+> invrootW <- solve(rootW)
+> invrootW
+
+This should give you the same numerical result as
+
+> invrootW <- pdsroot(solve(W))
+> invrootW
+
+What happens if you try to compute the square root of the matrix A
+defined above?
+
+Next, try out the simdiag2 procedure by typing
+
+> results <- simdiag2(W, A)
+> results$H
+> results$lambda
+
+Note that lambda is a vector rather than a matrix; but you can make
+a diagonal matrix out of it using
+
+> Lambda <- diag(results$lambda)
+> Lambda
+
+Now verify the results: by equation (41) of Appendix A.9, the commands
+
+> results$H %*% t(results$H)
+> results$H %*% Lambda %*% t(results$H)
+
+should reproduce the matrices W and A. The matrix Gamma in equation (40)
+is obtained from H by
+
+> Gam <- solve(t(results$H))
+
+Note that we cannot call it Gamma because "Gamma" is a reserved name in
+S-PLUS. If you now type
+
+> t(Gam) %*% W %*% Gam
+> t(Gam) %*% A %*% Gam
+
+you should get the identity matrix and a diagonal matrix identical with
+the matrix Lambda defined above.
+
+*******************************  CUT HERE  ********************************
+
+pdsroot <- function(A)
+{
+# function PDSROOT
+# function PDSROOT
+# input:	A = positive definite symmetric matrix of arbitrary 
+#		dimension
+# output:	rootA = the pds matrix rootA such that rootA %*% rootA = A
+
+p <- dim(A)[1]                                        # dimension of matrix
+eigenv <- eigen(A, symmetric = T)                  # spectral decomposition of A
+rootA <- eigenv$vectors %*% diag(sqrt(eigenv$values)) %*% t(eigenv$vectors)
+                                  # compute square root using equation (25)
+
+rootA
+# end of procedure PDSROOT
+# end of procedure PDSROOT
+}
+
+*******************************  CUT HERE  ********************************
+
+
+simdiag2 <- function(W, A)
+{
+# procedure SIMDIAG2
+# procedure SIMDIAG2
+# input:    W        positive definite symmetric matrix of dimension p by p
+#           A        symmetric matrix of same dimension as A
+
+# output:   H        a nonsingular p by p matrix
+#           lambda   a p-vector such that H*H' = W and H*L*H' = A, where L
+#		     is a diagonal p by p matrix with the entries of lambda
+#		     on the diagonal.
+#  note: the elements of lambda are in algebraically decreasing order, and
+#  the columns of H are ordered accordingly.
+
+p <- dim(W)[1]   				     # dimension of matrices
+Whalf <- pdsroot(W)                                   # pds square root of W
+Whalfinv <- solve(Whalf)                          # inverse square root of W
+eigenv <- eigen(Whalfinv %*% A %*% Whalfinv, symmetric = T)
+                                                    # spectral decomposition
+lambda <- eigenv$values
+Beta <- eigenv$vectors
+H <- Whalf %*% Beta                                       # compute matrix H
+results <- list("H" = H, "lambda" = lambda)
+results
+# end of procedure SIMDIAG2
+# end of procedure SIMDIAG2
+}		
+
+*******************************  CUT HERE  ********************************

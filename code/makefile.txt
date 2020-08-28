@@ -1,0 +1,59 @@
+# Makefile for quantitative genetic jackknife and bootstrap
+#    Patrick Phillips 10/92
+
+CFLAGS=-O -Wall -g
+
+all:	h2boot cpcrand cpc h2jack
+
+h2boot:	types.h proto.h h2boot.o bend.o cpc.o eigen.o data.o bmenu.o \
+		linsolve.o memory.o print.o random.o stat.o vecmatch.o netbeta.o
+	cc $(CFLAGS) bend.o cpc.o eigen.o data.o bmenu.o \
+		linsolve.o memory.o print.o random.o stat.o vecmatch.o netbeta.o \
+		h2boot.o -o h2boot
+h2jack:	types.h proto.h h2jack.o linsolve.o random.o probdist.o
+	cc $(CFLAGS) linsolve.o random.o probdist.o h2jack.o -o h2jack
+cpcrand:	types.h proto.h cpcrand.o bend.o cpc.o eigen.o data.o rmenu.o \
+		linsolve.o memory.o random.o print.o stat.o vecmatch.o
+	cc $(CFLAGS) bend.o cpc.o eigen.o data.o rmenu.o \
+		linsolve.o memory.o print.o random.o stat.o vecmatch.o \
+		cpcrand.o -o cpcrand
+cpc:	cpcmain.o cpc.o memory.o eigen.o vecmatch.o probdist.o random.o
+	cc $(CFLAGS) memory.o cpc.o cpcmain.o eigen.o vecmatch.o \
+		random.o probdist.o -o cpc
+
+bend.o:	bend.c
+	cc $(CFLAGS) -c bend.c
+cpc.o:	cpc.c
+	cc $(CFLAGS) -c cpc.c
+cpcmain.o: cpcmain.c
+	cc $(CFLAGS) -c cpcmain.c
+eigen.o:	eigen.c
+	cc $(CFLAGS) -c eigen.c
+h2boot.o:	types.h h2boot.c
+	cc $(CFLAGS) -c h2boot.c
+h2jack.o:	types.h h2jack.c
+	cc $(CFLAGS) -c h2jack.c
+cpcrand.o:	types.h cpcrand.c
+	cc $(CFLAGS) -c cpcrand.c
+data.o:	types.h proto.h data.c
+	cc $(CFLAGS) -c data.c
+bmenu.o:	types.h proto.h bmenu.c
+	cc $(CFLAGS) -c bmenu.c
+rmenu.o:	types.h proto.h rmenu.c
+	cc $(CFLAGS) -c rmenu.c
+linsolve.o:	linsolve.c
+	cc $(CFLAGS) -c linsolve.c
+memory.o:	types.h proto.h memory.c
+	cc $(CFLAGS) -c memory.c
+print.o:	types.h proto.h print.c
+	cc $(CFLAGS) -c print.c
+probdist.o:	probdist.c
+	cc $(CFLAGS) -c probdist.c
+random.o:	random.c
+	cc $(CFLAGS) -c random.c
+stat.o:	types.h proto.h stat.c
+	cc $(CFLAGS) -c stat.c
+vecmatch.o:	types.h proto.h vecmatch.c
+	cc $(CFLAGS) -c vecmatch.c
+netbeta.o:	types.h netbeta.c
+	cc $(CFLAGS) -c netbeta.c

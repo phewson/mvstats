@@ -1,0 +1,71 @@
+\chapter{Multivariate normality}
+\label{mvn}
+
+The multivariate normal distribution remains central to most work concerning multivariate continuous data.   Experience has suggested that it is usually at least an acceptable approximation, and of course one usually has recourse to the central limit theorem.   Although we will examine a few common alternatives, it is perhaps in the field of robust statistics where it's use has been modified most.
+
+\section{Expectations and moments of continuous random functions}
+\label{meancovar}
+
+The mean and covariance can be defined in a similar way to to the univariate context
+
+\input{defs/mvexpectation}
+
+
+\section{Multivariate normality}
+\label{mvndetail}
+
+\input{defs/mvnpdf}
+
+And it can be shown that $E(\boldsymbol{x}) = \boldsymbol{\mu}$, and that $Var(\boldsymbol{x}) = \boldsymbol{\Sigma}$, hence we can use the notation:
+
+\begin{displaymath}
+\boldsymbol{y} \sim MVN_{p}(\boldsymbol{\mu}, \boldsymbol{\Sigma})
+\end{displaymath}
+
+Finding the maximum likelihood estimators for $\boldsymbol{\mu}$ and $\boldsymbol{\Sigma}$ is not trivial, there are perhaps at least three derivations.   We briefly recap results from one of the more popular derivations here.
+
+\input{defs/mvnlike}
+
+\subsection{\textbf{R} estimation}
+
+\verb+cov()+ and \verb+var()+ (equivalent calls) both give the unbiased estimate for the variance-covariance matrix, i.e. $\frac{1}{n-1} \sum_{i=1}^{n}(\boldsymbol{x}_{i} - \bar{\boldsymbol{x}})^{T}(\boldsymbol{x}_{i} - \bar{\boldsymbol{x}})$.   It is worth nothing that by default, \verb+cov.wt()+ (which will do a few other things as well) uses the divisor $\frac{1}{n}$
+
+
+%\section{Skewness}
+%\label{skewness}
+
+%\section{Outliers}
+%\label{outliers}
+
+%\section{Missing Data}
+%\label{missing}
+
+\section{Transformations}
+\label{transform}
+
+\cite{Box+Cox:1964} modified earlier proposals by \cite{Tukey:1957} to yield the following transformation:
+
+\input{defs/boxcox}
+
+\input{defs/boxcoxmle}
+
+
+A range of tranformations have been considered for multivariate data, mainly of the Box-Cox type.   If the variables $\boldsymbol{y} = (y_{1}, y_{2}, \ldots, y_{p}$ are are smooth transformation of $\boldsymbol{x}$, the frequency function for $\boldsymbol{y}$ can be given by:
+\begin{displaymath}
+g(\boldsymbol{y}) = f(\boldsymbol{x}(\boldsymbol{y}))\lvert \frac{\partial \boldsymbol{x}}{\partial \boldsymbol{y}} \rvert
+\end{displaymath}
+where $\boldsymbol{x}(\boldsymbol{y})$ is $\boldsymbol{x}$ expressed in terms of the elements of $\boldsymbol{y}$, and $J = \lvert \frac{\partial \boldsymbol{x}}{\partial \boldsymbol{y}} \rvert$ is the Jacobian % determinant of partial derivatives
+which ensures the density is mapped correctly. 
+
+$\prod_{j=1}^{p} \prod_{i=1}^{n} x_{ij}^{\lambda_{j}-1}$
+
+\input{defs/boxcoxmvmle}
+
+
+
+
+
+%%% Local Variables: ***
+%%% mode:latex ***
+%%% TeX-master: "../book.tex"  ***
+%%% End: ***

@@ -1,0 +1,24 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,graphicx}
+\usepackage{../setspace}
+\addtolength{\textwidth}{1.5in}
+\addtolength{\hoffset}{-1in}
+\addtolength{\textheight}{1.5in}
+\addtolength{\voffset}{-1in}
+
+\title{STAT3401: Lab exercises concerning principal components}
+\author{Paul Hewson}
+\date{11th January 2007}
+\begin{document}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{12pt}
+\sffamily
+\maketitle
+
+
+Don't know what's going on here.
+
+
+\end{document}
+
+

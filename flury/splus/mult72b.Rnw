@@ -1,0 +1,102 @@
+
+S-PLUS instructions for Section 7.2, part B
+*******************************************
+
+last updated: june 18, 1997
+
+
+In this unit we continue quadratic classification, illustrating the
+computation of error rates as in Example 7.2.4. We will use the
+procedure QDA from the software instructions for Section 7.2 part A.
+
+Read the Microtus data by
+
+> rawdat <- matrix(scan("c:\\multidat\\tab54_1.dat"), ncol = 9, byrow = T)
+> x <- rawdat[, 1]
+> Y <- rawdat[, 2:9]
+
+The group codes (in the x-vector) are 1 and 2 for the classified observations,
+and 0 for the unclassified observations. All eight morphometric variables are
+included in this example. We can call QDA (here using relative sample sizes as
+estimates of prior probabilities):
+
+> results <- qda(x, Y, 0)
+> post1 <- 100 * results$post1
+
+At this point the vector results$qdf contains values of the quadratic
+discriminant function (see equation 17), the vector xhat contains the
+predicted group membership, and prior1 is the prior probability for group1,
+in percent. Notice that observations with a positive value of qdf are
+assigned to group 1; negative values to group 2. You may display these
+results by typing
+
+> matrix(c(results$qdf, results$xhat, 100 * results$post1), ncol = 3)
+
+but this will fill several screens. Instead, let's just look at the
+misclassified observations. For easy identification of observations,
+create a vector of sequential observations numbers, and select
+the misclassified ones:
+
+> N <- length(x)
+> obs <- seq(1, by = 1, length = N)
+> misclas <- obs[x != results$xhat & x!= 0]
+
+Notice that the unclassified observations are excluded in the above
+statement. Now display results for the misclassified observations only:
+
+> matrix(c(misclas, x[misclas], results$qdf[misclas], results$xhat[misclas],
+> results$post1[misclas]), ncol = 5)
+
+The computation of the plug-in error rate is straighforward and need not
+be shown here. As an exercise, graph the distribution of qdf separately
+for all three groups of observations (multiplex, subterraneus, and
+unclassified).
+
+The leave-one-out analysis requires a loop over all N classified observations;
+as in Section 5.5 we provide a program that you can store in a file and
+execute in SPLUS. It would be a good idea to copy the procedure QDA into
+the same file so you don't have to worry about loading it first.
+
+****************************  CUT HERE  ************************************
+
+rawdat <- matrix(scan("c:\\multidat\\tab54_1.dat"), ncol = 9, byrow = T)
+              							 # read data
+
+x <- rawdat[, 1]                       # vector with actual group membership
+Y <- rawdat[, 2:9]                     # data matrix used for classification
+Y <- Y[x != 0,]                           # use only classified observations
+x <- x[x != 0]                  	  # use only classified observations
+N <- length(x) 					    # number of observations
+xhatleav <- c(rep(0, N))	      # vector for leave-one-out assignments
+p1leave <- c(rep(0, N))   # vector for leave-one-out posterior probabilities
+i <- 1
+while (i <= N)           	     # start loop for leave-one-out analysis
+{
+cat("i =", i, "\n")        # display number of omitted observation on screen
+xx <- x                           # copy group code vector into a new vector
+xx[i] <- 0        # change group membership of i-th observation to "unknown"
+
+results <- qda(xx, Y, 0)                   		# call QDA procedure
+
+xhatleav[i] <- results$xhat[i]
+			    # predicted group membership of i-th observation
+
+p1leave[i] <- results$post1[i]
+			    # posterior prob. of i-th observation in group 1
+
+i <- i + 1
+}						 # end of leave-one-out loop
+
+results <- qda(x, Y, 0)			
+		       # call QDA procedure with all observations classified
+
+cat(format(results, justify = "right"), file = "leave1.out", fill = 25)
+							  # open output file
+
+post1 <- 100 * results$post1    # convert posterior probabilities to percent
+p1leave <- 100 * p1leave	# convert posterior probabilities to percent
+
+cbind(rep(1:N, 1), x, results$qdf, post1, results$xhat, p1leave, xhatleav)
+							# create Table 7.2.2
+
+*****************************  CUT HERE  ***********************************

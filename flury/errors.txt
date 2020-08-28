@@ -1,0 +1,320 @@
+Corrections to  A FIRST COURSE IN MULTIVARIATE STATISTICS
+by Bernard Flury  (Springer, New York, 1997, ISBN 0-387-98206-X)
+
+
+                      LIST OF MISTAKES
+                    LISTINO DEI MISTACCHI
+                       MISTAKKENLISTE
+                    LISTE DES MOUSTACHES
+
+last updated: April 21, 1999.
+
+
+Contributors to this list are:
+
+Aneil Agrawal
+Marco Bee
+Anne Buu
+R.B. Fisher
+Leah Flury
+Bev Grunden
+Christian Klingenberg
+Daan Nel
+Massimo Pigone
+Kevin Ryan
+Ron Schewe
+Thaddeus Tarpey
+Berwin Turlach
+Carampana Zoppe
+
+p. xiii: 
+The title of section 9.3 should be "The EM Algorithm for Normal Mixtures".
+All page numbers referring to the Appendix are wrong, except for A.0
+and A.8.
+
+p. 19, in exercise 2, pi/2 should be pi/4 (3 places)
+
+p. 43, the page reference to Figure 2.2.5 is wrong; should be 37.
+
+p. 46, Exercise 16, "partial integration" should be "integration by parts".
+
+p. 57, story following Exercise 15, "Cherry" should be "cherry"
+       (lowercase c) in two places.
+
+p. 73, Exercise 22, in the definition of the function G(x) replace
+       x by x^2 (2 places)
+
+p. 83, the page reference to Figure 2.3.3 is wrong; should be 42.
+
+p. 84, the page reference to Figure 2.2.2 is wrong; should be 32.
+
+p. 100, first displayed formula, "2" to the left of last "="
+        should be "1.5".
+
+p. 120, the page reference to Figure 2.6.4 is wrong; should be 86.
+
+p. 139, Exercise 8, " 1 <= y <= 1 "  should be  " 0 <= y <= 1 ".
+
+p. 148, third line of displayed math in Definition 2.10.2, 
+      "cov[X2,X2]" should be "cov[X2,X1]".
+
+p. 154, Exercise 17, the last entry in the table of probabilities 
+        should be 0.07, not 0.14.
+
+p. 157, equation (7), "var" should be in roman font.
+
+p. 161, last line of Example 2.1.14, " U1 + U2"  should be " U1 - U2 ".
+
+p. 165, l.2: "sin R" should be "sin A" .
+
+p. 167, Exercise 10, line 4, "Exercise 10" should be "Exercise 9".
+
+p. 173, middle, "the sum X+Y follows" should be "the sum Y+Z follows".
+
+p. 185, exercise 10(b), "is the same as the distribution of U" should
+       be: "is the same as the distribution of cos(U)".
+
+p. 187, middle of third line from bottom, "x" in formula should be "X".
+
+p. 189, equation (13), comma in wrong place (move down).
+
+p. 190, last line, first element in sample should be X_1, not X.
+
+p. 192, two lines after equation (20), "known" should be "unknown".
+        ( ... a vector of UNknown parameters)
+
+p. 193:
+Theorem 3.3.5(i): "(N+p)" should be "(N+k)" .
+After equation (25), "indempotent" should be "idempotent".
+
+p. 207, exercise 18, insert boldface greek mu between the equal sign and
+       the plus sign
+
+p. 217, above equation (7) "Theorem 4.2.2" should be "Theorem 4.2.3".
+
+p. 219, in Theorem 4.2.1,  "Cov" should be in roman type, and
+        the capital boldface X should have an overbar.
+
+p. 224, line 5 from bottom, "random variables" should be "random vectors".
+
+p. 232, exercise 21, reference to page 237 should be to 229.
+
+p. 236, equation (5), insert left parenthesis between "ell" and "theta".
+
+p. 240, Theorem 4.3.1, add subscript "p" to calligraphic N.
+
+p. 244, equation (33) and line before, replace index "k" by "h".
+
+p. 252, second displayed formula (LLRS), the second theta should
+        have a tilde symbol instead of a hat symbol.
+
+p. 253, end of first paragraph, (5, 5.5) should be (3.5, 5.5). Two
+        lines below, 5.191 should be 4.591.
+
+p. 256, exercise 4(b), delete subscript "i" from greek epsilon.
+
+p. 259, exercise 22(b), "2" should be a subscript to "sigma".
+
+p. 259, exercise 23, the last vector should have subscripts "N", not "1".
+
+p. 266, in description of E-step and M-step, "parametric" and
+        "parameteric" should both be just "parameter".
+
+p. 271:
+Equation (26): the "+" sign following mu about in the middle
+of the lengthy expression in brackets should be a "-" sign.
+last line: "jth observation" should be "ith observation".
+p. 273, line following equation (33), subscript 2 should be 0.
+
+p. 276: 
+Exercise 3, reference to Example 4.4.3 should be 4.4.1.  
+In exercise 5, reference to Example 4.4.6 should be 4.4.5.
+
+p. 282, example 5.2.3:
+5th line should read " ... 3, 4, 5, 6#. 6th line "...  Delta = 6".
+
+p. 283, legend to Figure 5.2.1, "Delta = 5" should be "Delta = 6".
+
+p. 286, legend to Table 5.2.2, "V=Y-Y" should be "V=Y-X".
+
+p. 293:
+equation (28), attach index X (boldface, cap) to Delta.
+three lines below, "and a linear ..." should be "is a linear ...".
+
+p. 301, Exercise 9, reference to definition 7.2.2 should be 5.2.3.
+
+p. 325, l.2, "Figures 2.6.7 and 2.8.10" should be "2.6.4 and 2.8.6".
+
+p. 332, middle, line after displayed math, insert "is" after "distance".
+
+p. 342, exercise 2, 1st line, " vs .Y_2" should be "vs. Y_2" .
+
+p. 343, 2nd line of exercise 6, omit commas before and after "continuous".
+
+p. 346, line following last displayed math, omit commas around "normal".
+
+p. 349: 
+Equation 9, upper index N of the sum should be N_1 + N+2.
+Change sentence before equation (11) to " .. rate is then given by"
+
+p. 356:
+exercise 4, change sentence to "Suppose that the two populations are
+in fact identical, and ..."
+exercise 11, "decrease" should be "increase".
+
+p. 363, equation (22), change E_2 to E_1, and E_1 to E_2.
+
+p. 370, last line of Exercise 11, delete "and equal cost of 
+        misclassification".
+
+p. 379, insert space between Muirhead and left parenthesis.
+
+p. 382, displayed math in middle nuhat_1 should be nuhat_2.
+
+p. 383, line 11, "p-variate" should be "k-variate"
+
+p. 384, 2 lines below displayed numerical results, "99th" should be "95th".
+
+p. 390: 
+exercise 10, "unspecifed" should be "unspecified".
+exercise 11, attach index "m" to Z  (two places).
+
+p. 395, middle, reference to Section 6.6 should be 6.7.
+
+p. 404, first line of Theorem 6.4.1, delete comma at end of line.
+
+p. 406, second to last paragraph, "randomization tests" should be
+   "tests based on resampling".
+
+p. 415, Equation (14), "p-1" in denominator should be "p-q".
+
+p. 441, 4th line following Example 6.7.3, " ... of two distributions "
+   should be " ... of two mean vectors".
+
+p. 453, equation (2), "for" should be in roman font.
+
+p. 464, equation (12), "b" should NOT be boldface.
+
+p. 473, erase pencil marks above Figure 7.2.4.
+
+p. 487:
+Second paragraph should start "We show first how ..."
+Third paragraph should start "We proceed now to ..."
+
+p. 500, line 5 following Equation (48), the dimension of the
+        multivariate normal distribution of Z_1 is m, not p.
+        (Change subscript of calligraphic N).
+
+p. 506, 2nd line of Exercise 7, "rank(Gamma)" should be "rank(Lambda)" 
+     (capital boldface greek Lambda).
+
+p. 522, above Definition 7.5.1: change "Now we have now" to "We have now".
+
+p. 544, index of last pihat in line above equation (21) should be N,
+        not M.
+
+p. 551, equation (35), alpha_j should be "gamma_j".
+
+p. 552, table with numerical results near bottom, third line
+      (associated with gamma_1): Wald statistic is 2.248, not 1.641.
+
+p. 553, just above Figure 7.6.3, "authors" should be "author's".
+
+p. 554, 2nd paragraph of Example 7.6.5 should start "Consider first ... "
+
+p. 562, end of exercise 14(c), "black chestnut" should be 
+        "flowering dogwood".
+
+p. 576, last line, "X" should be "U".
+
+p. 581, equation (11), put large paernetheses around partitioned
+        matrix on l.h.s.
+
+p. 583, displayed math at top, "X_1 - X_2" should be "X_2 - X_1".
+
+p. 584, 2nd line, " ... and Y = Cov( ..." should be 
+        " ... and PSI = Cov( ...". (capital greek boldface Psi).
+
+p. 617, Exercise 11(a), "positive-definite" should be "positive definite"
+    
+p. 633, equation (16), both i and j are indices to Psi.
+        should be Psi_{ij}
+
+p. 647, line above Equation (13), "log likelihood" should be
+        "log-likelihood".
+
+p. 648, line 2 following the displayed math, "log likelihood" should
+        be "log-likelihood".
+
+p. 657: 
+line above equation (5), "4.2" should be "4.3".
+beginning of last paragraph, "equation(6)" should be "equation (3)".
+
+p. 675, the numerical results displayed towards the bottom of the
+        page are inaccurate. Here are the corrected values.
+        pi1hat = 0.266
+        pi2hat = 0.734
+        mu1hat: 6.117, 95.316
+        mu2hat: 7.260, 102.221
+        Psi1hat: 0.253, 0.484, 0.484, 2.530
+        Psi2hat: 0.054, 0.020, 0.020, 1.624
+
+p. 682:
+Legend to Table 9.5.1, "Here, beta = "  should be changed to
+"Here, Delta is the multivariate standard distance, beta = ...".
+(capital greek Delta).
+
+The estimates using discrimix, in the rightmost column of Table 9.5.1,
+are inaccurate. Here are corrected numerical values.
+       pi1: 0.528
+       pi2: 0.472
+       mu1: 2070.5, 3957.8
+       mu2: 1784.5, 3862.6
+       Psi: 12249, 13921, 13921, 60421
+       corr: 0.512
+       alpha: -36.03
+       beta*10^3: 29.20, -5.15
+       Delta: 2.804
+
+First line of second to last paragraph, replace "estimates of Delta"
+by "estimates of the standard distance Delta".
+
+p. 683, lines 3 and 4, the confidence intervals are inaccurate.
+        Corrected values are (2.451, 3.938) in line 3, and
+        (2.420, 3.320) in line 4.
+
+p. 690, first line of equation (5), the second C should be C' 
+   (insert transposed sign).
+
+p. 691: 
+Equation (11), lowercase boldface x should be capital boldface X
+(in two places).
+Equation 12, insert "2" between the equal sign and Xinverse.
+
+p. 695, above equation (26), eliminate space between "eigenvalue" and "s".
+
+p. 704, the Efron 1982 reference should be moved down and appear after
+     the Efron 1975 reference.
+
+p. 705, Flury, Boukai, and Flury reference, "in press" should be 
+      replaced by "758-766".
+
+p. 706:
+Hills reference, insert "Vol. 1" between title and authors.
+Reverse order of "Johnson and Wichern" reference and "Johnson and
+Kotz" reference.
+
+p. 708, last line of Monetti et al reference, "Chiemistry" should be
+     "Chemistry".
+
+p. 711 index entry "analysis of variance: multivariate", correct
+    page number is 486, not 5486.
+
+p. 712, entry "deviances" should be "deviance".
+
+p. 713: 
+add entry "regression, multivariate, 362"
+page number for "score function" should be 244, not 245.
+page number for "standard distance: multivariate" should be 293, not 303.
+
+

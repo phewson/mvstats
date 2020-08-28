@@ -1,0 +1,126 @@
+Consider the following study (Johnson and Wichern).
+
+The study comprised of $p=5$ job characteristic and $q=7$ job satisfaction variables.   $n=784$ executives were surveyed surveyed.   The variables examined were:
+  
+  \begin{itemize}
+\item  $x_{1}$ = Feedback
+\item  $x_{2}$ = Task significance
+\item $x_{3}$ = Task variety
+\item $x_{4}$ = Task identity
+\item $x_{5}$ = Autonomy
+   \end{itemize}
+   
+  \begin{itemize}
+\item  $y_{1}$ = Supervisor satisfaction
+\item  $y_{2}$ = Career-future satisfaction
+\item $y_{3}$ = Financial Satisfaction
+\item $y_{4}$ = Workload satisfaction
+\item $y_{5}$ = Company identification
+\item $y_{6}$ = Kind-of-work satisfaction
+\item $y_{7}$ = General satisfaction
+   \end{itemize}  
+
+
+
+The correlation matrix for this lot is as follows:
+
+\begin{displaymath}
+\boldsymbol{\hat{R}} = \left[ \begin{array}{rrrrr|rrrrrrr}
+1.0 & & & & & .33 & .32 & .20 & .19 & .30 & .37 & .21 \\
+.49 & 1.0 & & & & .30 & .21 & .16 & .08 & .27 & .35 & .20 \\
+.53 & .57 & 1.0 & & & .31 & .23 & .14 & .07 & .24 & .37 & .18 \\
+.49 & .46 & .48 & 1.0 & & .24 & .22 & .12 & .19 & .21 & .29 & .16 \\
+.51 & .53 & .57 & .57 & 1.0 & .38 & .32 & .17 & .23 & .32 & .36 & .27 \\
+\hline
+ & & & & & 1.0 & & & & & & \\
+ & & & & & .43 & 1.0 & & & & & \\
+ & & & & & .27 & .33 & 1.0 & & & &\\
+ & & & & & .24 & .26 & .25 & 1.0 & & & \\
+ & & & & & .34 & .54 & .46 & .28 & 1.0 & & \\
+ & & & & & .37 & .32 & .29 & .30 & .35 & 1.0 & \\
+ & & & & & .40 & .58 & .45 & .27 & .59 & .31 & 1.0\\
+ \end{array} \right]
+ \end{displaymath}
+
+
+
+Canonical variables are as follows (note that $x_{1}$ etc. refer to \emph{scaled} variables):
+
+%\begin{table}
+
+\begin{tabular}{lrrrrr|r|lrrrrrrr}
+\scriptsize
+ & $x_{1}$ & $x_{2}$ & $x_{3}$ & $x_{4}$ & $x_{5}$ & $\rho_{i}$ & & $y_{1}$ & $y_{2}$ & $y_{3}$ & $y_{4}$ & $y_{5}$ & $y_{6}$ & $y_{7}$\\
+$a_{1}$ & .42 & .21 & .17 & -.02 & .44 & .55 &  $b_{1}$ & .42 & .22 & -.03 & .01 & .29 & .52 & -.12\\
+$a_{2}$ & -.30 & .65 & .85 & -.29 & -.81 & .23 & $b_{2}$ & .03 & -.42 & .08 & -.91 & .14 & .59 & -.02\\
+$a_{3}$ & -.86 & .47 & -.19 & -.49 & .95 & .12 & $b_{3}$ & .58 & -.76 & -.41 & -.07 & .19 & -.43 & .92\\
+$a_{4}$ & .76 & -.06 & -.12 & -1.14 & -.25 & .08 & $b_{4}$ & .23 & .49 & .52 & -.47 & .34 & -.69 & -.37\\
+$a_{5}$ & .27 & 1.01 & -1.04 & .16 & .32 & .05 & $b_{5}$ & -.52 & -.63 & .41 & .21 & .76 & .02 & .10 
+\end{tabular}
+%\end{table}
+
+
+Sample correlations between original variables and canonical variables.
+
+\begin{tabular}{lrr|lrr}
+ & $u_{1}$ & $v_{1}$ & & $u_{1}$ & $v_{1}$\\
+$x_{1}$ & .83 & .46 & $y_{1}$ & .42 & .75\\
+$x_{2}$ & .74 & .42 & $y_{2}$ & .35 & .65\\
+$x_{3}$ & .75 & .42 & $y_{3}$ & .21 & .39\\
+$x_{4}$ & .62 & .34 & $y_{4}$ & .21 & .37\\
+$x_{5}$ & .85 & .48 & $y_{5}$ & .36 & .65\\
+ & & & $y_{6}$ & .44 & .80\\
+ & & & $y_{7}$ & .28 & .50
+ \end{tabular}
+
+
+\section{Exercises}
+
+\begin{itemize}
+\item Interpret these canonical variates
+\item Determine which are significant
+\end{itemize}
+
+
+\begin{eqnarray*}
+u = a^{T}x\\
+v = b^{T}y
+\end{eqnarray*}
+
+$var(u) = var(v) = 1$ and $var(u) = a^{T} \Sigma_{11} a$, $var(v) = b^{T} \Sigma_{22} b$.   Also, $corr(u,v) = a^{T} \Sigma_{12}b$
+
+
+So we want to maximise:
+
+\begin{displaymath}
+\psi = a^{T} \Sigma_{12}b - \frac{1}{2} \lambda (a^{T} \Sigma_{11} a) - \frac{1}{2} \mu (b^{T} \Sigma_{22} b)
+\end{displaymath}
+
+\begin{eqnarray*}
+\frac{\partial \psi}{\partial a} = \Sigma_{12} b - \lambda \Sigma_{11} a = 0\\
+\frac{\partial \psi}{\partial b} = \Sigma_{21} b - \mu \Sigma_{22} b = 0
+\end{eqnarray*}
+
+Premultiplying by $a^{T}$ and $b^{T}$ respectively
+
+\begin{eqnarray*}
+\frac{\partial \psi}{\partial a} = a^{T} \Sigma_{12} b - \lambda a^{T} \Sigma_{11} a = 0\\
+\frac{\partial \psi}{\partial b} = b^{T} \Sigma_{21} b - \mu b^{T} \Sigma_{22} b = 0
+\end{eqnarray*}
+
+Hence $\lambda$ = $mu$ = cor(u,v)
+
+
+Also
+
+\begin{displaymath}
+\left( \begin{array}{rr} -\lambda \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & -\lambda \Sigma_{22} \end{array} \right) \left( \begin{array}{r} a \\ b \end{array} \right)
+\end{displaymath}
+
+Where
+
+\begin{displaymath}
+\left| \begin{array}{rr} -\lambda \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & -\lambda \Sigma_{22} \end{array} \right) = \boldsymbol{0}
+\end{displaymath}
+
+

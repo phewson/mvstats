@@ -1,0 +1,248 @@
+S-PLUS instructions for Section 7.3
+***********************************
+
+last updated: june 18, 1997
+
+
+The computations needed for canonical discriminant functions are
+somewhat more involved than those required for the two-group case.
+In particular, we will need the simultaneous decomposition of two
+symmetric matrices from Appendix A.9. The file multapp.spl contains
+two procedures, one for computing the symmetric square root of a
+pds matrix, and one for computing the simultaneous decomposition.
+The two procedures need to be loaded before the calculations for
+canonical discriminant analysis can start.
+
+We will illustrate the computations using Example 7.3.2, the Iris data.
+
+> rawdat <- matrix(scan("c:\\multidat\\tab73_1.dat"), ncol = 5, byrow = T)
+> groups <- rawdat[, 1]
+> Y <- rawdat[, 2:5]
+> N <- dim(Y)[1]
+
+First, compute the mean vectors and covariance matrices of all groups.
+Notice that we are using plug-in (or maximum likelihood) estimates
+of the covariance matrices.
+
+> Y1 <- Y[groups == 1,]
+> N1 <- dim(Y1)[1]
+> ybar1 <- apply(Y1, 2, mean)
+> Psihat1 <- (N1-1) * var(Y1) / N1
+> Y2 <- Y[groups == 2,]
+> N2 <- dim(Y2)[1]
+> ybar2 <- apply(Y2, 2, mean)
+> Psihat2 <- (N2-1) * var(Y2) / N2
+> Y3 <- Y[groups ==3,]
+> N3 <- dim(Y3)[1]
+> ybar3 <- apply(Y3, 2, mean)
+> Psihat3 <- (N3-1) * var(Y3) / N3
+
+Next compute the "total", "within", and "between" covariance matrices:
+
+> Total <- (N-1) * var(Y) / N
+> Within <- (N1 * Psihat1 + N2 * Psihat2 + N3 * Psihat3) / N
+
+The "Between" covariance matrix is most easily obtained as the difference
+between "total" and "within", see equation (41):
+
+> Between <- Total - Within
+
+It may be a good idea to display intermediate results at this point.
+The procedure "simdiag2" from the Appendix returns a matrix H and a vector
+lambda for the simultaneous decomposition of "within" and "between":
+
+> results <- simdiag2(Within, Between)
+
+The matrix H has dimension 4 by 4, and the vector lambda has dimension
+4 by 1; the entries of lambda are in decreasing order of modulus. Because
+we have k=3 groups and p=4 variables, the number of canonical discriminant
+functions is at most m = min(p, k-1) = 2, i.e., the two smallest entries
+in lambda should be exactly zero. Due to numerical inaccuracies they
+may not be exactly zero, as you may verify by displaying lambda.
+(Actually the above way of computing the "Between" matrix is numerically
+inaccurate; we will do better in the procedure given later). The vectors
+of canonical discriminant function coefficients are the first m columns of
+the inverse of t(results$H):
+
+> Gam <- solve(t(results$H))
+> Gam1 <- Gam[, c(1, 2)]
+
+Display Gam1 at this point: it should be a 4 by 2 matrix with columns
+equal to the two vectors gammahat1 and gammahat2 given in Example 7.3.2.
+
+Next we will transform the data to canonical discriminant functions.
+Only the first m=2 functions are needed.
+
+> Z1 <- Y %*% Gam1
+
+At this point you may construct a graph similar to Figure 7.3.1. Notice
+that Z1 is a 150 by 2 matrix, with blocks of 50 rows corresponding to the
+three species of Iris flowers. For classification based on posterior
+probabilities we need the means of the canonical discriminant functions
+in all three groups:
+
+> nu1 <- apply(Z1[groups == 1,], 2, mean)
+> nu2 <- apply(Z1[groups == 2,], 2, mean)
+> nu3 <- apply(Z1[groups == 3,], 2, mean)
+
+Suppose we wish to use equal prior probabilities, and define
+
+> pi1 <- 1/3
+> pi2 <- 1/3
+> pi3 <- 1/3
+
+From equation (49), classification functions can now be computed as
+
+> q1 <- (sweep(Z1, 2, t(nu1)/2)) %*% nu1  + log(pi1)
+> q2 <- (sweep(Z1, 2, t(nu2)/2)) %*% nu2  + log(pi2)
+> q3 <- (sweep(Z1, 2, t(nu3)/2)) %*% nu3  + log(pi3)
+
+Posterior probabilities for all three groups are computed using
+equation (51):
+
+> q <- cbind(q1, q2, q3)
+> post1 <- exp(q1) / apply(t(exp(q)), 2, sum)
+> post2 <- exp(q2) / apply(t(exp(q)), 2, sum)
+> post3 <- exp(q3) / apply(t(exp(q)), 2, sum)
+
+List these posterior probabilities:
+
+> cbind(groups, post1, post2, post3)
+
+Before we can use the posterior probabilities for classification, we need
+a more general version of the function maxindc; we cannot use the function
+maxindc defined in the instructions for section 5.4, because in this case
+the matrix has three columns. So we need the following function (of course
+this one can be used in place of the old one in section 5.4):
+
+maxindc <- function(X)
+{
+	y <- c(rep(0, dim(X)[1]))
+	for(i in 1:dim(X)[1])
+		y[i] <- rev(order(X[i,  ]))[1]
+	y
+}
+
+You can now attempt classification
+
+> post <- cbind(post1, post2, post3)
+> xhat <- maxindc(post)
+
+The vector xhat contains the predicted group membership according to
+maximum posterior probability. If all calculations have been done
+correctly you will see that three observations would be misclassified:
+two observations from group 2 would be assigned to group 3, and one
+observation from group 3 would be assigned to group 2.
+
+The instructions you have just followed are not necessarily the most
+elegant way to do the computations; in particular it is somewhat tedious
+to repeat similar calculations for all groups. The following procedure
+can be used for an arbitrary number k of groups; it will also be useful
+for leave-one-out computations as in Example 7.3.3. The procedure uses
+only classified observations for the estimation of the classification
+rule, but computes normal theory posterior probabilities and predicted
+group membership for all observations.
+
+Assuming that you start all over at this point, remember to first run
+the file that contains procedures "pdsroot", "simdiag2", and "candisc",
+or to load them. Then proceed as follows (for the Iris data set):
+
+> rawdat <- matrix(scan("c:\\multidat\\tab73_1.dat"), ncol = 5, byrow = T)
+> x <- rawdat[, 1]
+> k <- 3
+> Y <- rawdat[, 2:5]
+
+For equal prior probabilities, define
+
+> prior <- matrix(1, 3, 1) / 3
+
+(For prior probabilities equal to the relative sample sizes you would
+define "prior" to be a vector with zero entries). Then call the procedure:
+
+> results <- candisc(Y, k, x, prior)
+
+Now look at the various vectors and matrices returned by the procedure;
+they should be identical to the results found in the earlier analysis.
+
+******************************  CUT HERE  ********************************
+
+candisc <- function(Y, k, x, prior)
+{
+# function CANDISC
+# function CANDISC
+# INPUT:  Y         N by p data matrix of variables to be used
+#         k         number of groups
+#         x         N by 1 vector of group codes (1 through k for the
+#                   classified observations, 0 for unclassified ones)
+#         prior     k by 1 vector of prior probabilities to be used for
+#                   classification. If prior[1] is zero, relative sample
+#                   sizes will be used.
+
+# OUTPUT: W         within-groups covariance matrix (Psihat in eq. 41)
+#         B         between groups covariance matrix (Psihat_B in eq. 41)
+#         Gam1      m by p matrix whose columns are the vectors of canonical
+#                   discriminant function coefficients; m = min(p, k-1)
+#         lambda1   m by 1 vector of (nonzero) eigenvalues of inv(W)*B, i.e.,
+#                   diagonal entries in equation (31)
+#         post      N by k matrix; the j-th column contains the posterior
+#                   probabilities for membership in group j
+#         xhat      predicted group membership
+
+p <- dim(Y)[2]                                        # number of variables
+Mu <- matrix(0, k, p)       # define matrix to store groupwise mean vectors
+Within <- matrix(0, p, p) # will be used as within-groups covariance matrix
+n <- rep(0, k)                              # vector for sample sizes
+j <- 1
+while (j <= k)                         		    # start loop over group
+{
+YY <- Y[x == j,]                       		# select data of j-th group
+n[j] <- dim(YY)[1]                              # sample size of j-th group
+Mu[j, ] <- t(apply(YY, 2, mean))              # mean vector of j-th group
+Within <- Within + (n[j] - 1) * var(YY)
+					  # update within-groups SSP matrix
+
+j <- j + 1
+}		                                              # end of loop
+
+nclas <- sum(n)              # number of classified observations
+Within <- Within / nclas                  # within-groups covariance matrix
+prop <- n / nclas                                   # relative sample sizes
+mubar <- t(prop) %*% Mu               # mean vector of mixture (row vector)
+Between <- (t(sweep(Mu, 2, mubar)) %*% diag(prop) %*% 
+(sweep(Mu, 2, mubar)))
+                                        # between--groups covariance matrix
+
+results <- simdiag2(Within, Between)	     # simultaneous diagonalization
+Gam <- solve(t(results$H))   # canonical discriminant function coefficients
+m <- min(c(p, (k-1)))	       # number of canonical discriminant functions
+Gam1 <- Gam[, 1:m]                                 # choose first m columns
+lambda1 <- results$lambda[1:m]      # choose (possibly) nonzero eigenvalues
+Z1 <- Y %*% Gam1                   # canonical discriminant function scores
+nu <- Mu %*% Gam1        # mean vectors of canonical discriminant functions
+                                                  # (mean vectors are rows)
+if (prior[1] == 0)			      # choose between pre-assigned
+prior <- prop	    # (fixed) prior probabilities and relative sample sizes		      
+
+clasfun <- matrix(0, dim(Z1)[1], k) # matrix for k classification functions
+j <- 1
+while (j <= k)		  
+{                               # loop over groups
+clasfun[, j] <- (sweep(Z1, 2, nu[j,]/2)) %*% nu[j,] + prior[j]
+                 	                       # evaluate classification functions
+
+post <- exp(clasfun) / apply(t(exp(clasfun)), 2, sum)
+						  # posterior probabilities
+
+j <- j + 1
+}		                                              # end of loop
+
+xhat <- maxindc(clasfun)                    # predicted group membership
+
+results <- list("Within" = Within, "Between" = Between, "Gam1" = Gam1,
+"lambda1" = lambda1, "post" = post, "xhat" = xhat)
+results
+# end of procedure CANDISC
+# end of procedure CANDISC
+}						 
+
+*******************************  CUT HERE  ********************************

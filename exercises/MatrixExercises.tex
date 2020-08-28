@@ -1,0 +1,337 @@
+\documentclass{article}
+\usepackage{amsmath,amssymb}
+\title{Some matrix exercises}
+\author{Paul Hewson}
+
+\begin{document}
+
+\maketitle
+
+\section{Computer exercises for the lab}
+
+Make sure you are comfortable with the matrix operators in R.   Also, be very very sure you can subscript matrices, i.e. use things such as \text{[,1]} to select column 1, \text{[,-1]} to select everything \emph{except} column 1, and \text{[,2:3]} to select columns 2 and 3.
+
+\begin{enumerate}
+
+\item Find (where possible) the determinants and the inverse of the following matrices:
+
+$C_{1} = \left[ \begin {array}{cc} 4& 4\\\noalign{\medskip} 4& 4\end {array} \right]$, $C_{2} = \left[ \begin {array}{cc} 4& 4.001\\\noalign{\medskip} 4.001& 4.002\end {array} \right]$ and $C_{3} = \left[ \begin {array}{cc} 4& 4.001\\\noalign{\medskip} 4.001& 4.002001\end {array} \right] $
+
+Very briefly comment on the magnitude of the difference between $C_{2}^{-1}$ and  $C_{3}^{-1}$ given the only difference between $C_{2}$ and $C_{2}$ amounts to a difference of $0.000001$ in the bottom right position.
+
+%\begin{verbatim}
+%> A <- matrix(c(4,4,4,4),2,2)
+%> A
+%     [,1] [,2]
+%[1,]    4    4
+%[2,]    4    4
+%> det(A)
+%[1] 0
+%> solve(A)
+%Error in solve.default(A) : Lapack routine dgesv: system is exactly singular
+%> B <- matrix(c(4,4.001,4.001,4.002),2,2)
+%> B
+%      [,1]  [,2]
+%[1,] 4.000 4.001
+%[2,] 4.001 4.002
+%> det(B)
+%[1] -1e-06
+%> solve(B)
+%         [,1]     [,2]
+%[1,] -4002000  4001000
+%[2,]  4001000 -4000000
+%> C <- matrix(c(4,4.001,4.001,4.002001),2,2)
+%> C
+%      [,1]     [,2]
+%[1,] 4.000 4.001000
+%[2,] 4.001 4.002001
+%> det(C)
+%[1] 3e-06
+%> solve(C)
+%         [,1]     [,2]
+%[1,]  1334000 -1333667
+%[2,] -1333667  1333333
+%\end{verbatim}
+
+%\textit{Note that A is singular, the determinant is zero and it can't be inverted.   Also note that the inverses of B and C are very very different - but this is something of a pathological example}
+
+
+\item Matrix partitioning.   Consider Sterling's financial data held in the R object LifeCycleSavings (see \texttt{?LifeCycleSavings}).   To make life a little easier, reorder the columns using \texttt{X <- LifeCycleSavings[,c(2,3,1,4,5)]}.
+
+\begin{itemize}
+\item Find the correlation matrix of \texttt{X} (longhand, using the centering matrix), call this matrix \texttt{R}
+
+%\begin{verbatim}
+%> data(LifeCycleSavings)
+%> X <- LifeCycleSavings[,c(2,3,1,4,5)]
+%> R <- cor(X)
+%> R
+%            pop15       pop75         sr        dpi        ddpi
+%pop15  1.00000000 -0.90847871 -0.4555381 -0.7561881 -0.04782569
+%pop75 -0.90847871  1.00000000  0.3165211  0.7869995  0.02532138
+%sr    -0.45553809  0.31652112  1.0000000  0.2203589  0.30478716
+%dpi   -0.75618810  0.78699951  0.2203589  1.0000000 -0.12948552
+%ddpi  -0.04782569  0.02532138  0.3047872 -0.1294855  1.00000000
+%\end{verbatim}
+
+\item Partition \textit{R = cov(X)} following the scheme below such that $\boldsymbol{R_{11}}$ is a $2 \times 2$ matrix containing the covariance of \texttt{pop15} and \texttt{pop75}, and $\boldsymbol{R_{22}}$ contains the covariance of \texttt{sr}, \texttt{dpi} and \texttt{ddpi}
+
+\begin{displaymath}
+\boldsymbol{R} = \left( \begin{array}{l|l} \boldsymbol{R_{11}} & \boldsymbol{R_{12}} \\ \hline    \boldsymbol{R_{21}} & \boldsymbol{R_{22}} \end{array} \right) 
+\end{displaymath}
+
+You should find for example that  $\boldsymbol{R_{11}}$ is given by:
+ % latex table generated in R 2.3.1 by xtable 1.3-2 package
+% Wed Nov 15 22:15:30 2006
+\begin{table}[ht]
+\begin{center}
+\begin{tabular}{rrr}
+\hline
+ & pop15 & pop75 \\
+\hline
+pop15 & 83.75 & $-$10.73 \\
+pop75 & $-$10.73 & 1.67 \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+%\begin{verbatim}
+%> R11 <- R[1:2,1:2]
+%> R12 <- R[1:2,3:5]
+%> R21 <- R[3:5,1:2]
+%> R22 <- R[3:5,3:5]
+%> R11
+%           pop15      pop75
+%pop15  1.0000000 -0.9084787
+%pop75 -0.9084787  1.0000000
+%> R12
+%              sr        dpi        ddpi
+%pop15 -0.4555381 -0.7561881 -0.04782569
+%pop75  0.3165211  0.7869995  0.02532138
+%\end{verbatim}
+
+\item Find the matrix $\boldsymbol{A}$, where:
+
+\begin{displaymath}
+\boldsymbol{A} = \boldsymbol{R_{22}^{-1}R_{21}R_{11}^{-1}R_{12}}
+\end{displaymath}
+
+%\begin{verbatim}
+%A <- solve(R22) %*% R21 %*% solve(R11) %*% R12
+%> A
+%                sr        dpi         ddpi
+%sr    0.2082835957 0.13567828  0.028218990
+%dpi   0.2428243102 0.60736349  0.019316733
+%ddpi -0.0001528633 0.06307685 -0.001930969
+%\end{verbatim}
+
+
+\item Find the matrix $\boldsymbol{B}$ where:
+
+\begin{displaymath}
+\boldsymbol{B} = \boldsymbol{R_{11}^{-1}R_{12}R_{22}^{-1}R_{21}}
+\end{displaymath}
+
+%\begin{verbatim}
+%> B <- solve(R11) %*% R12 %*% solve(R22) %*% R21
+%> B
+%           pop15      pop75
+%pop15  0.4471770 -0.3095406
+%pop75 -0.2362827  0.3665391
+%\end{verbatim}
+
+
+
+%\begin{itemize}
+\item Are $\boldsymbol{A}$ and $\boldsymbol{B}$ symmetric?   What is the difference between symmetric and asymmetric matrices in terms of their eigenvalues and eigenvectors?\\
+%\textit{Note that they are both asymmetric matrices, it just so happens for these particular matrices that the eigenvalues are positive the the eigenvectors are real.   This isn't always the case for asymmetric matrices}
+
+\item Find the eigenvalues and eigenvectors of $\boldsymbol{A}$ and $\boldsymbol{B}$ then find the square roots of the eigenvalues.   
+
+
+%\begin{verbatim}
+%> eigen(A)
+%$values
+%[1]  6.802894e-01  1.334267e-01 -3.516940e-19
+%
+%$vectors
+%            [,1]       [,2]        [,3]
+%[1,] -0.28005745 -0.8743085 -0.15327638
+%[2,] -0.95591190  0.4395680  0.02986593
+%[3,] -0.08831912  0.2058267  0.98773194
+%
+%> eigen(B)
+%$values
+%[1] 0.6802894 0.1334267
+%
+%$vectors
+%           [,1]      [,2]
+%[1,]  0.7988131 0.7023149
+%[2,] -0.6015793 0.7118664
+%
+%> sqrt(eigen(A)$values)
+%[1] 0.8247966 0.3652762       NaN
+%> sqrt(eigen(B)$values)
+%[1] 0.8247966 0.3652762
+%\end{verbatim}
+
+\item Do you notice any similarities between the first two eigenvalues from either matrix?\\
+%\textit{Note that the square roots of the eigen values are identical.}
+\end{itemize}
+
+\item Revisit the \texttt{wines} data in the \texttt{Flury} package.   Consider only Y1, Y5, Y6, Y8 and Y9, use matrix algebra to find the means, correlation and covariance of these data.   Compare the eigenvalues and eigenvectors, and the determinants and inverse you get from the covariance matrix and the correlation matrix.\\
+%\textit{Part of this is straightforward application of algebra covered in notes.   Remainder follows, eigenvalues and eigenvectors or corrlation matrix and covariance matrix are very very different}
+
+%\begin{verbatim}
+%> eigen(cor(X))
+%$values
+%[1] 1.9816214 1.5230931 0.7636275 0.4807668 0.2508912
+%
+%$vectors
+%           [,1]       [,2]       [,3]         [,4]        [,5]
+%[1,] -0.2777688  0.6861076 -0.1803411 -0.008575869  0.64769164
+%[2,] -0.5561121 -0.1831683  0.2691167  0.763621722  0.04058118
+%[3,] -0.4812999 -0.3654121  0.4287131 -0.604767532  0.29203728
+%[4,] -0.5632681  0.3692665 -0.1701835 -0.225349857 -0.68310049
+%[5,] -0.2542899 -0.4752074 -0.8260121 -0.016792704  0.16412387
+%
+%> eigen(cov(X))
+%$values
+%[1] 2330.125258  814.467485  545.200401    3.584549    1.403159
+%
+%$vectors
+%            [,1]         [,2]        [,3]         [,4]         [,5]
+%[1,] -0.05483952  0.735862357  0.67335086  0.007708220  0.045148845
+%[2,]  0.50030899  0.604193500 -0.61998120 -0.013591715  0.008928181
+%[3,]  0.86393142 -0.303609773  0.40160604 -0.008022325  0.009582822
+%[4,]  0.01284463  0.035080362  0.02616497  0.195179471 -0.979706462
+%[5,]  0.01187679 -0.006876112 -0.01580852  0.980610251  0.194846828
+%\end{verbatim}
+
+\end{enumerate} 
+
+
+
+
+\section{Consolidation Exercises}
+
+You should complete these exercises over the next week.   You are guaranteed to meet some simple matrix arithmetic in the exam!   We will briefly go through the answers in class next week.   Don't rely on memorising model solutions.
+
+\begin{enumerate}
+\item Which of the following are orthogonal to each other:
+
+\begin{displaymath}
+\boldsymbol{x} = \left( \begin{array}{r} 1 \\ -2 \\ 3 \\ -4 \end{array} \right)
+\boldsymbol{y} = \left( \begin{array}{r} 6 \\ 7 \\ 1 \\ -2 \end{array} \right)
+\boldsymbol{z} = \left( \begin{array}{r} 5 \\ -4 \\ 5 \\ 7 \end{array} \right)
+\end{displaymath}
+
+Normalise each of the two orthogonal vectors.
+
+
+%\begin{displaymath}
+%\boldsymbol{x}^{T}\boldsymbol{y} = \left( \begin{array}{rrrr}1 & -2 & 3 & -4 \end{array} \right) \left( \begin{array}{r} 6 \\ 7 \\ 1 \\ -2 \end{array} \right) = \left( \begin{array}{rrrr} 1 \times 6 + & -2 \times 7 + & 3 \times 1 + & -4 \times -2 \end{array} \right) = 3
+%\end{displaymath}
+%i.e. not orthogonal
+
+%\begin{displaymath}
+%\boldsymbol{x}^{T}\boldsymbol{z} = \left( \begin{array}{rrrr}1 & -2 & 3 & -4 \end{array} \right) \left( \begin{array}{r} 5 \\ -4 \\ 5 \\ 7 \end{array} \right) = \left( \begin{array}{rrrr} 1 \times 5 + & -2 \times -4 + & 3 \times 5 + & -4 \times 7 \end{array} \right) = 0
+%\end{displaymath}
+%i.e. orthogonal
+
+%\begin{displaymath}
+%\boldsymbol{y}^{T}\boldsymbol{z} = \left( \begin{array}{rrrr}6 & 7 & 1 & -2 \end{array} \right) \left( \begin{array}{r} 5 \\ -4 \\ 5 \\ 7 \end{array} \right) = \left( \begin{array}{rrrr} 6 \times 5 + & 7 \times -4 + & 1 \times 5 + & -2 \times 7 \end{array} \right) = -7
+%\end{displaymath}
+%i.e. not orthogonal
+
+
+%\begin{eqnarray*}
+%\lVert \boldsymbol{x} \rVert &=& \sqrt{1 + 4 + 9 + 16} = \sqrt{30} \\
+%\lVert \boldsymbol{y} \rVert &=& \sqrt{36 + 49 + 1 + 4} = \sqrt{90}\\
+%\lVert \boldsymbol{z} \rVert &=& \sqrt{25 + 16 + 25 + 49} = \sqrt{115} \\
+%\end{eqnarray*}
+
+%Normalise the orthogonal vector, divide by the length of the vector:
+
+%\begin{displaymath}
+%\boldsymbol{y}_{norm} = \left( \begin{array}{r} 6/\sqrt{90} \\7/\sqrt{90} \\ 1/\sqrt{90} \\ 2/\sqrt{90} \end{array} \right)
+%\end{displaymath}
+
+
+\item Find vectors which are orthogonal to:
+
+
+\begin{displaymath}
+\boldsymbol{u} =  \left( \begin{array}{r} 1 \\ 3 \end{array} \right)
+\boldsymbol{v} = \left( \begin{array}{r} 2 \\ 4 \\ -1 \\ 2 \end{array} \right)
+\end{displaymath}
+
+%Any $w_{1}$ and $w_{2}$ that satisfies $w_{1}+3w_{2}=0$ will be orthogonal to $\boldsymbol{u}$, e.g. $w = \left( \begin{array}{r} 3 \\ -1 \end{array} \right)$.   For $\boldsymbol{v}$ we require $2x_{1} + 4x_{2} - x_{3} + 2x_{4}=0$, which can be solved with $\boldsymbol{x} = \left( \begin{array}{r} 0 \\ 0 \\ 2 \\ 1 \end{array} \right)$
+
+\item Find vectors which are orthonormal to:
+
+
+\begin{displaymath}
+\boldsymbol{x} =  \left( \begin{array}{r} \frac{1}{\sqrt{2}} \\ 0 \\ -\frac{1}{\sqrt{2}} \end{array} \right)
+\boldsymbol{y} = \left( \begin{array}{r} \frac{1}{2} \\ \frac{1}{6} \\ \frac{1}{6} \\ \frac{5}{6} \end{array} \right)
+\end{displaymath}
+
+%If $\boldsymbol{u} = \left( \begin{array}{r}u_{1} \\ u_{2} \\u_{3} \end{array} \right)$, then $\boldsymbol{x}^{T}\boldsymbol{u} = \frac{1}{\sqrt{2}}u_{1}-\frac{1}{\sqrt{2}}u_{3}$, so $\boldsymbol{u} = \left( \begin{array}{r} 1 \\ 0 \\1 \end{array} \right)$ is orthogonal, and we only require to normalise it.   $\lVert \boldsymbol{u} \rVert = \sqrt{1 + 0 + 1} = \sqrt{2}$.   Consequently, $\boldsymbol{u} = \left( \begin{array}{r} \frac{1}{\sqrt{2}} \\ 0 \\ \frac{1}{\sqrt{2}} \end{array} \right)$ has length 1 and is orthogonal.
+
+%In a similar way, we find $\left( \begin{array}{r} 0 \\ 0 \\ 5 \\ -1 \end{array} \right)$, a vector which has length $\sqrt{25+1}$, so the orthogonal vector of unit length is given by:  $\left( \begin{array}{r} 0 \\ 0 \\ 5/\sqrt{26} \\ -1/\sqrt{26} \end{array} \right)$
+
+\item What are the determinants of:
+
+\begin{displaymath}
+(a) \left( \begin{array}{rr} 1 & 3 \\ 6 & 4 \end{array} \right)
+(b) \left( \begin{array}{rrr} 3 & 1 & 6 \\ 7 & 4 & 5 \\ 2 & -7 & 1 \end{array} \right)
+\end{displaymath}
+
+%Solutions are (a) -14, (b) -222.
+
+\item Invert the following matrices:
+
+\begin{displaymath}
+(a) \left( \begin{array}{rrr} 3 & 0 & 0 \\ 0 & 4 & 0 \\ 0 & 0 & 9 \end{array} \right)
+(b) \left( \begin{array}{rr} 2 & 3 \\ 1 & 5  \end{array} \right)
+(c) \left( \begin{array}{rrr} 3 & 2 & -1 \\ 1 & 4 & 7 \\ 0 & 4 & 2 \end{array} \right)
+(d) \left( \begin{array}{rrr} 1 & 1 & 1 \\ 2 & 5 & -1 \\ 3 & 1 & -1 \end{array} \right)
+\end{displaymath}
+
+%Solutions are (a) $\left( \begin{array}{rrr} 0.333 & 0 & 0 \\ 0 & 0.25 & 0 \\ 0 & 0 & 0.111 \end{array} \right)$, note the determinant is 108 (b) $\left( \begin{array}{rr} 0.714 & -0.429 \\ -0.143 & 0.286  \end{array} \right)$ (with a determinant of 7), (c)  $\left( \begin{array}{rrr} 0.294 & 0.118 & -0.265 \\ 0.029 & -0.088 & 0.325 \\ -0.059 & 0.176 & -0.147 \end{array} \right)$ (with a determinant of -68) and (d) $ \left( \begin{array}{rrr} 0.222 & -0.111 & 0.333 \\ 0.056 & 0.222 & -0.167 \\ 0.722 & -0.111 & -0.l67 \end{array} \right)$ (with a determinant -18)
+
+
+\item Find eigenvalues and corresponding eigen vectors for the following matrices:
+
+
+\begin{displaymath}
+\boldsymbol{a} = \left( \begin{array}{rr} 1 & 4\\ 2 & 3 \end{array} \right)
+\boldsymbol{b} = \left( \begin{array}{rr} 1 & 2 \\ 3 & 2  \end{array} \right)
+\boldsymbol{c} = \left( \begin{array}{rr} 2 & -2 \\ -2 & 5 \end{array} \right)
+\boldsymbol{d} = \left( \begin{array}{rr} 2 & 2 \\ 2 & 5 \end{array} \right)
+\end{displaymath}
+
+\begin{displaymath}
+\boldsymbol{e} = \left( \begin{array}{rrr} 1 & 4 & 0\\ 4 & 1 & 0 \\ 0 & 0 & 1 \end{array} \right)
+\boldsymbol{f} = \left( \begin{array}{rrr} 4 & 0 & 0 \\ 0  & 9 & 0 \\ 0 & 0 & 1  \end{array} \right)
+\boldsymbol{g} = \left( \begin{array}{rrr} 13 & -4 & 2\\ -4 & 13 & -2 \\ 2 & -2 & 10 \end{array} \right)
+\end{displaymath}
+
+
+%\textit{We will run through some solutions in class}
+
+\item Convert the following covariance matrix (you've seen it earlier) to a correlation matrix, calculate the eigenvalues and eigenvectors and verify that the eigen vectors are orthogonal.
+
+\begin{displaymath}
+\boldsymbol{g} = \left( \begin{array}{rrr} 13 & -4 & 2\\ -4 & 13 & -2 \\ 2 & -2 & 10 \end{array} \right)
+\end{displaymath}
+
+\item If $\boldsymbol{X} = \left( \begin{array}{rr} 2 & 6\\ 1 & 3 \\ 4 & 2 \end{array} \right)$, use matrix procedures to find $cov(\boldsymbol{X})$ and $cor(\boldsymbol{X})$.   What is a sum of squares and crossproducts matrix?   What are the eigenvalues and eigenvectors of $cov(\boldsymbol{X})$ and $cor(\boldsymbol{X})$?
+
+\item Find $\frac{\left| \begin{array}{rr} 2 & 4\\2 & 7 \end{array} \right|}{\left| \begin{array}{rr} 1 & 9\\4 & 5 \end{array} \right| }$.
+
+\end{enumerate}
+
+
+\end{document}

@@ -1,0 +1,82 @@
+
+S-PLUS instructions for Chapter 5.3
+***********************************
+
+The computation of a linear discriminant function is a fairly
+straightforward task, because mean vectors, covariance matrices,
+and inverses of matrices are very easy to compute in S-PLUS. We
+illustrate the interactive computation of the discriminant
+function and related quantities for Example 5.3.1, the familiar
+midge data.
+As usual we will multiply the raw data by 100. Recall that the
+first column of the data matrix is a group code.
+ 
+> rawdat <- matrix(scan("c:\\multidat\\tab1_1.dat"), ncol = 3, byrow = T)
+> group <- rawdat[, 1]
+> X <- 100 * rawdat[, 2:3]
+
+Although the following method for identifying the Af and Apf
+midges seems more complicated than what we did in Chapter 1, it
+will be convenient later when we need a procedure to compute
+discriminant functions repeatedly.
+
+> Af = X[group == 0,]
+> Apf = X[group == 1,]
+
+Now the actual computations can start:
+
+> xbar1 <- apply(Af, 2, mean)
+> S1 <- var(Af)
+> N1 <- dim(Af)[1]
+> xbar2 <- apply(Apf, 2, mean)
+> S2 <- var(Apf)
+> N2 <- dim(Apf)[1]
+
+At any point, you should display intermediate results (by just
+typing the name of the variable whose value you want to see), so
+you can compare your results to those given in the book. Next
+follow the computation of the pooled covariance matrix and its
+inverse; for the inverse of a matrix we may use the function
+"solve".
+
+> S <- ((N1-1) * S1 + (N2-1) * S2 ) / (N1 + N2 - 2)
+> Sinv <- solve(S)
+> d <- xbar1 - xbar2
+> b <- Sinv %*% d
+> stddist <- sqrt(t(d) %*% b)
+
+At this point, the vector b contains the discriminant function
+coefficients, and stddist ist the standard distance. We can
+apply the discriminant function to the raw data of both groups
+by
+
+> v <- X %*% b
+
+The means of the two groups in the discriminant function are
+
+> vbar1 <- t(b) %*% xbar1
+> vbar2 <- t(b) %*% xbar2
+
+but (verify!) you could also obtain the same results from
+
+> vbar1 <- mean(v[group == 0])
+> vbar2 <- mean(v[group == 1])
+
+The midpoint between the two means is
+
+> m <- (vbar1 + vbar2) / 2
+
+If you prefer to use the standardized version of the discriminant
+function suggested by equation (34) of section 5.2, then type
+
+> dim(stddist) <- NULL
+> vstar <- (v - m) / stddist
+
+The first command is necessary because otherwise S-PLUS will
+still treat stddist as a matrix and will not execute the division
+because the dimensions do not match.
+
+Now compute the means of vstar in both groups and the pooled
+variance of vstar; you should get the results given at the end
+of Example 5.3.1.
+

@@ -1,0 +1,138 @@
+
+S-PLUS instructions for Chapter 1
+*********************************
+
+last updated: june 18, 1997
+
+
+In this unit we will learn how to do elementary operations with data matrices
+in S-PLUS. Refer to chapter 1. All computations are done interactively. The
+symbol > at the left margin represents the S-PLUS prompt.  At the end of
+each line of input to S-PLUS you have to hit ENTER. We will do some 
+manipulations with the midge data of Table 1.1.
+
+Assuming that the data is stored in file c:\multidat\tab1_1.dat,
+type
+
+> rawdat <- matrix(scan("c:\\multidat\\tab1_1.dat"), ncol = 3, byrow = T)
+
+This reads a matrix with 15 rows and 3 columns. To see the contents
+of the file, type
+
+> rawdat
+
+S-PLUS will display the data matrix, plus column- and row indices. To
+display the data in a different format, you should use the commands cat
+and format. Use the online help facility to find out more about the various
+formats in which data can be displayed.
+
+Suppose now we wish to work only with the data of the Af midges. You can
+create a matrix containing only the data for antenna length and wing length
+of Af midges by extracting the proper submatrix from the matrix named
+tab1.1:
+
+> Af <- tab1.1[1:9, 2:3]
+> Af
+
+S-PLUS now displays the data of Af midges. You can use this matrix to
+construct a scatterplot of wing length vs antenna length. This is not
+discussed here; please refer to the S-PLUS manual. Similarly, you can put
+the data of the Apf midges into a separate matrix by typing
+
+> Apf <- tab1.1[10:15, 2:3]
+
+In later chapters we will multiply the data by 100 (for purely cosmetic
+reasons) ; this is easily achieved by typing
+
+> Af <- 100 * Af 
+> Apf <- 100 * Apf
+
+Use again
+
+> Af 
+> Apf
+
+to display the transformed data. Next, suppose we want to transform the data
+to their sum and difference. Let's illustrate this for the Af midges.
+A beginner's version would work as follows:
+
+> antenna <- Af[, 1]
+> wing <- Af[, 2]
+> su <- antenna + wing
+> di <- antenna - wing
+> newdat <- cbind(su, di)
+> newdat
+
+At this point S-PLUS displays a matrix with 9 rows and 2 columns,
+corresponding to the sum and the difference of the two original variables,
+for all Af midges. The first two lines create two column vectors containing
+the data of antenna length and wing length, respectively. In the third and
+fourth line two new vectors corresponding to sum and difference are
+created. Finally, in the fifth line the two new vectors are combined into a
+single matrix with two columns.
+
+We will frequently use linear transformations, and it will typically be
+more efficient to use matrix notation. For instance, we could replace the
+above three lines by the following commands (S-PLUS is case sensitive, so
+we will use capital letters for matrices and lowercase letters for vectors
+and numbers):
+
+> B <- cbind(c(1, 1), c(1, -1))
+> newdat1 <- Af %*% B
+> newdat1
+
+Note that "c(a,b)" creates a column vector with components "a" and "b".
+Explain why the above three lines produce the same results as the method
+used before. Solve Exercises 2 and 3 in chapter 1 using both the
+variable-by-variable technique, and using a single matrix multiplication.
+
+Alternatively to defining the 2 by 2 matrix as illustrated above, you might
+also use the following commands:
+
+> B <- matrix(1, 2, 2)
+> B[2, 2] <- -1
+
+The command "matrix (1,2,2)" creates a matrix of ones of dimension 2 by 2.
+Assigning values to individual entries in a matrix as illustrated in the
+above statement will be useful when the entries of the matrix are computed
+within S-PLUS. For instance, the following statements will produce a
+rotation matrix for an angle of 30 degrees:
+
+> phi <- pi / 3 
+> cc <- cos(phi) 
+> ss <- sin(phi)
+> B <-matrix(0, 2, 2)
+> B[1, 1] <- cc 
+> B[2, 1] <- ss 
+> B[1, 2] <- -ss 
+> B[2, 2] <- cc
+
+Yet another way to achieve the same goal is to replace the lines from the
+fourth to the eighth by
+
+> B <- cbind(c(cc,ss), c(-ss,cc))
+
+Be careful when you apply this transformation to the raw data: because the
+data matrix contains the individual observations as rows, you need to
+postmultiply the data matrix by the transposed of the rotation matrix.
+(This will be important in Exercise 3). For the Af data, you would for
+instance use the commands
+
+> rotdat <- Af %*% t(B)
+> rotdat
+
+In Exercise 3 you are also asked to compute means and standard deviations
+for all variables, and correlations. We will discuss these computations in
+more detail in a later unit (section 4.2 of the book), but here are some
+preliminary instructions which you may use for the current purposes.
+The commands
+
+> ave <- apply(Af, 2, mean)
+> sd <- sqrt(apply(Af, 2, var))
+> cormat <- cor(Af)
+
+produce two column vectors of length 2 containing the means and the
+standard deviations of the two variables, and a 2 by 2 correlation matrix.
+The function "apply" applies a user specified function to all rows (if 
+the second parameter is equal to 1) or to all columns (if the second
+parameter is equal to 2) of a data matrix.

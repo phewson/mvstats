@@ -1,0 +1,184 @@
+S-PLUS instructions for Chapter 9
+********************************
+
+last updated: june 24, 1997
+
+
+In Section 9.3 the EM-algorithm is applied to the finite mixture model.
+At the end of this file you will find aN S-PLUS program for the mixture
+model with two univariate normal components. It will be a good exercise
+to expand the program to the general situation of k >= 2 normal
+components, and to the multivariate case.
+
+We will illustrate procedure UNORMIX using the wing length data of
+Example 9.3.1, discussed earlier also in Examples 1.3 and 2.8.4. The
+procedure asks for a data vector of length N (number of observations)
+as input; however, in Table 1.3 the data is given in form of frequency
+counts. It may be most convenient for future use to convert the
+frequency table into a vector of raw data and store the raw data as
+an ASCII file. You may use the following short S-PLUS
+program for this purpose. The program creates a file called BIRDWING.DAT;
+please make sure you don't have an existing file with the same name
+because the old file will be erased.
+
+
+***************************  CUT HERE  ******************************** 
+
+wingfreq <- matrix(scan("c:\\multidat\\tab1_3.dat"), ncol = 2, byrow = T)
+wing <- wingfreq[, 1]
+freq <- wingfreq[, 2]
+y <- wing[1] * matrix(1, freq[1], 1)
+i <- 2
+while (i <= 17)
+{
+if (freq[i] != 0)
+y <- rbind(y, wing[i] * matrix(1, freq[i], 1))
+i <- i + 1
+}
+cat(y, file = "birdwing.dat", append = F)
+
+****************************  CUT HERE  ********************************
+
+Next, copy procedure UNORMIX (attached below) into a file and execute
+the file, or put the procedure into a library. Now you are ready to
+start a test run.
+
+Read the data using
+
+y <- matrix(scan("c:\\spluswin\\home\\birdwing.dat"), ncol = 1, byrow = T)
+
+The procedure needs the raw data and initial parameter values as input.
+In addition, you need to tell the procedure if you want to assume
+equal variances or unequal variances of the two components. This is
+done using an indicator variable, as you will see shortly. We will use
+the same initial values as in Example 9.3.1. Here is a sequence of
+commands you may use for initialization:
+
+Assign initial prior probabilities:
+
+> prior <- rbind(.2,.8)
+
+That is, the initial prior probabilities are stored as a vector of
+length 2 (in a later run you may try out what happens if you initialize
+the initial probabilities with values that do not add up to one: you
+might be surprised to see that the algorithm will automatically generate
+prior probabilities that DO add up to one. However, please do not use
+negative initial probabilities).
+
+Next, assign initial means and variances:
+
+> mu <- rbind(84,96)
+> var <- rbind(10,10)
+
+Finally, initialize the indicator variable for equal/unequal variances.
+To replicate the results of Example 9.3.1, set it equal to 0 (unequal
+variances). For equal variances you would set it equal to 1. Note that
+even if you require equal variances for your solution, the initial
+variances do not have to be equal, as you may verify.
+
+> pool <- 0
+
+Now you are ready to run the EM-algorithm:
+
+> results <- unormix(y, prior, mu, var, pool)
+
+You should see a protocol of the EM-algorithm appear on the screen. For
+each iteration, procedure UNORMIX will display a line containing the
+iteration number, the current values of all parameters, and the
+value of the (observed data) log-likelihood function. If you don't want
+to see this protocol in the future, you need to comment out two lines
+in the procedure, where indicated.
+
+The final results can now be displayed:
+
+> cat("prior probabilities: ", t(results$prior), "\n")
+> cat("means: ", t(results$mu), "\n")
+> cat("variances: ", t(results$var), "\n")
+> cat("standard deviations: ", sqrt(t(results$var)), "\n")
+> cat("log-likelihood: ", results$loglik, "\n")
+> cat("# iterations: ", results$nit, "\n")
+
+This concludes our test run of the algorithm. The results should be
+identical to those given in Example 9.3.1. To reproduce the numerical
+results of Example 2.8.4, use the same sequence of commands, but
+set the indicator variable "pool" equal to 1.
+
+To reproduce Example 9.3.2, partition the data set as indicated, use the
+groupwise means and variances as initial values, and the relative sample
+sizes as initial prior probabilities.
+
+
+****************************  CUT HERE  ********************************
+
+#  procedure UNORMIX  
+#  procedure UNORMIX  
+
+# input:   y       N-vector of observed data
+#          prior   2-vector of initial prior probabilities
+#          mu      2-vector of initial means
+#          var     2-vector of initial variances
+#          pool    indicator for equality of variances:
+#                  pool<-0: unequal variances; pool<-1: equal variances
+
+#  output  prior   final initial probabilities
+#          mu      final means
+#          var     final variances
+#          loglik  value of (complete data) log-likelihood
+#          nit     number of iterations of EM-algorithm
+
+
+unormix <- function(y, prior, mu, var, pool)
+{
+N <- dim(y)[1]                                     # number of observations 
+eps <- 10^(-10)                                   # convergence criterion 
+change <- 1                           # initial test value for convergence 
+maxiter <- 1000                             # maximum number of iterations 
+nit <- 0                                    # initialize iteration counter 
+param <- c(prior, mu, var)            # arrange all parameters in a vector 
+post <- matrix(0, N, 2)		# open matrix for posterior probabilities
+while (change > eps && nit <= maxiter)             # start iterations 
+{
+options(digits = 6)	    # format for the display of numerical results
+parold <- param                               # store old parameter values 
+f1 <- exp(-0.5 * (y - mu[1])^2 / var[1] ) / sqrt(2*pi*var[1])   # evaluate 
+f2 <- exp(-0.5 * (y - mu[2])^2 / var[2] ) / sqrt(2*pi*var[2])  # component 
+f <- prior[1] * f1 + prior[2] * f2       # densities and mixture density 
+loglik <- sum(log(f))                  # evaluate log-likelihood function 
+
+# comment next line out if you don't want a protocol of the algorithm 
+cat(format(c(nit, param, loglik), justify = "right"), fill = T)
+post[,1] <- (prior[1] * f1) / f
+post[,2] <- (prior[2] * f2) / f
+prior <- apply(post, 2, mean)              # M-step: prior probabilities 
+
+mu <- t(post) %*% y
+mu[1] <- mu[1] / (N * prior[1])				# M-step: means 
+mu[2] <- mu[2] / (N * prior[2])				
+var1 <- t(post[, 1]) %*% (y-mu[1])^2 / (N*prior[1]) # M-step: variances 
+var2 <- t(post[, 2]) %*% (y-mu[2])^2 / (N*prior[2])
+var <- c(var1, var2)
+							
+if (pool ==1)
+{
+var1 <- prior[1] * var1 + prior[2] * var2
+var2 <- var1						# M-step: common variance 
+}
+param <- c(prior, mu, var)              # arrange all parameters in a vector 
+change <- max(abs(param - parold))           # test value for convergence 
+nit <- nit + 1                               # increase interation counter 
+}
+if (nit >= maxiter)
+cat("algorithm did not converge in ")   # warning message if convergence 
+maxiter                        			    # is not reached 
+" iterations"
+results <- list("prior" = prior, "mu" = mu, "var " = var,
+"loglik" = loglik, "nit" = nit)
+results
+}
+
+#  end of procedure UNORMIX  
+#  end of procedure UNORMIX  
+
+#  *************************  CUT HERE  ********************************  
+
+

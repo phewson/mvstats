@@ -1,0 +1,414 @@
+			Vectors and Matrices
+
+
+split.screen(c(1,2))	# Divide the graphics device into two parts horizontally
+par(bg="white", pty="s")	# set background color (ensures proper erasure)
+screen(2)
+par(pty="s")				# and square plot regions
+
+# Vector representation
+
+a <- c(2, 1)
+
+screen(1)
+plot(a[1],a[2], xlim=c(-3,3), ylim=c(-3,3), pch=16, xlab='x', ylab='y')	
+			# point representation of a vector
+abline(h=0,v=0,col="grey")				# add coordinate axes
+title("Point Representation of (2, 1)")
+
+screen(2)
+plot(0, 0, xlim=c(-3,3), ylim=c(-3,3), type="n", xlab='x', ylab='y')	
+			# Empty plotting frame
+arrows(0, 0, a[1], a[2])	# ray representation of a vector
+abline(h=0,v=0,col="grey")
+title("Ray Representation of (2, 1)")
+
+# Data as a collection of vectors
+
+X<-read.table("H:/S5600/Data sets/ASCII/Ch02/WOMEN.txt")
+X
+apply(X, 2, mean)
+apply(X, 2, sd)
+
+screen(2)
+screen(1)
+plot(X, pch=16, xlab="Height", ylab="Weight")
+title("Raw Data (Women's Heights and Weights)")
+
+
+Xd <- scale(X, scale=F)		# mean-centered data (deviations)
+Xd
+apply(Xd, 2, mean)
+apply(Xd, 2, sd)
+
+screen(2)
+plot(Xd, pch=16, xlab="Height", ylab="Weight")
+title("Mean-Centered Data (Women's Heights and Weights)")
+abline(h=0,v=0,col="grey")
+
+
+Xs <- scale(X)		# standardized data
+Xs
+apply(Xs, 2, mean)
+apply(Xs, 2, sd)
+
+screen(2)
+plot(Xs, pch=16, xlab="Height", ylab="Weight")
+title("Standardized Data (Women's Heights and Weights)")
+abline(h=0,v=0,col="grey")
+
+# Scalar multiplication
+
+a
+
+
+screen(2)
+screen(1)
+
+plot(a[1],a[2], xlim=c(-3,3), ylim=c(-3,3), pch=16, xlab='x', ylab='y')	
+arrows(0, 0, a[1], a[2])
+abline(h=0,v=0,col="grey")
+symbols(rep(0,3),rep(0,3),circ=1:3,fg="grey",add=T,inches=F)
+title("Representation of (2, 1)")
+
+r<- .6
+ra <- r*a
+ra
+
+screen(2)
+
+plot(ra[1],ra[2], xlim=c(-3,3), ylim=c(-3,3), pch=16, xlab='x', ylab='y')	
+arrows(0, 0, ra[1], ra[2])
+abline(h=0,v=0,col="grey")
+symbols(rep(0,3),rep(0,3),circ=1:3,fg="grey",add=T,inches=F)
+title("Point Representation of 0.6*(2, 1)")
+
+
+screen(2)
+screen(1)
+
+plot(Xs, pch=16, xlab="Height", ylab="Weight", xlim=c(-2,2), ylim=c(-2,2))
+title("Standardized Data")
+abline(h=0,v=0,col="grey")
+
+screen(2)
+plot(r*Xs, pch=16, xlab="Height", ylab="Weight", xlim=c(-2,2), ylim=c(-2,2))
+title("Rescaled Standardized Data")
+abline(h=0,v=0,col="grey")
+
+# Vector multiplication: projection
+
+w1 <- matrix(rep(1,2),nc=1)
+w1
+w1^2
+lw1 <- sqrt(sum(w1^2))	# length of w1, ||w1||
+
+w1 <- w1/lw1	# unit length
+w1
+sqrt(sum(w1^2))
+
+
+a
+aw1 <- a %*% w1
+aw1
+
+screen(2)
+screen(1)
+
+plot(a[1],a[2], xlim=c(-3,3), ylim=c(-3,3), pch=16, xlab='x', ylab='y')	
+abline(h=0,v=0,col="grey")
+arrows(0, 0, w1[1], w1[2])
+abline(0, w1[2]/w1[1])
+
+points(aw1*w1[1], aw1*w1[2], pch=16, col="red")
+segments(a[1],a[2],aw1*w1[1],aw1*w1[2],lty=3)
+symbols(rep(0,3),rep(0,3),circ=1:3,fg="grey",add=T,inches=F)
+
+w2 <- matrix(c(-1, 1),nc=1)
+w2
+w2^2
+lw2 <- sqrt(sum(w2^2))	
+
+w2 <- w2/lw2	# unit length
+w2
+sqrt(sum(w2^2))
+
+
+a
+aw2 <- a %*% w2
+aw2
+
+screen(2)
+
+plot(a[1],a[2], xlim=c(-3,3), ylim=c(-3,3), pch=16, xlab='x', ylab='y')	
+abline(h=0,v=0,col="grey")
+arrows(0, 0, w2[1], w2[2])
+abline(0, w2[2]/w2[1])
+
+points(aw2*w2[1], aw2*w2[2], pch=16, col="green")
+segments(a[1],a[2],aw2*w2[1],aw2*w2[2],lty=3)
+symbols(rep(0,3),rep(0,3),circ=1:3,fg="grey",add=T,inches=F)
+
+
+
+Xs
+Z1 <- Xs %*% w1
+
+screen(2)
+screen(1)
+
+plot(Xs, xlim=c(-2,2), ylim=c(-2,2), pch=16, xlab='x', ylab='y')	
+abline(h=0,v=0,col="grey")
+arrows(0, 0, w1[1], w1[2])
+abline(0, w1[2]/w1[1])
+
+points(Z1*w1[1], Z1*w1[2], pch=16, col="red")
+segments(Xs[,1],Xs[,2],Z1*w1[1],Z1*w1[2],lty=3)
+symbols(rep(0,3),rep(0,3),circ=1:3,fg="grey",add=T,inches=F)
+
+
+Z2 <- Xs %*% w2
+
+screen(2)
+
+plot(Xs, xlim=c(-2,2), ylim=c(-2,2), pch=16, xlab='x', ylab='y')	
+abline(h=0,v=0,col="grey")
+arrows(0, 0, w2[1], w2[2])
+abline(0, w2[2]/w2[1])
+
+points(Z2*w2[1], Z2*w2[2], pch=16, col="green")
+segments(Xs[,1],Xs[,2],Z2*w2[1],Z2*w2[2],lty=3)
+symbols(rep(0,3),rep(0,3),circ=1:3,fg="grey",add=T,inches=F)
+
+# Orthogonal vectors
+
+t(w1) %*% w2
+
+screen(2)
+screen(1)
+
+plot(0, 0, xlim=c(-3,3), ylim=c(-3,3), type="n", xlab='x', ylab='y')	
+arrows(0, 0, w1[1], w1[2])
+arrows(0, 0, w2[1], w2[2])
+abline(h=0,v=0,col="grey")
+symbols(rep(0,3),rep(0,3),circ=1:3,fg="grey",add=T,inches=F)
+
+# Matrix Multiplication: Rotation
+
+screen(1)
+
+plot(Xs, xlim=c(-3,3), ylim=c(-3,3), pch=16, xlab='X1', ylab='X2')	
+abline(h=0,v=0,col="grey")
+arrows(0, 0, w1[1], w1[2])
+abline(0, w1[2]/w1[1])
+arrows(0, 0, w2[1], w2[2])
+abline(0, w2[2]/w2[1])
+
+
+points(Z1*w1[1], Z1*w1[2], col="red")
+segments(Xs[,1],Xs[,2],Z1*w1[1],Z1*w1[2],lty=3)
+points(Z2*w2[1], Z2*w2[2], col="green")
+segments(Xs[,1],Xs[,2],Z2*w2[1],Z2*w2[2],lty=3)
+symbols(rep(0,3),rep(0,3),circ=1:3,fg="grey",add=T,inches=F)
+
+screen(2)
+
+W <- cbind(w1, w2)
+Z <- Xs %*% W
+
+plot(Z, xlim=c(-3,3), ylim=c(-3,3), pch=16, xlab='Z1', ylab='Z2')
+abline(h=0,v=0)
+arrows(0,0,1,0)
+arrows(0,0,0,1)
+points(Z1, rep(0,20), col="red")
+segments(Z1,rep(0,20),Z1,Z2,lty=3)
+points(rep(0,20), Z2, col="green")
+segments(rep(0,20),Z2,Z1,Z2,lty=3)
+symbols(rep(0,3),rep(0,3),circ=1:3,fg="grey",add=T,inches=F)
+
+
+screen(1)
+
+plot(Xs, xlim=c(-3,3), ylim=c(-3,3), pch=16, xlab='X1', ylab='X2')	
+abline(h=0,v=0,col="grey")
+arrows(0, 0, w1[1], w1[2])
+arrows(0, 0, w2[1], w2[2])
+symbols(rep(0,3),rep(0,3),circ=1:3,fg="grey",add=T,inches=F)
+
+screen(2)
+
+plot(Z, xlim=c(-3,3), ylim=c(-3,3), pch=16, xlab='Z1', ylab='Z2')
+abline(h=0,v=0,col="grey")
+arrows(0,0,1,0)
+arrows(0,0,0,1)
+symbols(rep(0,3),rep(0,3),circ=1:3,fg="grey",add=T,inches=F)
+
+screen(1)
+
+plot(Xs, xlim=c(-3,3), ylim=c(-3,3), pch=16, xlab='X1', ylab='X2')	
+abline(h=0,v=0,col="grey")
+arrows(0, 0, w1[1], w1[2])
+arrows(0, 0, w2[1], w2[2])
+symbols(rep(0,3),rep(0,3),circ=1:3,fg="grey",add=T,inches=F)
+
+ZWt <- Z %*% t(W)
+points(ZWt, col="red")
+
+r1 <- c(cos(pi/3),-sin(pi/3))		# rotate axes pi/3 clockwise
+r2 <- c(sin(pi/3),cos(pi/3))
+R <- cbind(r1,r2)
+
+screen(2)
+screen(1)
+
+plot(Xs, xlim=c(-3,3), ylim=c(-3,3), pch=16, xlab='X1', ylab='X2')	
+abline(h=0,v=0,col="grey")
+arrows(0, 0, r1[1], r1[2])
+arrows(0, 0, r2[1], r2[2])
+symbols(rep(0,3),rep(0,3),circ=1:3,fg="grey",add=T,inches=F)
+
+screen(2)
+
+plot(Xs %*% R, xlim=c(-3,3), ylim=c(-3,3), pch=16, xlab='Z1', ylab='Z2')
+abline(h=0,v=0,col="grey")
+arrows(0,0,1,0)
+arrows(0,0,0,1)
+symbols(rep(0,3),rep(0,3),circ=1:3,fg="grey",add=T,inches=F)
+
+
+# Matrix Multiplication: Streching and Shrinking
+
+sd(Z)
+
+Dinv <- diag(1/sd(Z))
+Dinv
+
+Zs <- Z %*% Dinv
+
+screen(1)
+
+plot(Z, xlim=c(-3,3), ylim=c(-3,3), pch=16, xlab='Z1', ylab='Z2')
+abline(h=0,v=0,col="grey")
+arrows(0,0,1,0)
+arrows(0,0,0,1)
+symbols(rep(0,3),rep(0,3),circ=1:3,fg="grey",add=T,inches=F)
+
+screen(2)
+
+plot(Zs, xlim=c(-3,3), ylim=c(-3,3), pch=16, xlab='Z1', ylab='Z2')
+abline(h=0,v=0,col="grey")
+arrows(0,0,1,0)
+arrows(0,0,0,1)
+symbols(rep(0,3),rep(0,3),circ=1:3,fg="grey",add=T,inches=F)
+
+
+# Singular Value Decomposition
+
+D <- diag(sd(Z))
+D %*% Dinv
+
+screen(2)
+screen(1)
+
+plot(Xs, xlim=c(-3,3), ylim=c(-3,3), pch=16, xlab='X1', ylab='X2')	
+abline(h=0,v=0,col="grey")
+arrows(0, 0, w1[1], w1[2])
+arrows(0, 0, w2[1], w2[2])
+symbols(rep(0,3),rep(0,3),circ=1:3,fg="grey",add=T,inches=F)
+
+X2 <- Zs %*% D %*% t(W)
+
+points(X2, col="red")
+
+Xsvd <- svd(Xs)
+Xsvd
+
+U<-Xsvd$u
+
+screen(2)
+plot(U, pch=16, xlab='U1', ylab='U2')
+abline(h=0,v=0,col="grey")
+
+cov(U)
+
+t(U) %*% U
+
+# Matrix Computation of the covariance Matrix
+
+Xd	# Start with mean-centered matrix
+
+cov(Xd)
+
+n <- nrow(Xd)
+
+S <- 1/(n-1) * t(Xd) %*% Xd
+S
+
+# Matrix Determinant
+
+det(S)
+
+screen(2)
+screen(1)
+
+plot(0, 0, xlim=c(0, 290), ylim=c(0,290), type="n", xlab='S1', ylab='S2')	
+abline(h=0,v=0,col="grey")
+polygon(c(0,S[1,1],S[1,1]+S[1,2],S[1,2]),c(0,S[2,1],S[2,1]+S[2,2],S[2,2]),col="red")
+arrows(0, 0, S[1,1], S[2,1])
+arrows(0, 0, S[1,2], S[2,2])
+arrows(S[1,1], S[2,1], S[1,1]+S[1,2], S[2,1]+S[2,2])
+arrows(S[1,2], S[2,2], S[1,1]+S[1,2], S[2,1]+S[2,2])
+
+Xd.svd <- svd(Xd)
+
+d <- Xd.svd$d
+d
+
+D <- diag(d)
+D
+
+SD <- 1/(n-1) * t(D) %*% D
+SD
+
+det(SD)
+
+prod(d^2/(n-1))
+
+screen(2)
+
+plot(0, 0, xlim=c(0, 290), ylim=c(0,290), type="n", xlab='S1', ylab='S2')	
+abline(h=0,v=0,col="grey")
+polygon(c(0,SD[1,1],SD[1,1]+SD[1,2],SD[1,2]),c(0,SD[2,1],SD[2,1]+SD[2,2],SD[2,2]),col="red")
+arrows(0, 0, SD[1,1], SD[2,1])
+arrows(0, 0, SD[1,2], SD[2,2])
+arrows(SD[1,1], SD[2,1], SD[1,1]+SD[1,2], SD[2,1]+SD[2,2])
+arrows(SD[1,2], SD[2,2], SD[1,1]+SD[1,2], SD[2,1]+SD[2,2])
+
+
+
+Screen(2)
+screen(1)	# Rescale for better visibility
+
+plot(0, 0, xlim=c(0, 55), ylim=c(0,290), type="n", xlab='S1', ylab='S2')	
+abline(h=0,v=0,col="grey")
+polygon(c(0,S[1,1],S[1,1]+S[1,2],S[1,2]),c(0,S[2,1],S[2,1]+S[2,2],S[2,2]),col="red")
+arrows(0, 0, S[1,1], S[2,1])
+arrows(0, 0, S[1,2], S[2,2])
+arrows(S[1,1], S[2,1], S[1,1]+S[1,2], S[2,1]+S[2,2])
+arrows(S[1,2], S[2,2], S[1,1]+S[1,2], S[2,1]+S[2,2])
+
+
+screen(2)
+
+plot(0, 0, xlim=c(0, 255), ylim=c(0,3), type="n", xlab='S1', ylab='S2')	
+abline(h=0,v=0,col="grey")
+polygon(c(0,SD[1,1],SD[1,1]+SD[1,2],SD[1,2]),c(0,SD[2,1],SD[2,1]+SD[2,2],SD[2,2]),col="red")
+arrows(0, 0, SD[1,1], SD[2,1])
+arrows(0, 0, SD[1,2], SD[2,2])
+arrows(SD[1,1], SD[2,1], SD[1,1]+SD[1,2], SD[2,1]+SD[2,2])
+arrows(SD[1,2], SD[2,2], SD[1,1]+SD[1,2], SD[2,1]+SD[2,2])
+
+
+
+
+

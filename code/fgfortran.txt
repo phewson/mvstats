@@ -1,0 +1,82 @@
+StatLib
+Data, Software and News from the Statistics Community 	
+Jun 13, 2006 - 08:09 AM
+
+Main Page <http://lib.stat.cmu.edu> :: Mailing Lists
+<http://lib.stat.cmu.edu/modules.php?op=modload&name=News&file=index&catid=&topic=34> :: Forum
+<http://lib.stat.cmu.edu/modules.php?op=modload&name=DB_phpBB2&file=index> ::  
+
+
+Search   
+
+		
+Main Menu
+
+*·* Home <index.php>
+*·* CMU Statistics
+<modules.php?op=modload&name=Web_Links&file=index&req=visit&lid=267>
+*·* Get Software
+<modules.php?op=modload&name=Downloads&file=index&req=viewdownload&cid=1>
+*·* Get Data
+<modules.php?op=modload&name=Downloads&file=index&req=viewdownload&cid=2>
+*·* Other Places <modules.php?op=modload&name=Web_Links&file=index>
+*·* ASA/IMS
+<modules.php?op=modload&name=Downloads&file=index&req=viewdownload&cid=4>
+*·* DASL <modules.php?op=modload&name=PostWrap&file=index&page=/DASL>
+*·* Bayes Workshop
+<modules.php?op=modload&name=PostWrap&file=index&page=/bayesworkshop/>
+*·* Other Meetings <index.php?module=PostCalendar&func=view>
+*·* About StatLib <modules.php?op=modload&name=AboutUs&file=index>
+*·* Your account <user.php>
+
+
+Other options
+
+*·* Advanced Searches <modules.php?op=modload&name=Search&file=index>
+*·* FAQ <modules.php?op=modload&name=FAQ&file=index>
+*·* Feedback <modules.php?op=modload&name=Feedback&file=index>
+*·* Polls <modules.php?op=modload&name=NS-Polls&file=index>
+*·* Submit an event
+<index.php?module=FormExpress&func=display_form&form_id=3>
+*·* Submit software/data
+<modules.php?op=modload&name=Submit_News&file=index>
+
+
+User's Login
+
+ Username
+ Password
+ Remember me
+
+
+Don't have an account yet?
+You can create one <user.php>. As a
+registered user you have
+some advantages like a theme
+manager, comments
+configuration and posting
+comments with your name.
+
+
+Advanced Searches
+
+
+
+		
+[ Open in new window <apstat/> ]
+[ Open in new window <apstat/> ]
+
+CMU Statistics <http://www.stat.cmu.edu> :: CMU <http://www.cmu.edu> 
+
+*Credit where credit is due*
+If you use an algorithm, dataset, or other information from StatLib,
+please acknowledge both StatLib and the original contributor of the
+material.
+StatLib is hosted by
+the Department of Statistics
+<http://lib.stat.cmu.edu/modules.php?op=modload&name=Web_Links&file=index&req=visit&lid=267>
+at Carnegie Mellon University <http://www.cmu.edu>
+
+[ Terms of Use <modules.php?op=modload&name=legal&file=index> ] [
+Privacy Policy <modules.php?op=modload&name=legal&file=privacy> ]
+

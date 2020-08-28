@@ -1,0 +1,468 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3c.org/TR/1999/REC-html401-19991224/loose.dtd">
+<!-- saved from url=(0040)http://zoonek2.free.fr/UNIX/48_R/06.html -->
+<!-- This is a generated file --><HTML><HEAD><TITLE>Clustering</TITLE>
+<STYLE type=text/css>BODY {
+	COLOR: #000000; BACKGROUND-COLOR: #ffffff
+}
+H1 {
+	PADDING-RIGHT: 20pt; PADDING-LEFT: 20pt; PADDING-BOTTOM: 20pt; MARGIN-LEFT: 20%; COLOR: #000000; MARGIN-RIGHT: 20%; PADDING-TOP: 20pt; BACKGROUND-COLOR: #ffdb43; TEXT-ALIGN: center
+}
+H2 {
+	PADDING-RIGHT: 5pt; PADDING-LEFT: 5pt; FONT-WEIGHT: bold; FONT-SIZE: medium; PADDING-BOTTOM: 5pt; MARGIN-LEFT: 0pt; COLOR: #ffffff; PADDING-TOP: 5pt; BACKGROUND-COLOR: #6d8ada
+}
+H3 {
+	FONT-WEIGHT: bold; FONT-SIZE: medium
+}
+PRE {
+	BORDER-RIGHT: thin solid; PADDING-RIGHT: 10pt; BORDER-TOP: thin solid; PADDING-LEFT: 10pt; PADDING-BOTTOM: 10pt; MARGIN-LEFT: 20pt; BORDER-LEFT: thin solid; COLOR: #000000; MARGIN-RIGHT: 20pt; PADDING-TOP: 10pt; BORDER-BOTTOM: thin solid; WHITE-SPACE: pre; BACKGROUND-COLOR: #ffffaa
+}
+P {
+	MARGIN-LEFT: 20pt; MARGIN-RIGHT: 20pt
+}
+LI P {
+	MARGIN-LEFT: 0pt; MARGIN-RIGHT: 0pt
+}
+</STYLE>
+
+<META http-equiv=Content-Style-Type content=text/css>
+<META http-equiv=Content-Type content="text/html; charset=iso-8859-1">
+<META content="MSHTML 6.00.2800.1106" name=GENERATOR></HEAD>
+<BODY text=#000000 vLink=#415383 aLink=#ffffff link=#6d8ada bgColor=#ffffff>
+<H1>Clustering</H1>
+<BLOCKQUOTE><A href="http://zoonek2.free.fr/UNIX/48_R/06.html#1">(TODO: 
+  translate) Aggrégation autour des centres mobiles</A><BR><A 
+  href="http://zoonek2.free.fr/UNIX/48_R/06.html#2">Hierarchical Classification 
+  (dendogram)</A><BR><A 
+  href="http://zoonek2.free.fr/UNIX/48_R/06.html#3">Comparing those two 
+  methods</A><BR><A href="http://zoonek2.free.fr/UNIX/48_R/06.html#4">Density 
+  estimation</A><BR></BLOCKQUOTE>
+<P>We now consider the problem of classifying the observation or the subjects 
+into several groups, several classes. For instance, we have weighted and 
+measured animals and we would like to know if there are several species: do the 
+data form a single cluster or several? </P>
+<P>This is called "unsuervised" learning, because we do not know the classes nor 
+even their number. When we know the classes and try to find criteria to assign 
+new observations to a class, we call that "supervised learning" -- it is a 
+regression, with a qualitative variable to predict. </P>
+<H2><A name=1></A>(TODO: translate) Aggrégation autour des centres mobiles</H2>
+<P>We choose k points, the "centers", and we cluster the data into k classes, 
+assigning each point to its nearest center. We then replace the centers by the 
+center of gravity of the points in their class. And we iterate. </P>
+<P>This method has several problems: the result depends on the first centers 
+chosen (we can start again with new centers and compare -- or even adapt the 
+algorithm with genetic algorithms); it is not well-adapted to noisy data; we 
+have to know the number of clusters; the algorithm implicitely assumes that the 
+clusters have the same size (while one application of clustering is "outlier 
+detection", with two classes: one, large, with most of the data, another, 
+smaller, with the outliers); it assigns each point to a class, even if there is 
+some ambiguity (we would like to know if the classification of a new point is 
+ambiguous). </P>
+<P>The k-means algorith is very similar. </P><PRE>Explain what the k-means algorithm is. 
+
+"the nonhierarchical k means or iterative relocation algorithm. Each
+case is initially placed in one of k clusters, cases are then moved
+between clusters if it minimises the differences between cases
+within a cluster."
+
+x &lt;- rbind(matrix(rnorm(100, sd = 0.3), ncol = 2),
+           matrix(rnorm(100, mean = 1, sd = 0.3), ncol = 2))
+cl &lt;- kmeans(x, 2, 20)
+plot(x, col = cl$cluster, pch=3, lwd=1)
+points(cl$centers, col = 1:2, pch = 7, lwd=3)
+segments( x[cl$cluster==1,][,1], x[cl$cluster==1,][,2], 
+          cl$centers[1,1], cl$centers[1,2])
+segments( x[cl$cluster==2,][,1], x[cl$cluster==2,][,2], 
+          cl$centers[2,1], cl$centers[2,2], 
+          col=2)</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g445.png"></P>
+<P>Let us try this with my pupils' marks (I spent one year as a high school 
+teacher -- a dreadful experience, that I would not advise to anyone). </P><PRE># This is not what we want...
+load(file="data_notes.Rda") # reads in the "notes" matrix, defined
+                            # in a preceding chapter.
+cl &lt;- kmeans(notes, 6, 20)
+plot(notes, col = cl$cluster, pch=3, lwd=3)
+points(cl$centers, col = 1:6, pch=7, lwd=3)</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g446.png"></P>
+<P>This is not what we want: we got the plot in the first two coordinates of the 
+data set instead of the first two coordinates of the Principal Component 
+Analysis of the data set. </P><PRE>n &lt;- 6
+cl &lt;- kmeans(notes, n, 20)
+p &lt;- princomp(notes)
+u &lt;- p$loadings
+x &lt;- (t(u) %*% t(notes))[1:2,]
+x &lt;- t(x)
+plot(x, col=cl$cluster, pch=3, lwd=3)
+c &lt;- (t(u) %*% t(cl$center))[1:2,]
+c &lt;- t(c)
+points(c, col = 1:n, pch=7, lwd=3)
+for (i in 1:n) {
+  print(paste("Cluster", i))
+  for (j in (1:length(notes[,1]))[cl$cluster==i]) {
+    print(paste("Point", j))
+    segments( x[j,1], x[j,2], c[i,1], c[i,2], col=i )
+  }
+}
+text( x[,1], x[,2], attr(x, "dimnames")[[1]] )</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g447.png"></P>
+<P>In fact, the "clusplot" already does this. We give it the result of one of 
+the following functions, that are variants of the k-means algorithm. </P><PRE>pam    partitionning around medoids (more robust)
+clara  other partitionning, well-suited for large data sets
+       (the idea is just to sample from the large data set)
+daisy  dissimilarity matrix: qualitative or quantitative variables
+dist   dissimilarity matrix: quantitative variables only
+fanny  fuzzy clustering</PRE>
+<P>TODO: explain (here or elsewhere, the assumed properties of the clusters for 
+these different methods: same size or not, same shape (variance) or not, etc.) 
+</P>
+<P>Here are a few sample results. </P><PRE>library(cluster)
+clusplot( notes, pam(notes, 6)$clustering )</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g448.png"></P><PRE>clusplot( notes, pam(notes, 2)$clustering )</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g449.png"></P><PRE>clusplot( daisy(notes), pam(notes,2)$clustering, diss=T )</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g450.png"></P><PRE>clusplot( daisy(notes), pam(notes,6)$clustering, diss=T )</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g451.png"></P><PRE>clusplot(fanny(notes,2))</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g452.png"></P><PRE>clusplot(fanny(notes,10))</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g453.png"></P>
+<H2><A name=2></A>Hierarchical Classification (dendogram)</H2>
+<P>We start with a cloud of n points and we put each point in a class of its own 
+(so we have n classes, each containing a single point). Then, we look for the 
+closest two classes (for a given distance, for instance the distance between 
+their center of gravity -- but other distances will give other results, perhaps 
+more appropriate for some data sets) and we join them into a new class. We now 
+have n-1 classes, all but one containing a single element. Then we iterate. The 
+result can be presented as a dendogram: the leaves are the initial 1-element 
+classes and the various "cuts" (by a horizontal line in the following plot) of 
+the dendogram are various clusterings of the data, into a decreasing number of 
+classes. </P><PRE>data(USArrests)
+hc &lt;- hclust(dist(USArrests), "ave")
+plot(hc)</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g454.png"></P><PRE>plot(hc, hang = -1)</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g455.png"></P>
+<P>Here is the result with my pupils' marks: I try to plot the tree onto the 
+first two components of the PCA. </P><PRE>plot(hclust(dist(notes)))</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g456.png"></P><PRE>p &lt;- princomp(notes)
+u &lt;- p$loadings
+x &lt;- (t(u) %*% t(notes))[1:2,]
+x &lt;- t(x)
+plot(x, col="red")
+c &lt;- hclust(dist(notes))$merge
+y &lt;- NULL
+n &lt;- NULL
+for (i in (1:(length(notes[,1])-1))) {
+  print(paste("Step", i))
+  if( c[i,1]&gt;0 ){
+    a &lt;- y[ c[i,1], ]
+    a.n &lt;- n[ c[i,1] ]
+  } else {
+    a &lt;- x[ -c[i,1], ]
+    a.n &lt;- 1
+  }
+  if( c[i,2]&gt;0 ){
+    b &lt;- y[ c[i,2], ]
+    b.n &lt;- n[ c[i,2] ]
+  } else {
+    b &lt;- x[ -c[i,2], ]
+    b.n &lt;- 1
+  }
+  n &lt;- append(n, a.n+b.n)
+  m &lt;- ( a.n * a + b.n * b )/( a.n + b.n )
+  y &lt;- rbind(y, m)
+  segments( m[1], m[2], a[1], a[2], col="red" )
+  segments( m[1], m[2], b[1], b[2], col="red" )
+  if( i&gt; length(notes[,1])-1-6 ){
+    op=par(ps=30)
+    text( m[1], m[2], paste(length(notes[,1])-i), col="red" )
+    par(op)
+  }
+}
+text( x[,1], x[,2], attr(x, "dimnames")[[1]] )</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g457.png"></P>
+<P>Conclusion: either choose the representation as a tree (and forget about PCA, 
+at least for a moment), or only plot the first two or three levels of the tree 
+-- as we did above. </P>
+<P>Also see the "mclust" package (Model-based clustering) that models the data 
+as a mixture of gaussians (i.e., as a superposition of clusters). </P><PRE>library(help=mclust)</PRE>
+<H3><A name=2.1></A>Distance between points </H3>
+<P>Hierarchical classification requires you to choose a notion of distance 
+between points and a notion of distance between clusters. </P>
+<P>There might be several reasonable choices of a distance between points: for 
+instance, to perform a hierarchical analysis on protein sequences, we can, after 
+aligning them, count the number of differences. We can also weight those 
+differences: if the physico-chemical properties of the amino-acids are similar, 
+the distance will be short, if they are very different, the distance will be 
+higher. (For further analyses, we also have another notion of distance, only 
+available after hierarchical classification: we can measure the distance on the 
+dendogram.) </P><PRE>TODO: give an alignment example</PRE>
+<P>TODO: other distance examples </P><PRE>Cosine distance: scalar product of two (unit) vectors, i.e., the
+                 correlation. It is a similarity measure.
+
+TODO: define "similarity measure".
+
+Count data:
+  Chi2 : Chi2 of the test for equality.
+  Phi2 : ??? This measure is equal to the chi-square measure
+             normalized by the square root of the combined frequency.
+
+Binary (or qualitative) data: there are more than a dozen notions of
+distance or similarity.
+TODO: a reference.
+We already mentionned them when dealing with supervised
+classification, to assess the quality of the results: we were
+comparing the real classes and the predicted classes.</PRE>
+<H3><A name=2.2></A>Distance between clusters </H3>
+<P>The notion of distance between clusters is slightly trickier. Here are a few 
+examples of such a distance. </P><PRE>d(A,B) = Max { d(a,b) ; a \in A and b \in B }
+
+d(A,B) = Min { d(a,b) ; a \in A and b \in B }
+
+d(A,B) = d(center of gravity of A, center of gravity of B) (actually used?)
+
+d(A,B) = mean of the d(a,b) where a \in A and b \in B    (UPGMA: Unweighted Pair-Groups Method Average)</PRE>
+<P>TODO: plots illustrating those notions. </P>
+<P>TODO: Ward's method </P><PRE>Ward's method
+Cluster membership is assessed by calculating the total sum of
+squared deviations from the mean of a cluster. The criterion for
+fusion is that it should produce the smallest possible increase in
+the error sum of squares.</PRE>
+<P>Remark: the same data, with different algorithms and/or distances, can 
+produce completely unrelated dendograms. </P>
+<H3><A name=2.3></A>A few applications </H3><PRE>TODO
+Detecting outliers (they form one or several small clusters, isolated from
+the rest of the data)
+
+TODO
+Non-supervised learning, when you do not know the number of
+classes.</PRE>
+<H2><A name=3></A>Comparing those two methods</H2>
+<P>The k-means algorithm algorithm and its variants are very fast, well-suited 
+to large data sets, but non-deterministic -- hierarchical clustering is just the 
+opposite. </P>
+<P>That is why we sometimes mix those two approaches (hybrid clustering): we 
+start with the k-means algorithm to get a few tens or hundreds of classes; then 
+hierarchical clustering on those classes (not on the initial data, too large) to 
+find the number of classes; finally, we can refine, with the k-means algorithm 
+on the newly obtained classes. </P>
+<P>TODO Example: do this, following this example (from the manual) </P><PRE>## Do the same with centroid clustering and squared Euclidean distance,
+## cut the tree into ten clusters and reconstruct the upper part of the
+## tree from the cluster centers.
+hc &lt;- hclust(dist(USArrests)^2, "cen")
+memb &lt;- cutree(hc, k = 10)
+cent &lt;- NULL
+for(k in 1:10){
+  cent &lt;- rbind(cent, colMeans(USArrests[memb == k, , drop = FALSE]))
+}
+hc1 &lt;- hclust(dist(cent)^2, method = "cen", members = table(memb))
+opar &lt;- par(mfrow = c(1, 2))
+plot(hc,  labels = FALSE, hang = -1, main = "Original Tree")</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g458.png"></P><PRE>plot(hc1, labels = FALSE, hang = -1, main = "Re-start from 10 clusters")</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g459.png"></P>
+<H2><A name=4></A>Density estimation</H2>
+<P>The preceding methods assumed that the clusters were convex, or even 
+spherical. But this is not always the case. </P>
+<P>In the following example, we would like the computer to find two clusters... 
+</P><PRE>n &lt;- 1000
+x &lt;- runif(n,-1,1)
+y &lt;- ifelse(runif(n)&gt;.5,-.1,.1) + .02*rnorm(n)
+d &lt;- data.frame(x=x, y=y)
+plot(d,type='p', xlim=c(-1,1), ylim=c(-1,1))</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g460.png"></P>
+<P>With k-means: </P><PRE>test.kmeans &lt;- function (d, ...) {
+  cl &lt;- kmeans(d,2)
+  plot(d, col=cl$cluster, main="kmeans", ...)
+  points(cl$centers, col=1:2, pch=7, lwd=3)
+}
+test.kmeans(d, xlim=c(-1,1), ylim=c(-1,1))</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g461.png"></P>
+<P>With hierarchical clustering: </P><PRE>test.hclust &lt;- function (d, ...) {
+  hc &lt;- hclust(dist(d))
+  remplir &lt;- function (m, i, res=NULL) {
+    if(i&lt;0) {
+      return( c(res, -i) )
+    } else {
+      return( c(res, remplir(m, m[i,1], NULL), remplir(m, m[i,2], NULL) ) )
+    }
+  }
+  a &lt;- remplir(hc$merge, hc$merge[n-1,1])
+  b &lt;- remplir(hc$merge, hc$merge[n-1,2])
+  co &lt;- rep(1,n)
+  co[b] &lt;- 2
+  plot(d, col=co, main="hclust", ...)
+}
+test.hclust(d, xlim=c(-1,1), ylim=c(-1,1))</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g462.png"></P>
+<P>We can also imagine other pathologies, with non-convex clusters. </P><PRE>get.sample &lt;- function (n=1000, p=.7) {
+  x1 &lt;- rnorm(n)
+  y1 &lt;- rnorm(n)
+  r2 &lt;- 7+rnorm(n)
+  t2 &lt;- runif(n,0,2*pi)
+  x2 &lt;- r2*cos(t2)
+  y2 &lt;- r2*sin(t2)
+  r &lt;- runif(n)&gt;p
+  x &lt;- ifelse(r,x1,x2)
+  y &lt;- ifelse(r,y1,y2)
+  d &lt;- data.frame(x=x, y=y)
+  d
+}
+d &lt;- get.sample()
+plot(d,type='p', xlim=c(-10,10), ylim=c(-10,10))</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g463.png"></P><PRE>test.kmeans(d, xlim=c(-10,10), ylim=c(-10,10))</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g464.png"></P><PRE>test.hclust(d, xlim=c(-10,10), ylim=c(-10,10))</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g465.png"></P><PRE>y &lt;- abs(y)
+d &lt;- data.frame(x=x, y=y)
+plot(d,type='p', xlim=c(-10,10), ylim=c(0,10))</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g466.png"></P><PRE>test.kmeans(d)</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g467.png"></P><PRE>test.hclust(d)</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g468.png"></P>
+<P>You can try to add variables (this is the same idea that leads to polynomial 
+regression -- or kernel methods). </P><PRE>d &lt;- get.sample()
+x &lt;- d$x; y &lt;- d$y
+d &lt;- data.frame(x=x, y=y, xx=x*x, yy=y*y, xy=x*y)
+test.kmeans(d)</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g469.png"></P><PRE>test.hclust(d)</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g470.png"></P>
+<P>But it does not work, unless we add the "right" variables. </P><PRE>d &lt;- data.frame(x=x, y=y, xx=x*x, yy=y*y, xy=x*y, xpy=x*x+y*y)
+test.kmeans(d)</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g471.png"></P><PRE>test.hclust(d)</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g472.png"></P>
+<P>In that kind of situation, if there are only two dimensions, we can try to 
+estimate the corresponding probability density and hope to see two peaks. </P><PRE>help.search("density")
+# Suggests:
+#   KernSur(GenKern)        Bivariate kernel density estimation
+#   bkde2D(KernSmooth)      Compute a 2D Binned Kernel Density Estimate
+#   kde2d(MASS)             Two-Dimensional Kernel Density Estimation
+#   density(mclust)         Kernel Density Estimation
+#   sm.density(sm)          Nonparametric density estimation in 1, 2 or 3 dimensions.
+library(KernSmooth)
+r &lt;- bkde2D(d, bandwidth=c(.5,.5))
+persp(r$fhat)</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g473.png"></P><PRE>n &lt;- length(r$x1)
+plot( matrix(r$x1, nr=n, nc=n, byrow=F), 
+      matrix(r$x2, nr=n, nc=n, byrow=T), 
+      col=r$fhat&gt;.001 )</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g474.png"></P>
+<P>TODO: a similar plot with hexbin? </P>
+<P>(We leave it as an exercise to the reader to finish this example, by telling 
+the computer how to find the connected components of the preceding plot and how 
+to use them for forecasting.) </P>
+<P>You can use the same idea in a more algorithmitic way as follows: for each 
+observation x, we count the number of observations at a distance at most 0.1 
+(you can change this value) from x; if there are more than 5 (you can change 
+this value), we say that the observation x is dense, i.e., inside a cluster. We 
+then define an equivalence relation between dense observations by saying that 
+they are in the same cluster if their distance is under 0.1. </P><PRE><A href="http://www.genopole-lille.fr/fr/formation/cib/doc/datamining/DM-Bio.pps">http://www.genopole-lille.fr/fr/formation/cib/doc/datamining/DM-Bio.pps</A>
+(page 66)</PRE>
+<P>You can implement this idea as follows. </P><PRE>density.classification.plot &lt;- function (x,y,d.lim=.5,n.lim=5) {
+  n &lt;- length(x)
+  # Distance computation
+  a &lt;- matrix(x, nr=n, nc=n, byrow=F) - matrix(x, nr=n, nc=n, byrow=T) 
+  b &lt;- matrix(y, nr=n, nc=n, byrow=F) - matrix(y, nr=n, nc=n, byrow=T) 
+  a &lt;- a*a + b*b
+  # Which observations are dense (i.e., in a cluster)?
+  b &lt;- apply(a&lt;d.lim, 1, sum)&gt;=n.lim
+  plot(x, y, col=b)
+  points(x,y,pch='.')
+}
+density.classification.plot(d$x,d$y)</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g475.png"></P>
+<P>We then have to identify the various clusters. </P><PRE># Beware: the following code is very recursive -- but, by default, 
+# R limits the size of the function calls stack to 500 elements.
+# We first increment this value.
+options(expressions=10000)
+
+density.classification.plot &lt;- function (x,y,d.lim=.5,n.lim=5) {
+  n &lt;- length(x)
+  # Distance computations
+  a &lt;- matrix(x, nr=n, nc=n, byrow=F) - matrix(x, nr=n, nc=n, byrow=T) 
+  b &lt;- matrix(y, nr=n, nc=n, byrow=F) - matrix(y, nr=n, nc=n, byrow=T) 
+  a &lt;- a*a + b*b
+  # Which observations are dense (in a cluster)?
+  b &lt;- apply(a&lt;d.lim, 1, sum)&gt;=n.lim
+  # We sort the observations
+  cl &lt;- rep(0,n)
+  m &lt;- 1
+  numerote &lt;- function (i,co,cl) {
+    print(paste(co, i))
+    for (j in (1:n)[ a[i,]&lt;d.lim &amp; b &amp; cl==0 ]) {
+      #print(paste("  ",j))
+      cl[j] &lt;- co
+      try( cl &lt;- numerote(j,co,cl) )   # Too recursive...
+    }
+    cl
+  }
+  for (i in 1:n) {
+    if (b[i]) { # Are we in a cluster?
+      # Cluster number
+      if (cl[i] == 0) {
+        co &lt;- m
+        cl[i] &lt;- co
+        m &lt;- m+1
+      } else {
+        co &lt;- cl[i]          
+      }
+      # We number the nearby points
+      #print(co)
+      cl &lt;- numerote(i,co,cl)
+    }
+  }
+  plot(x, y, col=cl)
+  points(x,y,pch='.')
+}
+density.classification.plot(d$x,d$y)</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g476.png"></P>
+<P>Let us try again, in a more iterative way. </P><PRE>density.classification.plot &lt;- function (x,y,d.lim=.5,n.lim=5, ...) {
+  n &lt;- length(x)
+  # Distance computation
+  a &lt;- matrix(x, nr=n, nc=n, byrow=F) - matrix(x, nr=n, nc=n, byrow=T) 
+  b &lt;- matrix(y, nr=n, nc=n, byrow=F) - matrix(y, nr=n, nc=n, byrow=T) 
+  a &lt;- a*a + b*b
+  # Which observations are dense (in a cluster)?
+  b &lt;- apply(a&lt;d.lim, 1, sum)&gt;=n.lim
+  # We sort the observations
+  cl &lt;- rep(0,n)
+  m &lt;- 0
+  for (i in 1:n) {
+    if (b[i]) { # Are we in a cluster?
+      # Cluster number
+      if (cl[i] == 0) {
+        m &lt;- m+1
+        co &lt;- m
+        cl[i] &lt;- co
+        print(paste("Processing cluster", co))
+        done &lt;- F 
+        while (!done) {
+          done &lt;- T
+          for (j in (1:n)[cl==co]) {
+            l &lt;- (1:n)[ a[j,]&lt;d.lim &amp; b &amp; cl==0 ]
+            if( length(l)&gt;0 ) {
+              done &lt;- F
+              for (k in l) { 
+                cl[k] &lt;- co 
+                #print(k)
+              }
+            }
+          }
+            
+        }
+      } else {
+        # Already processed cluster: pass
+      }
+    }
+  }
+  plot(x, y, col=cl, ...)
+  points(x,y,pch='.')
+}
+density.classification.plot(d$x,d$y)</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g477.png"></P>
+<P>Let us play with the parameters. </P><PRE>op &lt;- par(mfrow=c(3,3))
+for (d.lim in c(.2,1,2)) {
+  for (n.lim in c(3,5,10)) {
+    density.classification.plot(d$x,d$y,d.lim,n.lim, 
+      main=paste("d.lim = ",d.lim, ",  n.lim = ",n.lim, sep=''))
+  }
+}
+par(op)</PRE>
+<P align=center><IMG alt=* src="Clustering_files/g478.png"></P>
+<P align=right><FONT color=#c8c8c8><A style="TEXT-DECORATION: none" 
+href="http://www.math.jussieu.fr/~zoonek/">Vincent Zoonekynd</A><BR><A 
+style="TEXT-DECORATION: none" 
+href="mailto:zoonek@math.jussieu.fr">mailto:zoonek@math.jussieu.fr</A><BR>latest 
+modification on Sun Aug 28 02:45:24 BST 2005 </FONT></P></BODY></HTML>

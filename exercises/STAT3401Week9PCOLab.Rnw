@@ -1,0 +1,107 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb}
+
+\author{Paul Hewson}
+\title{Lab. notes for principal co-ordinates analysis / multidimensional scaling}
+\date{1st February 2007}
+\begin{document}
+\maketitle
+
+
+
+
+\section{Preliminaries and exploratory data analysis}
+
+We're going to revisit data we considered in the cluster analysis lab., so you need to load the \texttt{cluster} and the \texttt{flexclust} libraries to make the data available.
+
+We'll start by considering the \texttt{milk} data; you should have done some interesting eda in the cluster lab.   We follow this up by carrying out multidimensional scaling using \texttt{cmdscale} from the \texttt{MASS} library (look at the helpfile):
+
+\begin{verbatim}
+library(cluster)
+library(flexclust)
+library(MASS)
+data(milk)
+milk.dist <- dist(milk)
+milk.pco <- cmdscale(milk.dist)
+par(xpd = NA, bty = "n") ## let the labels run past the 
+## plotting region, and remove the box
+plot(milk.pco, type = "n", main = "PCO representation")
+text(milk.pco, row.names(milk.pco), cex = 0.5)
+\end{verbatim}
+
+Note that we've produced a blank plot but then drawn text on in the positions of the data with the row names.   Can you make sense of the resulting plot?
+
+If you're very interested, you could even plot the cluster solutions you find when doing cluster analysis against the 2-dimensional representation of the distance matrix:
+
+\begin{verbatim}
+milk.hclust <- hclust(milk.dist)
+milk.cut <- cutree(milk.hclust, 3)
+plot(milk.pco, type = "n", main = "PCO representation")
+text(milk.pco, row.names(milk.pco), cex = 0.5, col = milk.cut, pch = milk.cut)
+\end{verbatim}
+
+
+More importantly this week is to consider some diagnostics.
+
+
+Lets look at the $n-1$ solution, using the delightfully titled \texttt{zapsmall} function to round our eigenvalues to 8 digits (computer arithmetic means we have a lot of negative eigenvalues in the 15th decimal place which we get rid of).   
+
+\begin{verbatim}
+milk.pco.24 <- cmdscale(milk.dist, eig = TRUE, k = 24)
+evals <- zapsmall(milk.pco.24$eig, digits = 8)
+evals
+\end{verabtim}
+
+Now, if we want to examine the fit of a $q$ dimensional approximation we use $2 \times n \times \sum_{j=q+1}^{n-1} \lambda_{j}$ (note we are summing all the discarded eigenvalues) to give us: 
+
+\begin{verbatim}
+2 * dim(milk)[1] * sum(milk.pco.24$eig[3:24])
+\end{verbatim}
+
+You can adjust this last line to see the SS for a 3 dimensional approximation (use \texttt{4:24} in the square brackets) and so on.
+
+And now try to calculate the same thing directly from the projection and from the data.   We already know $\boldsymbol{Delta}$ (although we have to tell \textbf{R} we want a matrix and not a distance matrix.   We can get an estimate of $d$ by taking the distance matrix of the points in the $q$ dimensional approximation that interests us.   Finally, we just want the sum of the differences in the squared distances:
+
+\begin{verbatim}
+milk.pco.2 <- cmdscale(milk.dist, eig = TRUE, k = 2)
+delta <- as.matrix(milk.dist)
+d <- as.matrix(dist(milk.pco.2$points))
+sum(as.vector(delta)^2 - as.vector(d)^2)
+\end{verbatim}
+
+
+The other obvious method is just to use the percentage of variance explained / discarded.   Consider dividing the cumulative sum of the eigenvalues by the sum of the eigenvalues:
+
+\begin{verbatim}
+cumsum(evals) / sum(evals)
+\end{verbatim}
+
+
+Careful examination should convince you that a 2-dimensional approximation might well be adequate.
+
+
+\section{Sammon Mapping}
+
+You could try ``Sammon'' mapping on the mvmclass data.   Assuming you've used \texttt{daisy} to generate a distance matrix from the class data (we did this in an earlier lab.)
+
+\begin{verbatim}
+mvmclass <- read.csv("class06.csv", row.names = 1)
+mvmclass.dist <- daisy(mvmclass)
+mvmclass.sammon <- sammon(mvmclass.dist)
+\end{verbatim}
+
+If you want to plot the representation, the material you need is under \verb+mvmclass.sammon$points+.
+
+\begin{itemize}
+\item How do you determine whether your sammon fit is a good one or not?
+\end{itemize}
+
+\section{Further analyses}
+
+In case you wish to follow this from Johnson and Wichern's perspective, two datasets have been placed in the portal are very interesting: \texttt{utilities.csv} and \texttt{USUni.csv}.   The former we saw last time when we were considering clustering.   The latter considers a number of measures on 25 US Universities.   
+
+Another interesting analysis involves the Painters data (see \texttt{?painters} in \texttt{MASS}) - in particular you may like to see whether there any evidence that the first dimension corresponds with a time axis?
+
+
+\end{document}
+

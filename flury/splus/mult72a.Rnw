@@ -1,0 +1,171 @@
+SPLUS instructions for Section 7.2, part A
+******************************************
+
+last updated: june 18, 1997
+
+
+Normal theory quadratic discrimination is illustrated here for the
+electrode data of Example 7.2.3, using variables 2 and 5. The
+computations are quite straightforward, using equations (14) through
+(17) of Section 7.2.
+
+The datafile contains a first column with a group indicator variable
+taking values 1 and 2 for the electrodes produced by machines 1 and 2,
+respectively, followed by variables y1 to y5. We will extract the
+variables labeled y1 and y5 into a matrix that we simply call Y.
+
+Assuming that the data file is stored as C:\MULTIDAT\TAB53_5.DAT,
+start by typing
+
+
+> rawdat <- matrix(scan("c:\\multidat\\tab53_5.dat"), ncol = 6, byrow = T)
+> groups <- rawdat[, 1]
+> Y <- rawdat[, c(2, 6)]
+> pi1 <- .5
+> pi2 <- .5
+
+Next, partition the data into the two groups and do the calculations
+required in equation (15). As in Example 7.2.3 we use prior probabilities
+of 1/2. To define the function "det1", type
+
+> det1 <- function(M) prod(diag(qr(M)$qr)) * ifelse(nrow(M) %% 2, 1, -1)
+
+The following commands are similar to those used earlier in
+Sections 5.3 to 5.5 and require no further comments.
+
+> Y1 <- Y[groups == 1,] 
+> N1 <- dim(Y1)[1]
+> ybar1 <- apply(Y1, 2, mean)
+> S1 <- var(Y1)
+> Y2 <- Y[groups == 2,]
+> N2 <- dim(Y2)[1]
+> ybar2 <- apply(Y2, 2, mean)
+> S2 <- var(Y2)
+> S1inv <- solve(S1)
+> S2inv <- solve(S2)
+> A1 <- -S1inv / 2
+> b1 <- S1inv %*% ybar1
+> c1 <- log(pi1) - log(det1(S1)) / 2 - t(ybar1) %*% S1inv %*% ybar1 / 2
+> dim(c1) <- NULL
+> A2 <- -S2inv / 2
+> b2 <- S2inv %*% ybar2
+> c2 <- log(pi2) - log(det1(S2)) / 2 - t(ybar2) %*% S2inv %*% ybar2 / 2
+> dim(c2) <-NULL
+
+This completes the evaluation of equation (15).
+Next we compute the quadratic classification functions (14). It
+would seem that we need a loop to evaluate the quadratic form in
+equation (14) for all observations. Fortunately this is not the
+case; it is left to the student to explain why the following
+command works. (Hint: * is the elementwise multiplication of
+two matrices of the same dimension).
+
+> q11 <- apply(t((Y %*% A1) * Y), 2, sum)
+> q1 <- q11 + Y %*% b1 + c1
+> q21 <- apply(t((Y %*% A2) * Y), 2, sum)
+> q2 <- q21 + Y %*% b2 + c2
+
+At this point the vectors q1 and q2, both of dimension N1 + N2,
+contain the values of the quadratic classification functions. The
+computation of normal theory posterior probabilities (equation 16)
+and of the quadratic discriminant function (equation 17) is now
+straightforward:
+
+> post1 <- exp(q1) / (exp(q1) + exp(q2))
+> post2 <- 1 - post1
+> Q <- q1 - q2
+
+While doing these calculations you may at times want to display
+intermediate results. For instance, the posterior probabilities
+for the observations 41 through 60 are displayed by the command
+
+> matrix(c(post1[41:60],post2[41:60]), ncol = 2)
+
+Refer to the SPLUS instructions for Section 5.4 for the computation
+of a vector of predicted group membership. This should enable you to
+solve Exercise 7 in Section 7.2.
+
+As before it will be convenient to have a formal procedure available
+to perform these calculations. Such a procedure is given below; you
+may copy the procedure QDA, starting where indicated, into any program of
+your own, or put it into a library. The procedure allows you to either
+assign prior probabilities or to use the relative sample sizes Nj / (N1+N2)
+of all classified observations as estimates of prior probabilities. Notice
+that posterior probabilities are calculated for all observations in the
+data matrix Y, while only classified observations (group codes 1 and 2)
+are used for the construction of the classification rule. A similar
+procedure can be written for quadratic classification with a general number
+k>=2 of groups. The program given below starts out by reading again the
+raw data of the electrode example. For the definition of the function
+"maxindc" refer to the instructions for section 5.4.
+
+******************************  CUT HERE  *******************************
+
+# qda function 
+
+rawdat <- matrix(scan("c:\\multidat\\tab53_5.dat"), ncol = 6, byrow = T)
+								 # read data
+x <- rawdat[, 1]					 # grouping variable
+Y <- rawdat[, 2:6]			     # choose variables for analysis
+prior1 <- 0.5			      # set prior probabilities equal to 0.5
+
+qda <- function(x, Y, prior1)
+{
+# function QDA 
+# function QDA 
+# input:   x: n-vector indicating group membership. Only observations
+#             with values of 1 or 2 will be used, but the quadratic
+#	      classification rule will be applied to all N observations.	
+#          Y: n by p matrix of variables to be used for classification.
+#     prior1: if 0, prior probabilities are estimated as relative sample
+#	      sizes; if between 0 and 1, this will be the prior 
+#	      probability for group 1.
+# output: qdf: n-vector of quadratic discrimination function scores,
+#	      computed (as in equation 17) for all observations in the data
+#	      matrix Y.
+#       xhat: predicted group membership for all n observations.
+#      post1: posterior probability for group 1, for all n observations.
+
+nobs <- dim(Y)[1]
+Y1 <- Y[x == 1,]
+n1 <- dim (Y1)[1]
+Y2 <- Y[x == 2,]
+n2 <- dim(Y2)[1]
+if (prior1 == 0)
+{prior1 <- n1 / (n1 + n2)}
+prior2 <- 1 - prior1
+ybar1 <- apply(Y1, 2, mean)
+S1 <- var(Y1)
+S1inv <- solve(S1)
+A1 <- -S1inv / 2
+b1 <- S1inv %*% ybar1
+c1 <- log(prior1) - log(det1(S1)) / 2 - t(ybar1) %*% S1inv %*% ybar1 / 2
+dim(c1) <- NULL
+ybar2 <- apply(Y2, 2, mean)
+S2 <- var(Y2)
+S2inv <- solve(S2)
+A2 <- -S2inv / 2
+b2 <- S2inv %*% ybar2
+c2 <- log(prior2) - log(det1(S2)) / 2 - t(ybar2) %*% S2inv %*% ybar2 / 2
+dim(c2) <- NULL
+q11 <- apply(t((Y %*% A1) * Y), 2, sum)
+q1 <- q11 + Y %*% b1 + c1
+q21 <- apply(t((Y %*% A2) * Y), 2, sum)
+q2 <- q21 + Y %*% b2 + c2
+post1 <- exp(q1) / (exp(q1) + exp(q2))
+xhat <- maxindc(matrix(c(post1, (1 - post1)), ncol = 2))
+qdf <- q1 - q2
+results <- list(qdf = qdf, xhat = xhat, post1 = post1)
+results
+# end of procedure QDA
+# end of procedure QDA
+}
+results <- qda(x, Y, prior1)				# call QDA procedure
+
+cat(format(t(results$xhat[41:60])), "\n") 
+	 # display predicted group membership for observations 41 through 60
+
+cat(format(t(100 * results$post1[41:60])), fill = 8, "\n")
+					       # and posterior probabilities
+
+******************************  CUT HERE  *******************************

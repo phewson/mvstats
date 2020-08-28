@@ -1,0 +1,169 @@
+
+S-PLUS instructions for Section 5.4
+***********************************
+
+last updated: june 18, 1997
+
+
+Having seen in Section 5.3 how a linear discriminant function is computed,
+we proceed now to the calculation of normal theory posterior probabilities.
+The vole data of Example 5.4.4 will serve as an illustration.
+Because this is a rather large dataset, it will not be reasonable to
+display too many intermediate results. Example 5.4.4 is chosen because it
+illustrates the calculation of posterior probabilities for unclassified
+observations.
+
+First, read the data and extract the variables labeled Y1 and Y4 in
+a matrix that we will simply call Y. Notice that the first variable
+in the data file is a group code: 1 for multiplex, 2 for subterraneus,
+0 for unclassified.
+
+> rawdat <- matrix(scan("c:\\multidat\\tab54_1.dat"), ncol = 9, byrow = T)
+> groups <- rawdat[, 1]
+> Y <- rawdat[, c(2,5)]
+
+Now compute the linear discriminant function; the following commands
+are very similar to those discussed in section 5.3 and need no further
+comments.
+
+> Y1 <- Y[groups == 1,] 
+> N1 <- dim(Y1)[1]
+> ybar1 <- apply(Y1, 2, mean)
+> S1 <- var(Y1)
+> Y2 <- Y[groups == 2,]
+> N2 <- dim(Y2)[1]
+> ybar2 <- apply(Y2, 2, mean)
+> S2 <- var(Y2)
+> S <- ((N1 - 1) * S1  +  (N2 - 1) * S2) / (N1 + N2 - 2)
+> b <- solve(S) %*% (ybar1 - ybar2)
+> ldf <- Y %*% b
+> dim(ldf) <- NULL
+
+At this point the vector "ldf" contains values of the linear discriminant
+function for all observations in the data file.
+For the calculation of posterior probabilities it will be most convenient
+to use equations (12) and (13). Define prior probabilities by
+
+> prior1 <- N1 / (N1 + N2)
+> prior2 <- 1 - prior1
+
+and then evaluate equation (12):
+
+> z <- log(prior1/prior2) - t(b) %*% (ybar1 + ybar2)/2  + ldf
+
+The posterior probabilites for group 1 are computed by
+
+> post1 <- exp(z) / (1 + exp(z))
+
+The command
+
+> post1[1:15]
+
+will display the posterior probabilities for the first 15 observations;
+these should be the same as in Table 5.4.2. To define a vector of
+predicted group membership, you should first of all define the function
+"maxindc". To do this, type
+
+> fix(maxindc)
+
+and then write the following function
+
+function(X)
+{
+	y <- c(rep(0,dim(X)[1]))
+	for(i in 1:dim(X)[1])
+		if(X[i, 1] > X[i, 2]) y[i] <- 1 else y[i] <- 2
+	y
+}
+
+Then you may use the following sequence of commands:
+
+> post2 <- 1 - post1
+> post <- cbind(post1,post2)
+> xhat <- maxindc(post)
+
+The last function produces a vector containing integers 1 and 2: 1 if
+the entry in the first column of the matrix "post" is larger then the
+entry in the second column, and 2 otherwise. Verify the results by
+
+> cbind(xhat[90:104], post1[90:104])
+
+This should produce the results in the bottom right corner of Table 5.4.2.
+Notice that we have computed posterior probabilities for ALL observations
+in the file, not just for the classified ones. 
+
+It will be useful in Section 5.5 to have a formal procedure available
+to perform these calculations. Such a program is given below; you
+may copy the procedure LDA, starting where indicated, into
+any program of your own, or put it into a library. In addition to the
+calculations illustrated above, procedure LDA will return the standard
+distance between the two groups, and it allows you to either assign
+prior probabilities or use the relative sample sizes (Nj / (N1 + N2))
+of all classified observations as estimates of the prior probabilities.
+The program starts out by reading again the Microtus data set.
+
+
+*****************************  CUT HERE  ********************************
+
+rawdat <- matrix(scan("c:\\multidat\\tab54_1.dat"), ncol=9, byrow=T)
+							     # read data
+
+x <- rawdat[, 1]                                     # grouping variable
+Y <- rawdat[, c(2,5)]                         # choose variables 1 and 4
+prior1 <- 0        # choose prior probabilities as relative sample sizes
+
+LDA <- function(Y, x, prior1)
+{
+#  procedure LDA starts here 
+#  procedure LDA starts here
+
+# input:     Y  N by p matrix of variables to be used for classification
+#	     x  N-vector indicating group membership. Only observations
+#               with values 1 or 2 are used for estimation, but the
+#               linear discriminant function will be applied to all
+#               N observations.
+#            
+#       prior1  if 0, prior probabilities are estimated as the relative
+#               sample sizes. if between 0 and 1, this will be the
+#               prior probability for group 1.
+
+#  output:   b  vector of linear discriminant function coefficients
+#            d  p-variate standard distance.
+#           ldf  N-vector of linear discriminant function scores, computed
+#                for all observations in the data matrix y.
+#          xhat  predicted group membership for all N observations
+#         post1  posterior probability for group 1, for all N observations
+
+	Y1 <- Y[x == 1,  ]
+	N1 <- dim(Y1)[1]
+	ybar1 <- apply(Y1, 2, mean)
+	S1 <- var(Y1)
+	Y2 <- Y[x == 2,  ]
+	N2 <- dim(Y2)[1]
+	ybar2 <- apply(Y2, 2, mean)
+	S2 <- var(Y2)
+	S <- ((N1 - 1) * S1 + (N2 - 1) * S2)/(N1 + N2 - 2)
+	b <- solve(S) %*% (ybar1 - ybar2)
+	d <- sqrt(t(b) %*% (ybar1 - ybar2))
+	ldf <- Y %*% b
+	dim(ldf) <- NULL
+	if(prior1 == 0)
+		prior1 <- N1/(N1 + N2)
+	z <- log(prior1/(1-prior1)) - t(b) %*% (ybar1 + ybar2)/2 + ldf
+	post1 <- exp(z)/(1 + exp(z))
+	xhat <- maxindc(cbind(post1, (1 - post1)))
+	results <- list(b=b, d=d, ldf=ldf, xhat=xhat, post1=post1)
+	results
+}
+
+results <- LDA(Y, x, prior1)     		    # call LDA procedure
+
+cat("\n predicted group membership\n", format(results$xhat[90:104],
+	justify	= "right"), fill = 3)	
+	# display predicted group membership for selected observations
+
+cat("\n posterior probabilities are\n",
+	format(100 * t(results$post1[90:104]), justify = "right"),
+	fill = 10)			 # and posterior probabilities
+
+***************************  CUT HERE  ********************************

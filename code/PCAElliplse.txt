@@ -1,0 +1,74 @@
+V <- matrix(c(2,1,1,1), 2,2)
+eV <- eigen(V)
+
+theta <- seq(0,(2*pi),length=101)
+x <- sqrt(eV$val[1]) * cos(theta)
+y <- sqrt(eV$val[2]) * sin(theta)
+
+
+
+
+
+
+newxy <- cbind(x,y) %*% t(eV$vec)
+
+xyplot( newxy[,2] ~ newxy[,1],
+       xlab=list("x", cex=1.7), ylab=list("y", cex=1.7),
+       aspect=2/3,
+       xlim=c(-1.65,1.65), ylim=c(-1.1,1.1),
+       scales=list(at=seq(-1.5,1.5,.5), cex=1.7),
+       panel=function(x,y) {
+         panel.xyplot(x,y, type="l")
+         panel.abline(h=0, v=0, lty=2)
+         panel.abline(a=0,b=eV$vec[2,1]/eV$vec[1,1])
+         panel.abline(a=0,b=eV$vec[2,2]/eV$vec[1,2])
+       })
+## export.eps(hh("mthp/figure/ellipse2111.eps"))
+
+
+
+
+stigma <-  matrix(c(9,3,3,1),2,2)  %*% matrix(c(1,0.9,0.9,1),2,2) 
+
+library(MASS)
+spot <- mvrnorm(100, c(0,0), matrix(c(1,.9,.9,1),2,2))
+V <- var(spot)
+eV <- eigen(V)
+
+theta <- seq(0,(2*pi),length=101)
+x <- 1.96 * sqrt(eV$val[1]) * cos(theta)
+y <- 1.96 * sqrt(eV$val[2]) * sin(theta)
+
+plot(spot, xlim = c(-3,3), ylim = c(-3,3))
+newxy <- cbind(x,y) %*% t(eV$vec)
+lines(newxy)
+abline(a=0,b=eV$vec[2,1]/eV$vec[1,1])
+abline(a=0,b=eV$vec[2,2]/eV$vec[1,2])
+
+##V <- matrix(c(2,1,1,1), 2,2)
+##V
+##eV <- eigen(V)
+##eV
+##sqrt(eV$val)  ## semimajor and semiminor axis lengths
+atan(c(eV$vec[2,1]/eV$vec[1,1], eV$vec[2,2]/eV$vec[1,2])) ## angle of axes
+diff(atan(c(eV$vec[2,1]/eV$vec[1,1], eV$vec[2,2]/eV$vec[1,2]))) ## right angle
+
+
+
+
+
+xyplot( newxy[,2] ~ newxy[,1],
+       xlab=list("x", cex=1.7), ylab=list("y", cex=1.7),
+       aspect=2/3,
+       xlim=c(-1.65,1.65), ylim=c(-1.1,1.1),
+       scales=list(at=seq(-1.5,1.5,.5), cex=1.7),
+       panel=function(x,y) {
+         panel.xyplot(x,y, type="l")
+         panel.abline(h=0, v=0, lty=2)
+         panel.abline(a=0,b=eV$vec[2,1]/eV$vec[1,1])
+         panel.abline(a=0,b=eV$vec[2,2]/eV$vec[1,2])
+       })
+## export.eps(hh("mthp/figure/ellipse2111.eps"))
+
+
+

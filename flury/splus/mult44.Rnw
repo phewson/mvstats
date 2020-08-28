@@ -1,0 +1,56 @@
+
+S-PLUS instructions for Chapter 4.4
+***********************************
+
+last updated: june 18, 1997
+
+
+This unit illustrates the implementation of the EM-algorithm for
+Example 4.4.3. Because a while-loop is involved, the instructions are given
+in form of a self-documented S-PLUS program. Read the program into a file
+and run it with different initializations and with different values of the
+observed counts. For each iteration the program displays the current
+parameter values and the value of the observed data log-likelihood function.
+
+****************************  CUT HERE ***************************
+
+y1 <- 5					    # observed data values
+y2 <- 3
+y3 <- 2
+y23 <- 10               
+N <- y1 + y2 + y3 + y23
+theta <- c(0.6, 0.1, 0.3)	     # initialize parameter values
+iter <- 0				   # set iteration counter
+epsilon <- 10^(-6)		       # set convergence criterion
+di <- 1
+	 # set test value for convergence to some number > epsilon
+
+while (di > epsilon) 				# start iterations
+{
+ellstar <- (y1 * log(theta[1]) + y23 * log(1 - theta[1])
++ y2 * log(theta[2]) + y3 * log(theta[3]))
+		   # compute value of observed-data log-likelihood
+
+cat(format(c(iter, t(theta), ellstar), justify = "right"),
+fill = 60)	   # display iteration number and parameter values
+
+# E-step
+
+Ex2 <- y23 * (theta[2] / (theta[2] + theta[3]))
+					    # expected value of x2
+
+Ex3 <- y23 * (theta[3] / (theta[2] + theta[3]))
+					    # expected value of x3
+
+# M-step
+
+thetaold <- theta 		      # store old parameter values
+theta[1] <- y1 / N 				   # update theta1
+theta[2] <- (y2 + Ex2) / N 			   # update theta2
+theta[3] <- (y3 + Ex3) / N 			   # update theta3
+
+di <- max(abs(theta - thetaold))	      # compute test value
+iter <- iter + 1 		      # increase iteration counter
+} 						# end of iteration
+
+****************************  CUT HERE ***************************

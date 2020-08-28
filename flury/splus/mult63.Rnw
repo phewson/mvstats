@@ -1,0 +1,45 @@
+
+S-PLUS instructions for Section 6.3
+***********************************
+
+last updated: june 18, 1997
+
+
+From the software instruction to chapter 3 we are well prepared to do the
+calculations involved in graphing a confidence ellipse. We illustrate
+this for Example 6.3.1. The procedure ELLIPS  from the software
+instructions to chapter 3 will be used; make sure it is loaded before you
+call it with the commands given below. Recall that the procedure
+ellips is in your working directory if you used it before. Alternatively,
+you may just keep procedure ELLIPS in a file which you copy from an
+external editor before continuing to follow these instructions.
+
+No explanations are needed because the calculations are similar to
+those done in section 6.2.
+
+> X <- matrix(scan("c:\\multidat\\tab62_1.dat"), ncol = 4, byrow = T)
+> Y <- cbind((X[, 1] - X[, 3]),(X[, 2] - X[, 4]))
+> ybar <- apply(Y, 2, mean)
+> S <- var(Y)
+< A <- S
+
+Now define the constants for the size of the ellipses and call the
+procedure ELLIPS. Refer to the documentation of the procedure for details.
+
+> const <- 0.5345
+< e1 <- ellips(S, ybar, const, 500)
+> const <- 0.6876 
+> e2 <- ellips(S, ybar, const, 500)
+
+Both e1 and e2 contain the coordinates of 500 points forming the
+respective ellipses. Verify that you get the same ellipse as the
+solid one in Figure 6.3.1 by typing
+
+> plot(e2[, 1], e2[, 2])
+
+For generating Figure 6.3.1 you need to study the graphics manual;
+in particular, you will have to define a window, scale the axis,
+and change the appropriate parameters to get the circle symbols for
+data points, and a solid and broken line for the ellipses.
+
+

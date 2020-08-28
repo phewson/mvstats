@@ -1,0 +1,281 @@
+\chapter{Multidimensional scaling}
+\label{mds}
+
+%\section{Principal co-ordinates analysis - multidimensional scaling}
+
+
+We have looked at clustering techniques which partition an $n \times n$ matrix of dissimilarities into groups of like individuals.   Whilst it is possible to visualise differences between individuals in terms of dendrograms, it might be more useful to have a direct representation of the relationship between individuals.   We are now going to consider techniques which let us visualise the relative distances bewteen individuals in a low dimensional structure.  Some early ideas were set out by \cite{Richardson:1938}, and the algebraic techniques required to reconstruct a configuration from distances were established by \cite{Young+Householder:1938}.   \cite{Torgerson:1952} set out the foundations for this work, but developments in the technique associated with the name \emph{principal co-ordinates analysis} were given by \cite{Gower:1966}.   Arguably, the tecnique is most commonly referred to as \emph{scaling}, often as classical scaling.
+
+\section{Metric Scaling}
+
+Consider (any) distance matrix $\boldsymbol{\Delta}$.   It is metric if elements of $\boldsymbol{\Delta}$ satisfy the metric (triangle) inequality $\delta_{ij} \leq \delta_{ik} + \delta_{kj}$ for all $i$, $j$, $k$.
+
+Classical metric multidimensional scaling is based on the $n \times n$ distance or dissimilarity matrix, we will note later some connections with principal components.   Here, we will first consider a matrix $\boldsymbol{\Delta}$ of \emph{Euclidean} distances between objects, such that $\delta_{ij}$ is the distance between points $i$ and $j$.   These $n$ points can be represented in $n-1$ dimensional space.   We are looking for a configuration of $n$ points such that the distance $d_{ij}$ between points $i$ and $j$ equals the dissimilarity $\delta_{ij}$ for all $i$, $j$.   The dimensionality of this configuration is $q$ such that we are seeking to reconstruct an $n \times q$ matrix $\boldsymbol{X}$.
+
+We can very easily get from an $n \times p$ matrix $\boldsymbol{X}$ to a Euclidean distance matrix.   If we first form the $n \times n$ matrix $\boldsymbol{Q}$ then $\boldsymbol{Q} = \boldsymbol{X}\boldsymbol{X}^{T}$.   Considering this one element at a time:
+
+\begin{equation}
+q_{rs} = \sum_{j = 1}^{p} x_{rj}x_{sj}
+\end{equation}
+
+We know that the Euclidean distance is given by:
+
+\begin{eqnarray*}
+\delta_{rs}^{2} &=& \sum_{j=1}^{p} (x_{rj} - x_{sj})^{2} \\
+ &=& \sum_{j=1}^{p} (x_{rj}^{2} + \sum_{j=1}^{p} (x_{sj}^{2} - 2 \sum_{j=1}^{p} x_{rj}x_{sj} \\
+&=&  q_{rr} + q_{ss} - 2q_{rs}
+\end{eqnarray*}
+
+So given $\boldsymbol{X}$ we can find $\boldsymbol{Q} = \boldsymbol{X}\boldsymbol{X}^{T}$ and hence find the Euclidean distance.
+%proof pg 106
+
+What we want to do now is reverse this process.    We should note that our recovered $n \times q$ matrix is not uniquely defined - it is only defined up to translation, rotation and reflection.   To fix this, we will usually assume $\boldsymbol{X}$ has been centred (i.e. make column means zero, such that $\sum_{i=1}^{n} y_{ij} = 0)$.    It may be noted here that we don't necessarily want to recover an $n \times p$ matrix, we can reconstruct a matrix with up to $n-1$ columns, but as with other dimension reduction techniques we hope to find an $n \times q$ matrix with $q < p$; clearly if $q = 2$ it will be easy to visualise the results.   So, to recover $\boldsymbol{Q}$ from $\boldsymbol{D}$:
+
+\begin{eqnarray}
+\sum_{r=1}^{n} d_{rs}^{2} = trace(\boldsymbol{Q}) + n q_{ss}\\
+\sum_{s=1}^{n} d_{rs}^{2} = n q_{rr} + trace(\boldsymbol{Q}) \\
+\sum_{r=1}^{n} d_{rs}^{2} \sum_{s=1}^{n} d_{rs}^{2} = 2 n trace(\boldsymbol{Q})
+\end{eqnarray}
+
+By rearranging this and manipulating the equations above which lead us to our distance matrix, we can recover elements of $\boldsymbol{Q}$ from $\boldsymbol{D}$ using a double centering procedure:
+
+\begin{displaymath}
+q_{ij} = -\frac{1}{2} ( d_{ij}^{2} - d_{i \cdot}^{2} -  d_{\cdot j}^{2} +  d_{\cdot \cdot}^{2})
+\end{displaymath}
+
+The dots denote means taken over the relevant indices.
+
+% mention double centering here
+In summary, to find $\boldsymbol{Q}$ given $\boldsymbol{D}$:
+
+\begin{itemize}
+\item Square it element by element
+\item Double centre it 
+  \begin{itemize}
+  \item  subtract column means
+  \item subtract row means
+  \item add overall mean
+  \end{itemize}
+\item Multiply by $-\frac{1}{2}$.
+\end{itemize}
+
+
+%some people approximate Q with a similarity matrix
+
+Having found $\boldsymbol{Q}$ ($\boldsymbol{Q} = \boldsymbol{XX}^{T}$), all we need is to find a suitable $\boldsymbol{X}$, which sounds like some kind of matrix square root problem.   Given Euclidean distances, $\boldsymbol{Q}$ is symmetric and we can do this using the spectral decomposition $\boldsymbol{Q} = \boldsymbol{E \Lambda E}^{T}$ where $\boldsymbol{\Lambda} = \lambda_{1}, \lambda_{2}, \ldots, \lambda_{n}$, a diagnonal matrix of ordered eigenvalues and $\boldsymbol{E}$ is the matrix whose columns are the corresponding (normalised) eigenvectors.   If  $\boldsymbol{Q} = \boldsymbol{E \Lambda}^{\frac{1}{2}} \boldsymbol{\Lambda^{\frac{1}{2}} E}^{T}= \boldsymbol{X} \boldsymbol{X}^{T}$ then $\boldsymbol{X} =  \boldsymbol{E \Lambda}^{\frac{1}{2}}$ and we have recovered the co-ordinates from the inter-point distances.
+
+
+\begin{displaymath}
+\boldsymbol{X} = \left( \sqrt{\lambda_{1}} \left( \begin{array}{r} e_{11} \\ e_{12} \\ \vdots \\ e_{1n} \end{array} \right), \ldots,   \sqrt{\lambda_{n}} \left( \begin{array}{r} e_{n1} \\ e_{n2} \\ \vdots \\ e_{nn} \end{array} \right) \right)
+\end{displaymath}
+
+So if we want a one dimensional representation, we just use  $\left( \sqrt{\lambda_{1}} \boldsymbol{e}_{1} \right) $, for a two dimensional representation we would use  $\left( \sqrt{\lambda_{1}} \boldsymbol{e}_{1},   \sqrt{\lambda_{2}} \boldsymbol{e}_{2} \right)$
+
+
+\subsection{Similarities with principal components analysis}
+
+A short diversion noting a few similarities with principal component analysis may be in order.   Consider the centred data matrix $\boldsymbol{X}$:
+
+\begin{displaymath}
+C = \frac{1}{n-1} \boldsymbol{X}^{T} \boldsymbol{X}
+\end{displaymath}
+
+Principal components come from an eigenanalysis of $\boldsymbol{C}$, here we denote the eigenvalues of $\boldsymbol{C}$ by $\mu_{i}$ and associated eigenvectors by $\boldsymbol{a}_{i}$:
+
+\begin{eqnarray*}
+\boldsymbol{C} \boldsymbol{a}_{i} &=& \mu_{i} \boldsymbol{a}_{i}\\
+\frac{1}{n-1}\boldsymbol{X}^{T} \boldsymbol{X} \boldsymbol{a}_{i} &=& \mu_{i} \boldsymbol{a}_{i}\\
+\boldsymbol{X}^{T} \boldsymbol{X} \boldsymbol{a}_{i} &=& (n-1)\mu_{i} \boldsymbol{a}_{i}\\
+\boldsymbol{X}\boldsymbol{X}^{T} \boldsymbol{X} \boldsymbol{a}_{i} &=& (n-1)\mu_{i} \boldsymbol{X} \boldsymbol{a}_{i}\\
+\boldsymbol{Q} \underbrace{\boldsymbol{X} \boldsymbol{a}_{i}}_{\boldsymbol{z}_{i}} &=& (n-1)\mu_{i} \underbrace{\boldsymbol{X} \boldsymbol{a}_{i}}_{\boldsymbol{z}_{i}}
+\end{eqnarray*}
+
+So $\boldsymbol{X} \boldsymbol{a}_{i} = \boldsymbol{z}_{i}$ is an eigenvector of $\boldsymbol{Q}$ with corresponding eigenvalue $(n-1) \mu_{i}$.   If we want a normalised eigenvector it may be worth noting that the length can be found as follows:
+
+\begin{eqnarray*}
+||\boldsymbol{z}_{i}||^{2} = \boldsymbol{z}_{i}^{T}\boldsymbol{z}_{i} = \boldsymbol{a}_{i} \boldsymbol{X}^{T} \boldsymbol{X} \boldsymbol{a}_{i} &=& (n-1) \boldsymbol{a}_{i}^{T} \boldsymbol{C} \boldsymbol{a}_{i}\\
+ &=& (n-1) \boldsymbol{a}_{i}^{T} \mu_{i} \boldsymbol{a}_{i}\\
+ &=& (n-1) \mu_{i} \frac{\boldsymbol{a}_{i}^{T} \boldsymbol{a}_{i}}{||\boldsymbol{a}_{i}||^{2}}\\
+ &=& (n-1) \mu_{i}
+\end{eqnarray*}
+
+So, $||\boldsymbol{z}_{i}|| = \sqrt{(n-1) \mu_{i}}$.   Hence a normalised eigenvector for $\boldsymbol{Q}$ takes the form $\frac{1}{(n-1)\mu_{i}} \boldsymbol{Xa}_{i}$ with eigenvalue $(n-1) \mu_{i}$
+
+
+Therefore, our eigenvalues and eigenvectors found from multidimensional scaling / principal co-ordinates analysis are related to those found from decomposition of the covariance of the scaled data matrix:
+
+\begin{eqnarray*}
+\lambda_{i} = (n-1) \mu_{i}\\
+e_{i} = \frac{1}{\sqrt{\lambda_{i}}} \boldsymbol{Xa}_{i}
+\end{eqnarray*}
+
+Remember that $\boldsymbol{Z} = \boldsymbol{XA}^{T}$, where:
+
+\begin{displaymath}
+\boldsymbol{A} = \left( \begin{array}{c} \boldsymbol{a}_{1}^{T} \\  \boldsymbol{a}_{2}^{T} \\ \vdots \\ \boldsymbol{a}_{n}^{T}   \end{array} \right)
+\end{displaymath}
+
+So $\boldsymbol{Xa}_{i}$:
+
+\begin{displaymath}
+ \left( \boldsymbol{Xa}_{1} \boldsymbol{Xa}_{2}, \ldots, \boldsymbol{Xa}_{n} \right)
+\end{displaymath}
+in other words, this is our matrix of principal component scores.
+
+
+%This technique uses eigen decompositions (which we can do in our sleep by now) and a similarity matrix.   The thing to emphasise is that we are decomposing an $n \times n$ matrix of similarities between points, rather than in principal components where we had a $p \times p$ matrix of correlations / variance-covariances.
+
+
+
+\section{Visualising multivariate distance}
+\label{visdist}
+
+Consider the US Arrests data (we have looked at this a few times).   If you still have the distance matrix \texttt{spot} created earlier, you can run principal co-ordinates analysis quite easily:
+
+\singlespacing
+\begin{verbatim}
+> spot <- dist(USArrests, method = "euclidean")
+> what <- cmdscale(spot)
+> plot(what[,1], what[,2], 
+   xlab = "Axis 1", ylab = "Axis 2", 
+   main = "US Arrests")
+> identify(what[,1], what[,2], row.names(USArrests))
+\end{verbatim}
+\onehalfspacing
+
+By default you extract two variables, and you don't get the eigen values.   You can alter the function call if you want to change that (see \texttt{?cmdscale})
+
+You might like to use \texttt{identify()} to check that very odd points according to principal co-ordinates are also very odd according to your cluster analysis.
+
+
+\section{Assessing the quality of fit}
+
+
+One measure of discrepancy is given by:
+
+\begin{displaymath}
+\varphi = \sum_{i=1}^{n} \sum_{j=1}^{n} (\delta_{ij}^{2} - d_{ij}^{2})
+\end{displaymath}
+
+and it can be shown \citep{Mardia+etal:1979}%, page 406} 
+ that:
+
+\begin{displaymath}
+\varphi = 2n(\lambda_{q+1} + \ldots + \lambda_{n})
+\end{displaymath}
+
+
+So, if we fit a model with $q = n-1 = 49$ (in order to measure the size of the discarded eigenvalues - most of these eigenvalues are zero hence warnings about eigenvalues below zero):
+
+\singlespacing
+\begin{verbatim}
+> what <- cmdscale(spot, eig = TRUE, k = 49)
+> 2 * dim(USArrests)[1] * sum(what$eig[3:49])
+\end{verbatim}
+\onehalfspacing
+
+We should find that this give the same value as a direct comparison of the distance matrices formed from the data and the $q=2$ dimensional representation.  (Note that we convert the distance matrices into ordinary matrices, and then we carry out vectorised operations to take squares, subtract elementwise and sum)
+
+\singlespacing
+\begin{verbatim}
+what <- cmdscale(spot, eig = TRUE, k = 2)
+delta <- as.matrix(dist(USArrests, upper = TRUE))
+d <- as.matrix(dist(what$points, upper = TRUE))
+sum(as.vector(delta)^2 - as.vector(d)^2)
+\end{verbatim}
+\onehalfspacing
+
+
+This has clear analogies with the percent trace measure used in principal components analysis:
+
+\begin{equation}
+\frac{\sum_{i=1}^{q} \lambda_{i}}{\sum_{i=1}^{p} \lambda_{i}}
+\end{equation}
+
+\singlespacing
+\begin{verbatim}
+> what <- cmdscale(spot, eig = TRUE, k = 4)
+> what$eig / sum(what$eig)
+[1] 0.9655342206 0.0278173366 0.0057995349 0.0008489079
+\end{verbatim}
+\onehalfspacing
+
+
+Considerable work has been carried out on Goodness of fit measures for scaling problems.   If $\boldsymbol{\Delta}$ is based on a measure other than the Euclidean then our reconstructed $\boldsymbol{Q}$ may not be positive semi-definite (in other words we find some negative eigenvalues and imaginary co-ordinates).   If $\boldsymbol{Q} = \sum_{i=1}^{q} \lambda_{i} \boldsymbol{e}_{i} \boldsymbol{e}_{i}^{T}$ then \cite{Mardia:1978} suggests the discrepancy measure:
+
+\begin{equation}
+\varphi \prime = trace(\boldsymbol{Q} - \hat{\boldsymbol{Q}}^{2})
+\end{equation}.   Following \cite{Eckart+Young:1936} we would use:
+
+\begin{equation}
+\frac{\sum_{i=1}^{q} \lambda_{i}}{\sum_{i=1}^{p} |\lambda_{i}|}
+\end{equation}
+
+or following \cite{Mardia:1978} we would use:
+
+\begin{equation}
+\frac{\sum_{i=1}^{q} \lambda_{i}^{2}}{\sum_{i=1}^{p} \lambda_{i}^{2}}
+\end{equation}
+
+
+\subsection{Sammon Mapping}
+
+Classical metrical scaling works on orthogonal projections, and has the attractive property of an exact analytical solution.   This is quite restrictive, \cite{Sammon:1969} suggested minimising the discrepancy measure:
+
+\begin{displaymath}
+\varphi \prime \prime =  \sum_{i=1}^{n} \sum_{j=1}^{n} (\delta_{ij} - d_{ij})^{2}
+\end{displaymath}
+
+This has no analytical solution, and numerical methods must be used.   But it is worth noting that a set of disparities are generated:
+
+\begin{equation}
+\label{rsssammon}
+\hat{d}_{ij} = a + b \delta_{ij}
+\end{equation}
+
+This should look like a reasonably familiar formula, and you should have guessed that residual sums of squares from \ref{rsssammon} yields another discrepancy measure.   This measure can (should / must) be normalised with reference to its size $\sum_{i=1}^{n} \sum_{j=1}^{n} d_{ij}^{2}$, giving what is called the \textbf{st}andardised \textbf{re}sidual \textbf{s}um of \textbf{s}quares:
+
+\begin{equation}
+STRESS = \left( \frac{\sum_{i=1}^{n} \sum_{j=1}^{n} (d_{ij} - \hat{d}_{ij})^{2}}{\sum_{i=1}^{n} \sum_{j=1}^{n} d_{ij}^{2}} \right) ^{\frac{1}{2}}
+\end{equation}
+
+
+\begin{equation}
+SSTRESS = \left( \frac{\sum_{i=1}^{n} \sum_{j=1}^{n} (d_{ij}^{2} - \hat{d}_{ij}^{2})^{2}}{\sum_{i=1}^{n} \sum_{j=1}^{n} d_{ij}^{4}} \right) ^{\frac{1}{2}}
+\end{equation}
+
+Normalisation means that both these measures take on values between 0 and 1, lower values indicate better fit.   Values below 0.1 are usually considered adequate, but it may be worth noting that \cite{Kruskal:1964a} suggests values below 0.2 give a poor fit, values below 0.1 a fair fit, values below 0.05 a good fit, values below 0.025 an excellent fit.
+
+%\sum_{i=1}^{q} \lambda_{i}
+%\sum_{i=1}^{n} \lambda_{i}
+%abs(v) max(v,0)
+
+%F: a numeric vector of length 2, equal to say (g.1,g.2), where
+%          g.i = (sum{j=1..k} lambda[j]) / (sum{j=1..n} T.i(lambda[j])),
+%          where lambda[j] are the eigenvalues (sorted decreasingly),
+%          T.1(v) = abs(v), and T.2(v) = max(v, 0). 
+
+
+
+
+%Iff $d_{ij} = d_{ik} + d_{kj}$ then principal co-ordinates also acts as a method of metric scaling.   You will be given further directed reading on this topic in the relevant lecture.
+
+%principle co-ordinates analysis wk 104-109
+
+
+
+%\section{Modern approaches}
+%\label{modernmds}
+
+
+
+
+
+
+
+
+
+%%% Local Variables: ***
+%%% mode:latex ***
+%%% TeX-master: "../book.tex"  ***
+%%% End: ***

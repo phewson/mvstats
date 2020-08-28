@@ -1,0 +1,77 @@
+
+S-PLUS instructions for Section 6.2
+***********************************
+
+last updated: june 18, 1997
+
+
+In this unit we will show how to do the calculations for Examples 6.2.2
+and 6.2.3. This material is rather easy to program, and the student
+who feels comfortable with S-PLUS should try to reproduce the
+results of the two examples before looking into the following
+instructions.
+
+As usual, read the data first. Then transform the raw data to the three
+contrasts of Example 6.2.2:
+
+> X <- matrix(scan("c:\\multidat\\tab62_2.dat"), ncol = 4, byrow = T)
+> north <- X[, 1]
+> east <- X[, 2]
+> south <- X[, 3]
+> west <- X[, 4]
+> y1 <- north - east
+> y2 <- east - south
+> y3 <- south - west
+> Y <- cbind(y1, y2, y3)
+> Y
+
+The matrix Y just displayed should have 3 columns and 28 rows. A more
+elegant way to compute Y consists of defining a matrix of contrasts A
+
+> A <- matrix(c(1, -1, 0, 0, 0, 1, -1, 0, 0, 0, 1, -1), ncol = 4, byrow = T)
+
+and obtaining Y as a matrix product:
+
+> Y <- X %*% t(A)
+
+Because the data matrix X has variables as columns and observations as
+rows, the transformation (9) is a postmultiplication by t(A) rather
+than a pre-multiplication by A.
+
+Next, we compute the multivariate standard distance of the mean of the
+Y-variables from 0, transform it to T square and to an F-variable, and
+display the results:
+
+> ybar <- apply(Y, 2, mean)
+> S <- var(Y)
+> d <- sqrt(t(ybar) %*% solve(S) %*% ybar)
+> n <- dim(Y)[1]
+> p <- dim(Y)[2]
+> tsquare <- n * d^2
+> fstat <- ((n-p) * tsquare) / ((n-1) * p)
+> cat("standard distance:", d, "\n")
+> cat("Tsquare:", tsquare, "\n")
+> cat("F-statistic:", fstat, "\n")
+> cat("degrees of freedom:", p, n-p, "\n")
+
+Quantiles of the F distribution are directly available in S-PLUS; for
+example, the 95% quantile of the F distribution with df1 and df2 degrees
+of freedom can be obtained with the command:
+
+> qf(.95, df1, df2)
+
+Alternatively, the function pf allows us to evaluate the complement of
+the cumulative distribution function. We can get a p-value for the test
+as follows:
+
+> pvalue <- 1 - pf(fstat, p, n-p)
+> cat("p-value=", pvalue, "\n")
+
+For Example 6.2.3, we can do the transformation by
+
+> A <- matrix(c(1, 0, -1, 0, 0, 1, 0, -1, -1, 1, -1, 1), ncol = 4, 
+byrow = T)
+> V <- X %*% t(A)
+
+and then follow the same instructions as before, using the matrix V
+instead of Y.

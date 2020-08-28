@@ -1,0 +1,114 @@
+
+S-PLUS instructions for Section 5.5
+***********************************
+
+last updated: june 18, 1997
+
+
+The computation of plug-in and normal theory error rates is quite
+straightforward in S-PLUS. We illustrate it for Example 5.5.5 (fleabeetles).
+We are going to use the procedure LDA from Section 5.4 here. 
+
+We start by reading data, as usual:
+
+> rawdat <- matrix(scan("c:\\multidat\\tab53_2.dat"), ncol = 5, byrow = T)
+> x <- rawdat[, 1]
+> Y <- rawdat[, 2:5]
+
+The group codes (in the x-vector) are 1 and 2. Thus we can use LDA
+with x as the group variable:
+
+> results <- LDA(Y, x, 0)
+
+Note that the "0" in the call to LDA causes the program to use relative
+sample sizes as prior probabilities. Look at posterior probabilities
+and predicted group membership:
+
+> cbind(x, 100 * results$post1, results$xhat)
+
+This should display the same results as the corresponding columns in
+Table 5.5.1. For easy identification of observations, let's create a
+vector of sequential observation numbers:
+
+> N <- length(x)
+> obs <- rep(1:N, 1)
+
+Now identify the observations that have been misclassified:
+
+> misclas <- obs[x != results$xhat]
+> misclas
+
+The vector misclas contains indices of all misclassified observations. 
+What happens if NO observation has been misclassified? Try it out, for
+instance with the midge example. Unless the number of misclassified
+observations is zero, the plug-in error rate is
+
+> plugrat <- length(misclas) / N
+> cat("plug-in error rate is", 100 * plugrat, "percent\n")
+
+The normal theory error rate is straightforward to compute, but since
+we used relative sample sizes in Example 5.5.5, we need to compute the
+sample sizes first:
+
+> N1 <- length(x[x == 1])
+> N2 <- length(x[x == 2])
+> prior1 <- N1 / (N1 + N2)
+> prior2 <- 1 - prior1
+
+Now we can apply formula (10). Recall that we have already computed
+the standard distance d in the call to LDA. The cdf of the normal
+normal distribution is computed with the S-PLUS function "pnorm".
+
+> part2 <- (1 / results$d) * log(prior2 / prior1)
+> normrat <- prior1 * pnorm(-results$d/2 + part2) + prior2 *
+  pnorm(-results$d/2 - part2)
+> cat("normal theory error rate is", 100*normrat, " percent\n")
+
+
+The computation of the leave-one-out error rate requires a loop over
+all N observations; as usual we provide a program that you can store
+in a file and execute in S-PLUS. It is a good idea to copy the LDA
+procedure into the same file so you don't have to worry about LDA being
+loaded prior to the execution of the program.
+
+
+*****************************  CUT HERE  ****************************** 
+
+rawdat <- matrix(scan("c:\\multidat\\tab53_2.dat"), ncol = 5, byrow = T)
+							      # read data
+
+x <- rawdat[, 1]                         # vector with actual group codes
+Y <- rawdat[, 2:5]                  # data matrix used for discrimination
+N <- length(x)                             # total number of observations
+xhatleav <- c(rep(0, N))           # vector for leave-one-out assignments
+p1leave <- c(rep(1, N))       # vector for leave-one-out posterior prob's
+i <- 1
+while (i <= N){			  # start loop for leave-one-out analysis
+cat("i =", i, "\n")    # display number of left out observation on screen
+xx <- x                        # copy group code vector into a new vector
+xx[i] <- 0                # change group of i-th observation to "unknown"
+
+results <- LDA(Y, xx, 0)			     # call LDA procedure
+ 
+xhatleav[i] <- results$xhat[i]
+			 # predicted group membership of i-th observation
+
+p1leave[i] <- results$post1[i]
+			  # posterior probability of i-th obs. in group 1
+
+i <- i + 1
+}					      # end of leave-one-out loop
+
+results <- LDA(Y, x, 0)			     # call LDA procedure with all
+                         # observations classified, for plug-in error rate
+
+
+post1 <- 100 * results$post1
+			      # convert posterior probabilities to percent
+
+p1leave <- 100 * p1leave      # convert posterior probabilities to percent
+
+cbind(rep(1:N, 1), x, results$ldf, post1, results$xhat, p1leave, xhatleav)
+						      # create Table 5.5.1
+
+***************************  CUT HERE  ***********************************

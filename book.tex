@@ -1,0 +1,148 @@
+\documentclass[12pt]{tufte-book}
+\usepackage{Sweave}
+\usepackage{natbib}
+\usepackage{setspace}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{mathrsfs}
+\usepackage{makeidx}
+\usepackage{color}
+\usepackage{tikz}
+\usetikzlibrary{positioning,calc,shapes,decorations.pathreplacing,shapes}
+\newcommand{\R}{\textbf{\color{blue}{R}\ }}
+\newtheorem{definition}[section]{Definition}
+\newtheorem{theorem}[section]{Theorem}
+\renewcommand{\textfraction}{0.05}
+\makeindex
+
+\renewcommand{\maketitlepage}{%
+\tikz[remember picture,overlay] \node[opacity=1,inner sep=0pt] at
+(current page.center){\includegraphics[width=\paperwidth,height=\paperheight]{images/pexels-cottonbro-4646235.jpg}};
+
+\vspace*{0.7\textheight}
+\begin{figure}
+\begin{center}
+\begin{tikzpicture}[scale=2, transform canvas={scale=2}]
+  \node[draw, fill=black, fill opacity=0.7, text=black, text opacity = 1,
+        rectangle split, rectangle split parts=2, line width=0,
+        align=center] (a) {
+\Large{\color{green} Multivariate Statistics with R}\\
+\large{\color{white}\textit{Paul J. Hewson}}
+\nodepart{second}
+\includegraphics[width=0.1\textwidth, trim=25pt 25pt 25pt 25pt]{images/logo.png}
+};
+\draw[ultra thick] (a.text split west) -- (a.text split east);
+\end{tikzpicture}
+\end{center}
+\end{figure}
+%Photo by cottonbro from Pexels
+\thispagestyle{empty}%
+
+}
+
+
+\begin{document}
+\maketitle
+\frontmatter
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{12pt}
+
+\pagestyle{fancy}
+\lhead{Multivariate Statistics with \R}
+\chead{}
+\rhead{\textbf{Chapter \thechapter}}
+\lfoot{STAT3401}
+\cfoot{Paul Hewson}
+\rfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\sffamily
+
+\tableofcontents
+
+\include{chapters/intro}
+
+\mainmatter
+
+\include{chapters/visualising}
+
+
+\include{chapters/distance-woven}
+
+
+\include{chapters/mvn}
+
+
+\include{chapters/CompMeans}
+
+
+
+%\chapter{Principal Component Analysis}
+%    \begin{itemize}
+%    \item Properties of eigen decompositions
+%    \item Results of principal components (scree plot, loadings, scores, biplots)
+%    \item Bootstrapping principal components
+%    \end{itemize}
+
+
+\include{chapters/prcompchapter}
+
+%\chapter{Contemporary topics in projection}   
+%\label{projection}
+\include{chapters/pcaUpdate}
+
+An outline of probabilistic PCA, Independence Components Analysis, 
+Dimension reduction regression (SIR, PLS, Redundancy Analysis)
+
+
+
+
+\include{chapters/cancor}
+
+ 
+
+
+\include{chapters/FactAnal}
+
+
+
+\chapter{Contemporary topics in latent variable models}
+\label{latentvar}
+
+.   Structural equation models, 
+Bayesian factor analysis, sparsity priors
+
+
+\include{chapters/discriminant}
+
+
+
+\include{chapters/cluster}
+
+\include{chapters/pco}
+
+\chapter{Contemporary topics in classification}
+\label{modernclassification}
+
+   Trees (supervised classification), 
+thresholding, (large p small n classification), other methods of unsupervised clustering.
+
+
+\appendix
+\include{chapters/rintro}
+
+\include{chapters/matrices}
+
+\chapter{Appendix: data, functions used in this book}
+
+
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliographystyle{tufte}
+\bibliography{refs/mvmbib,refs/glmm}
+
+\printindex
+
+
+\end{document}

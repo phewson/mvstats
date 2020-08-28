@@ -1,0 +1,276 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\title{Chapter 8}
+\author{Flury Bee}
+
+
+\begin{document}
+\maketitle
+
+
+<<fig = FALSE, echo = FALSE>>=
+
+#*****************************  CUT HERE  ******************************
+
+  
+
+lpc <- function(X)
+{
+
+#  procedure LPC  
+#  procedure LPC  
+
+# input:     X        N by p  data matrix
+
+# output:    B        orthogonal p by p matrix, with eigenvectors of the
+#                     covariance matrix of X as columns
+#            eig$values   N-vector, with eigenvalues in descending order
+#            stdeB    p by p matrix, containing normal theory standard
+#                      errors of the coefficients in B
+#            stdelam  normal theory standard errors of the eigenvalues
+
+
+#  +++ NOTE: the calculation of standard errors will fail if any two
+#         eigenvalues are equal, or if any eigenvalue is zero       +++   
+
+p <- dim(X)[2]                                          # number of variables
+N <- dim(X)[1]                                          # number of observations 
+eig <- eigen(var(X))                            # eigenvalues and eigenvectors 
+Ones <- matrix(1, p, p)
+Lambda <- Ones * eig$values
+Q <- (t(Lambda) - Lambda + diag(p))^(-2) - diag(p)      # nifty trick
+Theta1 <- sweep(Q, 2, eig$values, FUN="*") 
+Theta <- Theta1 * eig$values            # compute matrix of theta-coefficients
+stdeB <- matrix(0,p,p)                     # open matrix for standard errors 
+h <- 1
+while (h <= p)                             # start loop over eigenvectors 
+{
+V <- eig$vectors %*% (Theta[, h] * t(eig$vectors))
+                                        # V-matrix for h-th eigenvector 
+
+stdeB[, h] <- sqrt(diag(V)/N)      # standard errors for h-th eigenvector 
+h <- h + 1 
+}                                           # end of loop 
+stdelam <- sqrt(2/N) * eig$values            # standard errors of eigenvalues 
+results <- list("eigenvectors" = eig$vectors, "eigenvalues" = eig$values,
+"stdeB" = stdeB, "stdelam" = stdelam)
+results
+}
+
+#  end of procedure LPC  
+#  end of procedure LPC  
+
+##*****************************  CUT HERE  ******************************
+@ 
+
+
+
+\section{S-PLUS instructions for Chapter 8}
+%*********************************
+
+\textit{last updated: june 22, 1997}
+
+
+The main computational ingredient of linear principal component analysis
+is the extraction of eigenvectors and eigenvalues of a symmetric matrix.
+The numerical methods available for computing eigenvectors and eigenvalues
+are by themselves highly interesting, but since we are mostly concerned
+about the statistical aspects, we will simply use the highly efficient
+procedure available in S-PLUS and not worry about details of the iterative
+calculations. The particular S-PLUS function we will use is called EIGEN;
+it computes eigenvalues and associated (normalized) eigenvectors of a
+symmetric matrix. It would be a good idea to familiarize yourself with
+EIGEN before starting this tutorial.
+
+We will use the turtle shell example for illustration. First, read the
+data using
+
+<<fig = FALSE>>=
+##> rawdat <- matrix(scan("c:\\multidat\\tab1_4.dat"), ncol = 4, byrow = T)
+rawdat <- matrix(scan("c:/work/book/flury/multidat/tab1_4.dat"), ncol = 4, byrow = T)
+rawdat <- turtle.carapace
+@ 
+
+We want to use the data of the 24 male turtles only, and do principal
+component analysis on log-transformed data. For numerical convenience,
+the log-transformed data are also multiplied by 10.
+
+<<fig = FALSE>>=
+X <- 10 * log(rawdat[1:24, 2:4])
+@ 
+
+Compute the usual sample statistics and, for later use, initialize
+the values of p (number of variables) and N (number of observations):
+
+<<fig = FALSE>>=
+xbar <- apply(X, 2, mean)
+S <- var(X)
+p <- dim(X)[2]
+N <- dim(X)[1]
+@ 
+
+Next follows the computation of eigenvectors and eigenvalues:
+
+<<fig = FALSE>>=
+eig <- eigen(S, symm = T)
+@ 
+Display eig\$values and eig\$vectors. In the spectral decomposition
+theorem, it is convenient to use a diagonal matrix with eigenvalues as
+diagonal entries; for numerical purposes it is easier to store the
+eigenvalues in a vector (eig\$values). The columns of B are eigenvectors of
+S in descending order.
+The following are simple manipulations with data matrices; the only
+difficulty is that observations are rows of data matrices, while in
+the theoretical notation observations are column vectors. Make sure
+you have understood the contents of the software instructions for
+Section 4.2 before continuing.
+
+By Definition 8.3.1, the transformation from original variables to
+principal components is achieved by
+
+<<fig = FALSE>>=
+U <- sweep(X, 2, t(xbar)) %*% eig$vectors
+@ 
+
+Using
+
+<<fig = FALSE>>=
+apply(U, 2, mean)
+var(U)
+@ 
+you may verify that the principal components are centered at zero, and
+have a diagonal covariance matrix. The eigenvalues in the vector eig\$values
+should appear on the diagonal of the covariance matrix.  Consider now
+computing a two-dimensional principal component approximation. Let A2
+be the matrix containing the first two eigenvectors as columns, i.e.,
+
+<<fig = FALSE>>=
+A2 <- eig$vectors[, c(1,2)]
+@ 
+
+By Definition 8.3.1, the two-dimensional principal component approximation
+of X is
+
+<<fig = FALSE>>=
+Y2 <- sweep(sweep(X, 2, t(xbar)) %*% A2 %*% t(A2), 2, t(xbar), FUN ="+")
+@ 
+Verify that Y2 has the same mean vector as X. The covariance matrix of Y2
+is most easily obtained using the var operator; but you may find it
+instructive to verify the numerical result using Equation 5 (Property 3)
+from Section 8.4.
+
+The preceding calculation of the two-dimensional principal component
+approximation is not really what you would want to do in practical
+applications with a large number of variables. Rather, you would have
+only the first two principal components stored, and you would want to
+construct Y2 using these rather than the original data X. This would
+work as follows: from the original data, compute the first two
+principal components by
+
+<<fig = FALSE>>=
+U2 <- sweep(X, 2,  t(xbar)) %*% A2
+@ 
+
+Then, using equation (34) from Section 8.3, the two-dimensional
+principal component approximation can be computed as
+
+<<fig = FALSE>>=
+Y2 <-  sweep(U2 %*% t(A2), 2, t(xbar), FUN = "+")
+@ 
+
+Verify that this gives you the same results as the first method used.
+
+As seen in Section 8.6, we will often be interested in computing
+standard errors associated with the coefficients of the eigenvectors.
+Using equation (6), it is not difficult to write a program to do
+these calculations. Interestingly, it is possible to compute the
+standard errors for a given eigenvector without using any loops, but
+this requires some nifty matrix calculations. By equations (2) or (4),
+we need a matrix of theta-coefficients. First, compute
+
+<<fig = FALSE>>=
+Ones <- matrix(1, p, p)
+Lambda <- Ones * eig$values
+t(Lambda) - Lambda
+@ 
+
+This operation yields a square matrix
+with value eig\$values[i]-eig\$values[j] in the [i,j]-th position. We
+will need the inverse of the square of each entry (except for the
+diagonal entries which are zero). For any matrix A, the formula A^(-2)
+in S-PLUS will compute a matrix of elementwise squared inverses. But
+
+<<fig = FALSE>>=
+(t(Lambda) - Lambda)^(-2)
+@ 
+will give you a matrix with "Inf" on the diagonal because the diagonal
+entries are zero. Here is the trick:
+
+<<fig = FALSE>>=
+Q <- (t(Lambda) - Lambda + diag(p))^(-2) - diag(p)
+@ 
+When you display Q, you will now see a matrix with zeros on the main
+diagonal, and entries  1 / (eig$values[i] - eig\$values[j])^2 else. This
+calculation will fail if any two entries of eig$values are equal, or if
+any entry of eig\$values is exactly zero.
+
+To get the matrix of theta coefficients, you need to premultiply
+and postmultiply Q by a diagonal matrix with the eig\$values on the
+diagonal. Since eig$values is a vector rather than a matrix, this is
+achieved by
+
+<<fig = FALSE>>=
+Theta1 <- sweep(Q, 2, eig$values, FUN="*")
+Theta <- Theta1 * eig$values
+Theta
+@ 
+Voilà!
+
+Let's compute the standard errors for the first eigenvector. One way to
+do this would be to put the entries in the first column of Theta on the
+diagonal matrix, say D, and compute \verb+B %*% D %*% t(B)+. A more direct
+method is
+
+<<fig = FALSE>>=
+V <- eig$vectors %*% (Theta[, 1] * t(eig$vectors))
+@ 
+This matrix V corresponds to equation (1) or (3) in Section 8.6, with
+index h=1. The standard errors of the coefficients of the first
+eigenvector are the square roots of the diagonal entries of V/N:
+
+<<fig = FALSE>>=
+stdeb1 <- sqrt(diag(V/N))
+@ 
+Display the results to verify that you got the same numerical values as
+those given in Example 8.6.1. Finally, the computation of standard errors
+of the eigenvalues is very simple, according to equation (7):
+
+<<fig = FALSE>>=
+stdelam <- sqrt(2/N) * eig$values
+@ 
+
+The above calculation of standard errors of eigenvector coefficients
+can be done separately for each eigenvector. It will then be more
+convenient to put these calculations into a loop and store the program
+as a S-PLUS function, such as function LPC (Linear Principal
+Components) given below. Call the procedure using
+
+<<fig = FALSE>>=
+results <- lpc(X)
+@ 
+and display the results:
+
+<<FIG = FALSE>>=
+cat("eigenvectors:\n"); results[1]
+cat("eigenvalues:\n"); results[2]
+cat("standard errors for eigenvector coefficients:\n"); results[3]
+cat("standard errors for eigenvalues:\n"); results[4]
+@ 
+
+Apply this procedure also to the head dimension data of Example 8.6.2,
+to verify the numerical results given in Table 8.6.1.
+
+
+\end{document}

@@ -1,0 +1,348 @@
+This is pdfeTeX, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=pdflatex 2007.9.7)  2 OCT 2007 17:53
+entering extended mode
+**\nonstopmode\input{MatrixExercisesSolutions.tex}
+(./MatrixExercisesSolutions.tex
+(/usr/share/texmf-tetex/tex/latex/base/article.cls
+Document Class: article 2004/02/16 v1.4f Standard LaTeX document class
+(/usr/share/texmf-tetex/tex/latex/base/size10.clo
+File: size10.clo 2004/02/16 v1.4f Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(/usr/share/texmf-tetex/tex/latex/amsmath/amsmath.sty
+Package: amsmath 2000/07/18 v2.13 AMS math features
+\@mathmargin=\skip43
+
+For additional information on amsmath, use the `?' option.
+(/usr/share/texmf-tetex/tex/latex/amsmath/amstext.sty
+Package: amstext 2000/06/29 v2.01
+
+(/usr/share/texmf-tetex/tex/latex/amsmath/amsgen.sty
+File: amsgen.sty 1999/11/30 v2.0
+\@emptytoks=\toks14
+\ex@=\dimen103
+))
+(/usr/share/texmf-tetex/tex/latex/amsmath/amsbsy.sty
+Package: amsbsy 1999/11/29 v1.2d
+\pmbraise@=\dimen104
+)
+(/usr/share/texmf-tetex/tex/latex/amsmath/amsopn.sty
+Package: amsopn 1999/12/14 v2.01 operator names
+)
+\inf@bad=\count87
+LaTeX Info: Redefining \frac on input line 211.
+\uproot@=\count88
+\leftroot@=\count89
+LaTeX Info: Redefining \overline on input line 307.
+\classnum@=\count90
+\DOTSCASE@=\count91
+LaTeX Info: Redefining \ldots on input line 379.
+LaTeX Info: Redefining \dots on input line 382.
+LaTeX Info: Redefining \cdots on input line 467.
+\Mathstrutbox@=\box26
+\strutbox@=\box27
+\big@size=\dimen105
+LaTeX Font Info:    Redeclaring font encoding OML on input line 567.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 568.
+\macc@depth=\count92
+\c@MaxMatrixCols=\count93
+\dotsspace@=\muskip10
+\c@parentequation=\count94
+\dspbrk@lvl=\count95
+\tag@help=\toks15
+\row@=\count96
+\column@=\count97
+\maxfields@=\count98
+\andhelp@=\toks16
+\eqnshift@=\dimen106
+\alignsep@=\dimen107
+\tagshift@=\dimen108
+\tagwidth@=\dimen109
+\totwidth@=\dimen110
+\lineht@=\dimen111
+\@envbody=\toks17
+\multlinegap=\skip44
+\multlinetaggap=\skip45
+\mathdisplay@stack=\toks18
+LaTeX Info: Redefining \[ on input line 2666.
+LaTeX Info: Redefining \] on input line 2667.
+)
+(/usr/share/texmf-tetex/tex/latex/amsfonts/amssymb.sty
+Package: amssymb 2002/01/22 v2.2d
+
+(/usr/share/texmf-tetex/tex/latex/amsfonts/amsfonts.sty
+Package: amsfonts 2001/10/25 v2.2f
+\symAMSa=\mathgroup4
+\symAMSb=\mathgroup5
+LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
+(Font)                  U/euf/m/n --> U/euf/b/n on input line 132.
+))
+(./MatrixExercisesSolutions.aux)
+\openout1 = `MatrixExercisesSolutions.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Try loading font information for U+msa on input line 8.
+
+(/usr/share/texmf-tetex/tex/latex/amsfonts/umsa.fd
+File: umsa.fd 2002/01/19 v2.2g AMS font definitions
+)
+LaTeX Font Info:    Try loading font information for U+msb on input line 8.
+
+(/usr/share/texmf-tetex/tex/latex/amsfonts/umsb.fd
+File: umsb.fd 2002/01/19 v2.2g AMS font definitions
+)
+Overfull \hbox (78.99655pt too wide) in paragraph at lines 54--54
+ []\OT1/cmtt/m/n/10 Error in solve.default(A) : Lapack routine dgesv: system is
+ exactly singular[] 
+ []
+
+[1
+
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 62.
+
+(/usr/share/texmf-tetex/tex/latex/base/omscmr.fd
+File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 62.
+
+Overfull \hbox (32.74715pt too wide) in paragraph at lines 75--75
+ []            \OT1/cmtt/m/n/10 pop15       pop75         sr        dpi        
+ddpi[] 
+ []
+
+
+Overfull \hbox (32.74715pt too wide) in paragraph at lines 75--75
+ []\OT1/cmtt/m/n/10 pop15  1.00000000 -0.90847871 -0.4555381 -0.7561881 -0.0478
+2569[] 
+ []
+
+
+Overfull \hbox (32.74715pt too wide) in paragraph at lines 75--75
+ []\OT1/cmtt/m/n/10 pop75 -0.90847871  1.00000000  0.3165211  0.7869995  0.0253
+2138[] 
+ []
+
+
+Overfull \hbox (32.74715pt too wide) in paragraph at lines 75--75
+ []\OT1/cmtt/m/n/10 sr    -0.45553809  0.31652112  1.0000000  0.2203589  0.3047
+8716[] 
+ []
+
+
+Overfull \hbox (32.74715pt too wide) in paragraph at lines 75--75
+ []\OT1/cmtt/m/n/10 dpi   -0.75618810  0.78699951  0.2203589  1.0000000 -0.1294
+8552[] 
+ []
+
+
+Overfull \hbox (32.74715pt too wide) in paragraph at lines 75--75
+ []\OT1/cmtt/m/n/10 ddpi  -0.04782569  0.02532138  0.3047872 -0.1294855  1.0000
+0000[] 
+ []
+
+[2] [3]
+Underfull \hbox (badness 10000) in paragraph at lines 184--185
+
+ []
+
+
+Overfull \hbox (5.4972pt too wide) in paragraph at lines 213--213
+ []           \OT1/cmtt/m/n/10 [,1]       [,2]       [,3]         [,4]        [
+,5][] 
+ []
+
+
+Overfull \hbox (5.4972pt too wide) in paragraph at lines 213--213
+ []\OT1/cmtt/m/n/10 [1,] -0.2777688  0.6861076 -0.1803411 -0.008575869  0.64769
+164[] 
+ []
+
+
+Overfull \hbox (5.4972pt too wide) in paragraph at lines 213--213
+ []\OT1/cmtt/m/n/10 [2,] -0.5561121 -0.1831683  0.2691167  0.763621722  0.04058
+118[] 
+ []
+
+
+Overfull \hbox (5.4972pt too wide) in paragraph at lines 213--213
+ []\OT1/cmtt/m/n/10 [3,] -0.4812999 -0.3654121  0.4287131 -0.604767532  0.29203
+728[] 
+ []
+
+
+Overfull \hbox (5.4972pt too wide) in paragraph at lines 213--213
+ []\OT1/cmtt/m/n/10 [4,] -0.5632681  0.3692665 -0.1701835 -0.225349857 -0.68310
+049[] 
+ []
+
+
+Overfull \hbox (5.4972pt too wide) in paragraph at lines 213--213
+ []\OT1/cmtt/m/n/10 [5,] -0.2542899 -0.4752074 -0.8260121 -0.016792704  0.16412
+387[] 
+ []
+
+[4]
+Overfull \hbox (10.74715pt too wide) in paragraph at lines 213--213
+ []\OT1/cmtt/m/n/10 [1] 2330.125258  814.467485  545.200401    3.584549    1.40
+3159[] 
+ []
+
+
+Overfull \hbox (31.74696pt too wide) in paragraph at lines 213--213
+ []            \OT1/cmtt/m/n/10 [,1]         [,2]        [,3]         [,4]     
+    [,5][] 
+ []
+
+
+Overfull \hbox (31.74696pt too wide) in paragraph at lines 213--213
+ []\OT1/cmtt/m/n/10 [1,] -0.05483952  0.735862357  0.67335086  0.007708220  0.0
+45148845[] 
+ []
+
+
+Overfull \hbox (31.74696pt too wide) in paragraph at lines 213--213
+ []\OT1/cmtt/m/n/10 [2,]  0.50030899  0.604193500 -0.61998120 -0.013591715  0.0
+08928181[] 
+ []
+
+
+Overfull \hbox (31.74696pt too wide) in paragraph at lines 213--213
+ []\OT1/cmtt/m/n/10 [3,]  0.86393142 -0.303609773  0.40160604 -0.008022325  0.0
+09582822[] 
+ []
+
+
+Overfull \hbox (31.74696pt too wide) in paragraph at lines 213--213
+ []\OT1/cmtt/m/n/10 [4,]  0.01284463  0.035080362  0.02616497  0.195179471 -0.9
+79706462[] 
+ []
+
+
+Overfull \hbox (31.74696pt too wide) in paragraph at lines 213--213
+ []\OT1/cmtt/m/n/10 [5,]  0.01187679 -0.006876112 -0.01580852  0.980610251  0.1
+94846828[] 
+ []
+
+
+Overfull \hbox (55.55182pt too wide) detected at line 238
+[][][] \OT1/cmr/m/n/10 = [] [] = [] = 3
+ []
+
+
+Overfull \hbox (55.2509pt too wide) detected at line 243
+[][][] \OT1/cmr/m/n/10 = [] [] = [] = 0
+ []
+
+
+Overfull \hbox (47.15596pt too wide) detected at line 248
+[][][] \OT1/cmr/m/n/10 = [] [] = [] = \OMS/cmsy/m/n/10 ^^@\OT1/cmr/m/n/10 7
+ []
+
+[5] [6] [7]
+Overfull \hbox (7.78291pt too wide) in paragraph at lines 367--369
+[]$ \OT1/cmr/m/n/10 is an eigen-vec-tor. Given the length of this vec-tor ($[]$
+),
+ []
+
+[8]
+Overfull \hbox (22.76912pt too wide) in paragraph at lines 409--410
+[]\OT1/cmr/m/n/10 Eigenvalues are $6\OML/cmm/m/it/10 ; \OT1/cmr/m/n/10 1$. Pos-
+si-ble eigen-vec-tors are $[]$ and $[]$ 
+ []
+
+
+Overfull \hbox (22.76912pt too wide) in paragraph at lines 411--412
+[]\OT1/cmr/m/n/10 Eigenvalues are $6\OML/cmm/m/it/10 ; \OT1/cmr/m/n/10 1$. Pos-
+si-ble eigen-vec-tors are $[]$ and $[]$ 
+ []
+
+[9]
+Overfull \hbox (11.2225pt too wide) in paragraph at lines 450--454
+[]\OT1/cmr/m/n/10 Eigenvalues $9\OML/cmm/m/it/10 ; \OT1/cmr/m/n/10 4\OML/cmm/m/
+it/10 ; \OT1/cmr/m/n/10 1$, with pos-si-ble eigen-vec-tors: $[] \OML/cmm/m/it/1
+0 ; [] ; []$ 
+ []
+
+
+Overfull \hbox (37.61145pt too wide) in paragraph at lines 455--462
+[]\OT1/cmr/m/n/10 Eigenvalues $18\OML/cmm/m/it/10 ; \OT1/cmr/m/n/10 9\OML/cmm/m
+/it/10 ; \OT1/cmr/m/n/10 9$, which pos-si-ble eigen-vec-tors: $[] \OML/cmm/m/it
+/10 ; [] ; []$
+ []
+
+
+Overfull \hbox (44.72285pt too wide) detected at line 477
+[] [] [] \OT1/cmr/m/n/10 =
+ []
+
+[10]
+Overfull \hbox (22.30614pt too wide) in paragraph at lines 484--487
+[]\OT1/cmr/m/n/10 This has eigen-val-ues $1\OML/cmm/m/it/10 :\OT1/cmr/m/n/10 44
+6\OML/cmm/m/it/10 ; \OT1/cmr/m/n/10 0\OML/cmm/m/it/10 :\OT1/cmr/m/n/10 862\OML/
+cmm/m/it/10 ; \OT1/cmr/m/n/10 0\OML/cmm/m/it/10 :\OT1/cmr/m/n/10 692$ with pos-
+si-ble eigen-vec-tors $[]$,
+ []
+
+
+Overfull \hbox (3.84158pt too wide) in paragraph at lines 493--502
+[]\OT1/cmr/m/n/10 If we first form $[]$ by mean-centering $[]$, we find $[] = [
+]$.
+ []
+
+
+Overfull \hbox (8.32077pt too wide) in paragraph at lines 493--502
+\OT1/cmr/m/n/10 We then need to form the sum of squares and cross-product ma-tr
+ix $[] =
+ []
+
+[11] [12] (./MatrixExercisesSolutions.aux) ) 
+Here is how much of TeX's memory you used:
+ 1161 strings out of 94500
+ 12884 string characters out of 1175789
+ 67744 words of memory out of 1000000
+ 4349 multiletter control sequences out of 10000+50000
+ 14168 words of font info for 54 fonts, out of 500000 for 2000
+ 580 hyphenation exceptions out of 8191
+ 28i,12n,24p,596b,396s stack positions out of 1500i,500n,5000p,200000b,5000s
+PDF statistics:
+ 89 PDF objects out of 300000
+ 0 named destinations out of 131072
+ 1 words of extra memory for PDF output out of 65536
+</usr/share/texmf-tetex/fonts/type1
+/public/tt2001/fmex7.pfb></usr/share/texmf-tetex/fonts/type1/bluesky/cm/cmr5.pf
+b></usr/share/texmf-tetex/fonts/type1/bluesky/cm/cmmi7.pfb></usr/share/texmf-te
+tex/fonts/type1/bluesky/cmextra/cmbsy7.pfb></usr/share/texmf-tetex/fonts/type1/
+bluesky/cm/cmbx7.pfb></usr/share/texmf-tetex/fonts/type1/bluesky/cm/cmmib10.pfb
+></usr/share/texmf-tetex/fonts/type1/bluesky/cm/cmsy10.pfb></usr/share/texmf-te
+tex/fonts/type1/bluesky/cm/cmtt10.pfb></usr/share/texmf-tetex/fonts/type1/blues
+ky/cm/cmsy7.pfb></usr/share/texmf-tetex/fonts/type1/bluesky/cm/cmex10.pfb></usr
+/share/texmf-tetex/fonts/type1/bluesky/cm/cmr7.pfb></usr/share/texmf-tetex/font
+s/type1/bluesky/cm/cmmi10.pfb></usr/share/texmf-tetex/fonts/type1/bluesky/cm/cm
+ti10.pfb></usr/share/texmf-tetex/fonts/type1/bluesky/cm/cmr10.pfb></usr/share/t
+exmf-tetex/fonts/type1/bluesky/cm/cmbx12.pfb></usr/share/texmf-tetex/fonts/type
+1/bluesky/cm/cmr12.pfb></usr/share/texmf-tetex/fonts/type1/bluesky/cm/cmr17.pfb
+>
+Output written on MatrixExercisesSolutions.pdf (12 pages, 123004 bytes).

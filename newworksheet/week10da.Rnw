@@ -1,0 +1,298 @@
+
+\section{Preliminaries and exploratory data analysis}
+
+You need to attach the \texttt{MASS} package which provides \texttt{lda()} as well as \texttt{eqscplot}.   You may want to look at the MASS scripts as well in relation to discriminant analysis.   From now on, you should now enough to be able to conduct your own exploratory data analysis.
+
+
+
+\section{Analysis with \texttt{wines} data from Flury}
+
+
+ Load the package and data, do a basic eda then fit a discrimant model to all variables
+
+<<wines, fig = FALSE, echo = TRUE, results = hide>>=
+options(width = 40)
+library(MASS)
+library(Flury)
+data(wines)
+table(wines$Country)
+wines.lda <- lda(Country ~ ., data = wines, 
+    prior = c(1, 1, 1)/3)
+wines.preds <- predict(wines.lda, 
+    wines)
+
+@
+
+Do have a look to see what is in the \texttt{wines.lda} and \texttt{wines.preds} objects.   For example, \texttt{wines.preds} contains information on the canonical discriminant function scores as well as the group classification.
+
+Now plot the canonical discriminant function.   \texttt{eqscplot} is just a super-plot function that makes sure the x and y axis have the same scale:
+
+<<dafigs, fig = FALSE, echo = TRUE, results = hide>>=
+eqscplot(wines.preds$x, type = "n", 
+    xlab = "First discriminant function", 
+    ylab = "Second discriminant function", 
+    main = "Wines, all variables")
+text(wines.preds$x, labels = substring(wines$Country, 
+    1, 2), col = 3 + unclass(wines$Country), 
+    cex = 0.8)
+
+#centroids <- wines.lda$means %*%   wines.lda$scaling
+#points(centroids, pch = c(1,2,3), col = c(1,2,3))
+
+@
+
+
+
+You should see that the canonical discriminant function has done a good job separating the three populations.   Can you explain how the decision rule works?
+
+You can now form the confusion matrix, which is basically found by crosstabulating the actual classes with the classes found in the prediction object:
+
+<<confusion, fig = FALSE, results = verbatim, echo = TRUE>>=
+confusion <- xtabs(~wines$Country + 
+    wines.preds$class)
+confusion
+
+@
+
+And the following (which you could turn into a function) will estimate the APER given a particular confusion matrix.
+
+<<aper, fig = FALSE, results = hide, echo = TRUE>>=
+correct <- sum(diag(confusion))
+total <- sum(confusion)
+wrong <- total - correct
+aper <- wrong/total
+aper
+
+@
+
+This should be a perfect fit.   But it may be too well optimised for the sample of wines we have here, and we may want to consider removing some variables.   As you should have noticed earlier, the coefficients can be examined:
+
+<<dacoefs, fig = FALSE, results = hide, echo=TRUE>>=
+wines.lda$scaling
+
+@
+
+And we could remove some of the smaller values
+
+
+<<updateda, fig = FALSE, results = hide, echo = TRUE>>=
+wines.lda1 <- update(wines.lda, 
+    . ~ . - Y1 - Y11 - Y12)
+wines.preds1 <- predict(wines.lda1, 
+    wines)
+
+@
+
+Having created these new discriminant functions we may wish to plot and evaluate them:
+
+
+<<plotdiscfunc, fig = FALSE, results = hide, echo =TRUE>>=
+eqscplot(wines.preds1$x, type = "n", 
+     xlab = "First discriminant function", 
+     ylab = "Second discriminant function", 
+     main = "Wines, minus y1,y11,y12")
+ text(wines.preds$x, labels = substring(wines$Country, 
+     1, 2), col = 3 + unclass(wines$Country), 
+     cex = 0.8)
+
+centroids <- wines.lda1$means %*%   wines.lda1$scaling
+points(centroids, pch = c(1,2,3), col = c(1,2,3))
+
+
+@
+
+
+
+Again, produce a confusion matrix and check the results.
+
+
+<<confuse2, fig = FALSE, echo = TRUE, results = hide>>=
+confusion <- xtabs(~wines$Country + 
+    wines.preds1$class)
+confusion
+correct <- sum(diag(confusion))
+total <- sum(confusion)
+wrong <- total - correct
+aper <- wrong/total
+aper
+
+@
+
+You should find that you still have a perfect table.   Perhaps it is safe to remove a few more variables.
+
+
+<<updateagain, fig = FALSE, results = hide, echo = TRUE>>=
+wines.lda2 <- update(wines.lda, 
+    . ~ . - Y1 - Y3 - Y4 - Y5 - 
+        Y6 - Y11 - Y12)
+wines.preds2 <- predict(wines.lda2, 
+    wines)
+eqscplot(wines.preds2$x, type = "n", 
+    xlab = "First discriminant function", 
+    ylab = "Second discriminant function", 
+    main = "Wines, eight variables")
+text(wines.preds$x, labels = substring(wines$Country, 
+    1, 2), col = 3 + unclass(wines$Country), 
+    cex = 0.8)
+confusion <- xtabs(~wines$Country + 
+    wines.preds2$class)
+correct <- sum(diag(confusion))
+total <- sum(confusion)
+wrong <- total - correct
+aper <- wrong/total
+aper
+
+@
+
+
+By now, you should find you have gone so far you have now introduced errors.   You could spend some time finding the most parsimonious model with the least error rate.   However, you do need to consider whether these functions have been overoptimised by evaluating them against the data used to build the rule.
+
+
+
+\section{Test and training set}
+
+On the other hand, you may want to consider using a test and training set.   You are going to create an index, called train, which contains a random set of half the data available.   When you use [train] you select the training set, when you use [-train] you deselect the training set, i.e. you select the test set.   Have a look at train.
+
+
+
+
+
+<<irisda, fig = FALSE, results = hide, echo = TRUE>>=
+data(iris)
+dim(iris)
+train <- sample(1:150, 75)
+table(iris$Species[train])
+
+@
+
+We fit the model almost as before, only this time use the training subset.
+
+
+<<irisldafit, fig = FALSE, results = hide, echo = TRUE>>=
+iris.lda <- lda(Species ~ ., iris, 
+    prior = c(1, 1, 1)/3, subset = train)
+
+@
+
+When we form our predictions, we only use the test set.
+
+
+<<irispreds, fig = FALSE, results = hide, echo = TRUE>>=
+iris.preds <- predict(iris.lda, 
+     iris[-train, ])
+
+@
+
+Now we want to plot the canonical discriminant function values for our test set against their actual classification.
+
+
+
+<<irisresults, fig = TRUE, echo = TRUE, results = hide>>=
+eqscplot(iris.preds$x, type = "n", 
+    xlab = "First discriminant function", 
+    ylab = "Second discriminant function", 
+    main = "Iris, all variables")
+text(iris.preds$x, labels = substring(iris$Species[-train], 
+    1, 2), col = 3 + unclass(iris$Species[-train]), 
+    cex = 0.8)
+
+@
+
+We can produce a confusion matrix from the test set:
+
+
+<<irisconfusion, fig = FALSE, results = hide, echo = TRUE>>=
+confusion <- xtabs(~iris$Species[-train] + 
+    iris.preds$class)
+
+@
+
+
+You can get the aper exactly as before.   By examining this carefully (the \texttt{iris.lda} object as well as the aper) you may feel you have scope for some variable reduction.   Try repeating the exercise without \texttt{Petal.W.}:
+
+
+<<irisupdate, fig = FALSE, results = hide, echo = TRUE>>=
+iris.lda1 <- update(iris.lda, . ~ 
+    . - Petal.W.)
+
+
+@
+
+
+\section{Checking the significance of discriminant functions}
+
+This is where life can get to be a whole load of fun!
+
+\subsection{Wilk's lambda}
+
+Is given by $\prod_{j=1}^{J} \frac{1}{1 + \lambda_{j}}$.   For example, we can extract the eigenvalues with:
+
+
+<<wilks, fig = FALSE, results = hide, echo = TRUE>>=
+evals <- wines.lda$svd^2
+
+@
+
+And calculate Wilk's lambda with 
+
+
+<<wilkscalc, fig = FALSE, results = hide, echo = TRUE>>=
+prod(1/(1 + evals))
+
+
+@
+
+If you wanted to examine Wilk's lambda for the smallest eigenvalues, you can remove the successive largest ones:
+
+
+<<wilkslambdacalc, fig = FALSE, results = hide, echo = TRUE>>=
+prod(1/(1 + evals[-1]))
+
+@
+
+All you need to do now is to find how to transform this in a $\chi^{2}$ statistic, and examine its significance in the usual way.
+
+
+\subsection{Another way}
+
+Alternatively, using the Bartlett correction supplied, we could construct a function as follows (don't trust this function, you must check it carefully.   It may not be correct):
+
+
+<<bartlett, fig = FALSE, results = hide, echo = TRUE>>=
+bartlett <- function(z) {
+    bartl <- (z$N - 1 - 0.5 * (dim(z$means)[2] + 
+        dim(z$means)[1])) * log(1 + 
+        z$svd^2)
+    sigb <- dchisq(sqrt(bartl), 
+        df = (dim(z$means)[2] + 
+            dim(z$means)[1]) - 
+            length(bartl))
+    cat("Lambda square\t")
+    cat(bartl)
+    cat("\n")
+    cat("Significance\t")
+    cat(sigb)
+    cat("\n")
+}
+
+@
+
+
+It can be called with the \texttt{lda} object: e.g. \texttt{bartlett(wines.lda)}
+
+\section{Summary}
+
+
+\fbox{\parbox[c]{0.9\textwidth}{\color{blue}
+You have seen how to use \texttt{lda()} to build and plot a discriminant function, and how to use it to classify observations and estimate it's performance as a classification function.   Do note carefully the use of training and test sets, and the rationale for reducing the number of variables used in building a classifier.   By the end of this week, we should be comfortable with:
+
+
+\begin{itemize}
+\item Discriminant analysis (perhaps as a follow up to a T$^2$ test or MANOVA as a descriptive method for explaining how groups vary
+\item Computing discriminant functions (by hand for simple cases)
+\item Determining the significance of these functions
+\item Using discriminant functions to build a classifier
+\item Assessing the performance of our classifier, and procedures for building a ``good'' classifier
+\end{itemize}
+
+}}

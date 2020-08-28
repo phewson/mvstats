@@ -1,0 +1,343 @@
+-------------- Cut here -------------------------------------------
+   
+   
+# MULTIVARIATE ANALYSIS OF VARIANCE PROCEDURE VERSION 2.2
+#
+#               Mark X. Norleans, M.D., Ph.D.
+#               Mark_X_Norleans%notes@sb.com
+#
+#
+# REFERENCES:
+#
+#   Norleans, M. X. Two simultaneous inference procedures for multiple
+#   responses on arbitrary scales. Unpublished manuscript. 1995.
+#
+#   Norleans, M. X. Multiple comparisons in the original sense of R. A. Fisher.
+#   Unpublished manuscript. 1995.
+#
+#   Norleans, M. X. Statistical techniques for the planning of clinical studies.
+#   Unpublished manuscript. 1995.
+#
+#=============================================================================#
+#   WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!   #
+#=============================================================================#
+# THIS PROGRAM MAY BE COPIED OR DISTRIBUTED FOR ANY PURPOSE. HOWEVER, THERE   #
+# IS ABSOLUTELY NO WARRANT OF ANY KIND FOR THE USE OF THIS PROGRAM AND THE    #
+# AUTHOR IS NOT RESPONSIBLE FOR ANY CONSEQUENCES DUE TO THE USE OF THIS       #
+# PROGRAM.                                                                    #
+#=============================================================================#
+#
+
+# A COPY OF ANY OF THE ABOVE MANUSCRIPTS MAY BE OBTAINED BY SENDING A WRITTEN
+# REQUEST WITH A SELF-ADDRESSED ENVELOP (FOR 11.5 x 8 PAPER) WITH SUFFICIENT
+# POSTAGE (US$ 5-10) TO Dr. Mark Norleans, 1204 Braeburn Terrace, Lansdale,
+# PA 19446-5321, USA.
+#
+#
+#              ABOUT THE SIMULTANEOUS INFERENCE PROCEDURES
+#
+#    If we are primarily interested in comparing individual responses and the
+# purpose of making a global statement to the multiple responses is to alert the
+# analyst that some significant effects might exist for some of the multiple
+# responses, Fisher's method for combining independent p-values is recommended;
+# if we do not intend to distinguish the source of information represented by 
+# multiple responses and we prefer to making a global statement by combining 
+# individual responses according to their independent contributions, a 
+# generalized multivariate linear model using measures of Mahalanobis-distance
+# type might be useful. For the second purpose, the GEEs of Liang and Zeger under
+# a slightly different parameterization is used.
+#    To illustrate these methods, data published by Lefkopoulou et al (JASA,1993)
+# are analyzed. In the first study, 19 litters of animals were exposed to phenytoin
+# and 17 were not. 14 response variables were used to record responses in different
+# aspects. Each response was coded as 1 or 0 indicating the presence or absence of
+# ossification. The litter size were also recorded. The problem is whether or not 
+# phenytoin has any effect on the ossification in any of the aspects indicated by 
+# those 14 response variables. For convenience, we model the 14 response variables
+# on the natural log scale. The corresponding multivariate linear model is defined
+# as
+#
+# ln[E(14 response variables)] = intercept + dose, weighted by litter size.
+#
+# phenytoin_gmanova(c(a,b,c,d,e,f,g,h,i,j,k,l,m,n), ~dose, poisson, oss, litter)
+#
+# The 14 responses are listed in the c(a,...), the design factor is given by ~dose,
+# poisson indicates the scale for all responses. oss is the data set. litter is the
+# weight. Each response can have its own scale or weight different from others. In
+# that case, the program may be called as follows.
+#
+# phenytoin_gmanova(c(a,b,c,d,e,f,g,h,i,j,k,l,m,n), ~dose, 
+#           c(poisson, binomial, gamma, quasi, binomial), oss,
+#           c(litter1, litter2, weight))
+# If the link or weight list is shorter than the response list, the last link or
+# weight is used for the remaining response variables after matching the link or
+# weight list. For instance, here, variables f to n are modelled on the logit scale,
+# and variables d to n are weighted by variable weight. 
+#    "maxit" denotes the maximum number of iterations for fitting the glm() of each
+# response variable and "epsilon" is the convergence criterion. These two parameters
+# are used by the glm() object.
+#
+# Results:
+#
+# phenytoin
+#
+# call:
+# gmanova(multivariates = c(a, b, c, d, e, f, g, h, i, j, k, l, m, n), design =  ~
+#      dose, families = poisson, data = oss, weights = litter)
+#
+# Regression Coefficients and Fisher's Combined P-values
+#
+#                   a      b      c        d       e      f       g       h 
+# (Intercept) -11.790 -1.524 -2.741  0.09237 -3.0285 -1.930 -0.1198 -11.790
+#        dose   9.733  1.156 -9.049 -0.85557  0.7772 -1.014 -1.0570   9.097
+#
+#                   i      j           k           l       m      n P-values 
+# (Intercept)  0.9291 -2.741 -2.579e+001 -2.579e+001  -1.685  1.657 0.000000
+#        dose -1.3651 -9.049 -9.132e-015 -9.132e-015 -10.105 -0.754 0.001257
+#
+#
+# Independent Anova's and Fisher's Combined P-values
+#
+#           a        b      c          d     e      f         g      h 
+# dose 0.7862 0.004264 0.8554 0.00007879 0.698 0.5065 0.0001559 0.8536
+#
+#               i      j k l      m n P-values 
+# dose 1.343e-012 0.8554 1 1 0.7182 0        0
+#
+# The small p-value indicates that phenytoin might have effects on some of the
+# multiple responses. If we choose to combine test statistics weighted by their
+# correlations, for the first 3 variables, the anova table is this:
+#
+# summary(phenytoin)
+#
+#             F-value NDF DDF P-value 
+# (Intercept)   9.186   3  34    0.00
+#        dose   1.185   3  34    0.33
+#
+#
+# The Fisher's combined p-value is 0.069 for these three response variables. Fisher's
+# method tends to give more emphasis to small p-values. This feature makes it
+# particularly useful to alert researcher for possible significant effects. On the
+# other hand, Fisher's method gives less emphasis to large p-values. This can be
+# illustrated by comparing the results for the first 5 responses variables that have
+# large p-values.
+#
+# gmanova(multivariates = c(a, c, e, f, h), design =  ~ dose, families = poisson,
+#     data = oss, weights = litter)
+#
+# Independent Anova's and Fisher's Combined P-values
+#
+#           a      c     e      f      h P-values 
+# dose 0.7862 0.8554 0.698 0.5065 0.8536    0.977
+#
+# The Anova Table
+#
+#              F-value NDF DDF P-value 
+# (Intercept)  6.8447   5  34   0.000
+#        dose  0.3526   5  34   0.877
+#
+#
+# A detailed report about the fitting of each individual response can be obtained
+# by using function detail:
+#
+# detail(phenytoin)
+#
+#
+###########################################################################
+
+
+#multivariates, families, weights must be character vectors
+
+varlist_function(x){
+  x_as.data.frame(x)
+  x_names(x)
+  names(x)_1:length(x)
+
+  print(x)
+  invisible(x)
+}
+
+# multivariates: a list of response names in the data
+# design: a single design matrix for all responses
+# families: a list of family names c(poisson, binomial)
+# weights: a list of names of weighting variables
+
+# Matching between multivariates and either families or weights is in the
+# order of head-to-tail. The last item of either families or weights is
+# assumed for all remaining multivariates. For example, if multivariates
+# has 4 variables and, say, families has only two, then the second element
+# of families is assumed for the second, third and fourth elements of 
+# multivariates.
+
+gmanova_function(multivariates, design=formula(data), families=gaussion, 
+                data=sys.parent(), weights, maxit=50, epsilon=1e-4, ...) {
+
+  call_match.call()
+
+  caller_match.call(expand=F)
+  mv_as.character(caller$multivariates);
+  if (length(mv)>1) mv_mv[-1]
+  dxt_as.character(caller$design)
+  fxt_as.character(caller$families);
+  if (length(fxt)>1) fxt_fxt[-1]
+  wt_caller$weights
+  
+  if (!is.null(wt)) {
+    wt_as.character(wt);
+    if (length(wt)>1) wt_wt[-1]
+  }
+
+  txt_paste('glm(',mv[1],dxt[1],dxt[2],',', fxt[1],',',
+      as.character(caller$data),',', wt[1],',maxit=',maxit,
+      ',epsilon=',epsilon, ',x=T',')', sep='')               
+  junk_eval(parse(text=txt))                                  #fit glm
+  xx_junk$x                                                   #heads
+  ass_junk$assign; df.x_junk$rank; df.residual_junk$df.residual
+  beta_coef(junk); betanames_names(beta); ww_junk$weights  
+  pearson_residuals(junk,'pearson')   
+  DB_solve(t(xx)%*%(ww*xx))
+  stds_sqrt(diag(DB)*sum(pearson^2)/df.residual)
+  pbeta_2*(1-pt(abs(beta/stds),df.residual))
+  A_as.vector(t(t(DB%*%t(xx))*sqrt(ww)))
+  junk_summary.aov(junk)
+  rnames_row.names(junk)[-nrow(junk)]
+  pvs_sapply(junk,c)[-nrow(junk),5]
+
+  for (i in 2:length(mv)) {      
+    fa_if (fxt[i]=="") fxt[length(fxt)] else fxt[i]
+    if (!is.null(wt)) {
+      if (wt[i]=="") wr_wt[length(wt)]
+      else wr_wt[i]
+    }
+    else 
+      wr_NULL
+    txt_paste('glm(',mv[i],dxt[1],dxt[2],',', fa,',',
+        as.character(caller$data),',', wr,',maxit=',maxit,
+        ',epsilon=',epsilon,')', sep='')
+    junk_eval(parse(text=txt))                                #fit glm
+    beta.in_coef(junk); ww_junk$weights  
+    pearson.in_residuals(junk,'pearson')   
+    DB_solve(t(xx)%*%(ww*xx))
+    stds.in_sqrt(diag(DB)*sum(pearson.in^2)/df.residual)
+    pbeta.in_2*(1-pt(abs(beta.in/stds.in),df.residual))
+    beta_cbind(beta,beta.in)
+    stds_cbind(stds,stds.in)
+    pbeta_cbind(pbeta,2*(1-pt(abs(beta.in/stds.in),df.residual)))
+    A_cbind(A, as.vector(t(t(DB%*%t(xx))*sqrt(ww))))
+    pearson_cbind(pearson, pearson.in)
+    junk_summary.aov(junk)
+    pvs_cbind(pvs, sapply(junk,c)[-nrow(junk),5])
+  }  
+  
+  beta_as.matrix(beta)  
+  dimnames(beta)_list(betanames, mv)
+  stds_as.matrix(stds)
+  dimnames(stds)_list(betanames, mv)
+  pbeta_as.matrix(pbeta)
+  dimnames(pbeta)_list(betanames, mv)
+
+  pvs_as.matrix(pvs)
+  dimnames(pvs)_list(rnames, mv)
+
+  out_NULL; out$call_call
+  out$X_xx; out$rank_df.x; out$df.residual_df.residual
+  out$assign_ass   
+  out$coefficients_beta;out$beta.stds_stds;out$beta.pvalues_pbeta
+  out$anova.pvalues_pvs
+  out$SIGMA_as.matrix(t(pearson)%*%pearson)/df.residual 
+  out$A_as.matrix(A)
+  attr(out,"class")_"gmanova"     
+
+  out
+}
+
+
+fisher_function(p) {
+  p_as.vector(p)
+  p[p==0]_.Machine$double.xmin
+  if (any(p>1)) {
+    warning(paste("\nAt least one p-value is greater than 1\n",
+    "1 is assigned to these values\n", sep=''))
+    p[p>1]_1
+  }
+  
+  1-pchisq(-2*sum(log(p)), 2*length(p))
+}
+
+summary.gmanova_function(x, ... ) {
+  
+  ass_x$assign; rnames_names(ass)
+  n_nrow(x$X); qx_x$rank; py_ncol(SIGMA_x$SIGMA); nq_x$df.residual
+  dxwx_x$A
+
+  vb_kronecker(diag(py),diag(qx))  
+  for (i in 1:py)
+   for (j in i:py) { 
+     xi_matrix(dxwx[,i],nrow=qx); xj_matrix(dxwx[,j],nrow=qx)
+     vb[((i-1)*qx+1):(qx*i),((j-1)*qx+1):(qx*j)]_xi%*%t(xj)*SIGMA[i,j]
+   }
+  vb[col(vb)<row(vb)]_0; vb_vb+t(vb)-diag(diag(vb))
+
+  beta_x$coefficients
+  
+  fvalue_ndf_numeric()
+  for (i in ass) {
+    bi_as.matrix(as.vector(beta[i,,drop=F]))
+    pick_numeric()
+    for (j in 1:py)
+      pick_c(pick, i+qx*(j-1))
+    qrvb_qr(vb[pick,pick,drop=F],1e-10)
+    if (qrvb$rank<length(pick)) 
+      stop("\nAppearnt Singular Matrix\n")
+    else
+      fvalue_c(fvalue, as.vector(t(bi)%*%solve.qr(qrvb)%*%bi))
+    ndf_c(ndf,length(pick))
+  }
+  
+  dxwx_rep(nq,length(ass))
+  bb_cbind(fvalue/ndf,ndf,dxwx,
+     round((1-pf(fvalue/ndf,ndf,dxwx))*1000,0)/1000)
+  dimnames(bb)_list(rnames, c("F-value","NDF","DDF","P-value")) 
+  print.default(bb, digits=4)    
+  
+  invisible(list(bb,vb))
+}
+
+print.gmanova_function(x,...){
+    
+  beta_x$coefficients; dimbeta_dimnames(beta)
+  beta.p_apply(x$beta.pvalues,1,fisher)
+  beta_cbind(beta,beta.p)
+  dimnames(beta)_list(dimbeta[[1]], c(dimbeta[[2]],"P-values"))
+
+  an_x$anova.pvalues; dimanova_dimnames(an)
+  anp_cbind(an, round(apply(an,1,fisher)*1000,0)/1000)
+  dimnames(anp)_list(dimanova[[1]], c(dimanova[[2]], "P-values"))
+  
+  cat("\n")
+  print(x$call)
+  cat("\n\nRegression Coefficients and Fisher's Combined P-values\n\n")
+  print.default(beta,digit=4)
+  
+  cat("\n\nIndependent Anova's and Fisher's Combined P-values\n\n")
+  print.default(anp,digit=4)
+  cat("\n\n\nCall summary() and detail() for further information\n\n")
+
+  invisible(list(beta, anp))
+}
+
+detail_function(x,...){
+  
+  beta_x$coefficients
+  std_x$beta.stds
+  ps_round(x$beta.pvalues,4)
+
+  cat("\n\nRegression Coefficients\n\n")
+  print(beta,digits=4)
+  cat("\n\nStandard Deviations of Regression Coefficients\n\n")
+  print(std,digits=4)
+  cat("\n\nP-values by Comparing with the t-Distribution\n\n")
+  print(ps,digits=4)
+  cat("\n\n")
+
+  invisible(list(beta, std, ps))
+}

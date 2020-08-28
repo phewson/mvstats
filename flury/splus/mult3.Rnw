@@ -1,0 +1,79 @@
+S-PLUS instructions for Chapter 3  (graphing an ellipse)
+********************************************************
+
+last updated: June 20, 1997
+
+
+This unit shows how to produce points forming an ellipse. Suppose
+m is a fixed point in the plane, A is a positive definite symmetric
+matrix of dimension 2 by 2, and c is a positive constant. We wish to
+compute points x in the plane that satisfy the equation
+
+                   -1            2
+           (x-m)' A   (x-m)  <-  c  .
+
+The set of all points satisfying this equation is an ellipse, as
+we have seen in chapter 3.
+
+The method of generating points on an ellipse used in the S-PLUS program
+given below first computes points on the unit circle centered
+at the origin, and then transforms the circle into an ellipse of
+the proper size and shape centered at m. As an exercise, try to
+find out why this method works!
+
+You can cut the file where indicated and execute it to see what
+happens. You may also put the procedure ELLIPS into a library or
+copy it into any other S-PLUS program.
+
+The example given in the program produces a single ellipse with the
+same center and shape as the ellipses in Figure 3.3.1. To produce
+several concentric ellipses with the same shape you can use a do-loop
+in which the value of the parameter c is varied while all other
+parameters remain the same.
+
+
+
+*****************************  CUT HERE  ********************************
+
+# S-PLUS instructions for graphing an ellipse 
+
+# First define all parameters 
+
+A <- matrix(c(1,1,1,2), ncol = 2)		 # define matrix A
+m <- c(3, 4)					 # define vector m
+const <- 1					 # define constant 
+k <- 1000		  # define number of points on the ellipse
+
+# procedure ELLIPS
+# procedure ELLIPS
+
+ellips <- function(A, m, const, k)
+{
+# input:  A	positive definite symmetric matrix of dimension 2 by 2
+#         m	column vector of length 2, center of ellipse
+#         const	positive constant
+#         k	number of points on ellipse (must be at least 2)
+# output: x 	a (k by 2) matrix whose rows are the coordinates
+#		of k points on the ellipse (y-m)'*A^{-1}*(y-m) = c^2
+
+r <- A[1, 2]/sqrt(A[1, 1] * A[2, 2])
+Q <- matrix(0, 2, 2)			  # construct matrix Q for
+Q[1, 1] <- sqrt(A[1, 1] %*% (1+r)/2)	# transformation of circle
+Q[1, 2] <- -sqrt(A[1, 1] %*% (1-r)/2)		      # to ellipse
+Q[2, 1] <- sqrt(A[2, 2] %*% (1+r)/2)
+Q[1, 1] <- sqrt(A[2, 2] %*% (1-r)/2)
+alpha <- seq(0, by = (2 * pi)/k, length = k)	   # define angles
+Z <- cbind(cos(alpha), sin(alpha)) 	   # points on unit circle
+X <- t(m + const * Q %*% t(Z))  # coordinates of points on ellipse
+X
+}					 # end of procedure ellips
+
+# call procedure ellips
+
+X <- ellips(A, m, const, k)		   
+
+# graph the results
+
+win.graph()
+plot(X[,1], X[,2])
+

@@ -1,0 +1,15 @@
+knn.dist <- function(X, k)
+
+{X.d <- as.matrix(dist(X))
+n <- nrow(X)
+knn.d <- apply(X.d, 2, sort)[k+1,]
+m<- 2*max(X.d)
+X.knn <- matrix(m, n, n)
+diag(X.knn) <- 0
+for (i in 1:(n-1)) for (j in (i+1):n)
+	if (X.d[i,j] <= knn.d[i] | X.d[i,j] <= knn.d[j])
+		{X.knn[i,j] <- (knn.d[i]+knn.d[j])/2
+		X.knn[j,i] <- X.knn[i,j]}
+return(as.dist(X.knn))}
+
+

@@ -1,0 +1,74 @@
+
+S-PLUS instructions for Chapter 4.2, part B (bootstrap computations)
+********************************************************************
+
+last updated: june 18, 1997
+
+
+Section 4.2 introduces the nonparametric bootstrap technique for computing
+standard errors of parameter estimates. The exact bootstrap, illustrated in
+Examples 4.2.1 and 4.2.2, is somewhat messy to implement, but fortunately
+generating bootstrap samples is very easy, as shown in this unit. This is
+actually a solution to exercises 23 and 24 of Section 4.2, using the midge
+data (Species Af), and B=10000 bootstrap samples. Because there is a loop
+involved in the bootstrap computations, it is better to run the algorithm as
+a program rather than type the commands iteratively. In the program attached
+below, comments provide some guidance, but here are some additional
+explanations.
+The program generates the bootstrap distribution of the mean vector; the
+analysis for the correlation coefficient requires some changes. At the end
+of the program, the bootstrap results are stored in a file called BOOT.OUT,
+which can subsequently be used as input to a program for graphing the
+bootstrap distributions, or for other calculations. Of course further
+calculations may be attached directly, as illustrated by the computation
+of bootstrap standard errors.
+
+The two lines following the opening of the bootstrap loop are the core of
+the algorithm. The S-PLUS function runif generates a vector of specified
+dimension, with independent uniform(0,1) entries.
+Multiplying a vector of N uniform(0,1) random numbers by N and applying the
+ceiling function (i.e., rounding up to the next integer) gives uniformly
+distributed integers in the range from 1 to N. The vector called "items"
+contains a list of N such numbers; the corresponding sample is then put into
+a bootstrap data matrix called Dboot.
+
+
+*************************   CUT HERE   ***************************
+
+
+# a bootstrap program for exercises 23 and 24 in Section 4.2
+
+rawdat <- matrix(scan("c:\\multidat\\tab1_1.dat"), ncol=3,
+	  byrow = T)
+
+D <- 100 * rawdat[1:9, 2:3]	               # data of Af midges
+N <- 9				   	  # number of observations
+B <- 10000     		     	     # number of bootstrap samples
+boot <- function()			    # define function boot
+{
+results <- matrix(0, B, 2)     # open matrix for bootstrap results
+it <- 1					    # start bootstrap loop
+while(it <= B) {
+	items <- ceiling(runif(N, min = 0, max = 1) * N)  
+			    # indices of items in bootstrap sample
+
+	Dboot <- D[items, ] 	       # generate bootstrap sample
+	ave <- apply(Dboot, 2, mean) 
+			 # compute statistic from bootstrap sample
+
+	results[it,  ] <- t(ave) 		   # store results
+	it <- it + 1			   # end of bootstrap loop
+	cat(format(results, justify = "right"), file = "boot.out",
+	fill = 25)				   # store results
+	}
+}
+boot()					 # run the function "boot"
+results <- matrix(scan("boot.out"), ncol = 2, byrow = T)
+					  # read results in S-PLUS
+
+sd.x <- function(x) sqrt(var(x)) 	# define the function sd.x
+stderr <- apply(results, 2, sd.x) 			  # use it
+cat("\nstandard errors are\n", stderr, file = "boot.out",
+append = T)					   # store results
+
+*************************   CUT HERE   ***************************

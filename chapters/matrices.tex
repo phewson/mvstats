@@ -1,0 +1,1174 @@
+\chapter{Matrix manipulation}
+\label{ChMatrix}
+
+It is convenient to represent multivariate data by means of $n \times p$ matrix such as $\boldsymbol{X}$.  We could consider the \texttt{USArrests} data in this way.   We follow the convention of using $n$ to denote the number of rows of individuals who have been observed, and $p$ to denote the number of columns (variables).   %Geneticists do this all back to front and put genes on the rows and individuals on the columns.   %This is a real nuisance, and is what happens when people insist on reinventing the wheel. 
+We will formalise some some aspects from linear algebra that will be important in understanding multivariate analysis.   These are very brief notes, there is a wealth of readable material on linear algebra as well as material specific for statistical applications such as \cite{Healy:2000} and \cite{Schott:1997}.   There is also an interesting presentation from a more geometric perspective in \cite{Wickens:1995} which supplements more algebraic presentations of matrix concepts.
+
+\section{Vectors}
+\label{vectors}
+
+Consider a vector $\boldsymbol{x} \in \mathbb{R}^{p}$, by convention this is thought of as a column vector:
+
+\begin{displaymath}
+\boldsymbol{x}  = \left(\begin{array}{r} x_{1} \\ x_{2} \\ \vdots \\ x_{n} \end{array}\right)
+\end{displaymath}
+
+ A row vector such as $\left(\begin{array}{rrrr} x_{1} & x_{2} & \ldots & x_{n} \end{array} \right)$ will be denoted by $\boldsymbol{x}^{T}$.
+
+A vector is a basic unit of numbers within \R, but the \R objects don't entirely conform to a formal mathematical definition (look at the way vecctor recycling works for example) and some caution is needed.   The following instruction:
+\singlespacing
+\begin{verbatim}
+> x <- c(3.289, 4.700, 10.400) 
+\end{verbatim}
+\onehalfspacing
+assigns the values to the object \verb+x+ creating the following \R vector:
+
+\begin{displaymath}
+\boldsymbol{x} = \left( \begin{array}{r} 3.289 \\  4.700 \\ 10.400 \end{array} \right)
+\end{displaymath}
+
+The default print method in \R gives these in the most compact form:
+\singlespacing
+\begin{verbatim}
+> x 
+[1]  [1]  3.289  4.700 10.400
+\end{verbatim}
+\onehalfspacing
+but forcing this into a matrix object with \verb+as.matrix()+ confirms its dimensionality:
+\singlespacing
+\begin{verbatim}
+> as.matrix(x)
+       [,1]
+[1,]  3.289
+[2,]  4.700
+[3,] 10.400
+\end{verbatim}
+\onehalfspacing
+and taking the transpose of this vector using \verb+t()+ does produce a row vector as expected:
+\singlespacing
+\begin{verbatim}
+> t(x)
+      [,1] [,2] [,3]
+[1,] 3.289  4.7 10.4
+\end{verbatim}
+\onehalfspacing
+
+
+\subsection{Vector multiplication; the inner product}
+\label{vectormult}
+
+We first define the inner product of two vectors.   For $\boldsymbol{x}, \boldsymbol{y} \in  \mathbb{R}^{p}$ this gives a scalar:
+
+\begin{displaymath}
+\langle \boldsymbol{x}, \boldsymbol{y} \rangle = \boldsymbol{x}^{T}\boldsymbol{y} = \sum_{j=1}^{p}x_{j}y_{j} = \boldsymbol{y}^{T}\boldsymbol{x}
+\end{displaymath}
+
+In other words, we find the product of corresponding elements of each vector (the product of the first element of the row vector and the first element of the column vector), and then find the sum of all these products:   
+
+\begin{displaymath}
+\left(
+\begin{array}{rrrr}
+x_{1} & x_{2} & \ldots & x_{n}
+\end{array}
+\right)
+\left(
+\begin{array}{r}
+y_{1}\\
+y_{2}\\
+\ldots\\
+y_{n}
+\end{array}
+\right)
+=
+\underbrace{x_{1}y_{1} + x_{2}y_{2} + \ldots + x_{n}y_{n}}_{\mbox{One number; the sum of all the individual products}}
+\end{displaymath}
+
+
+To give a simple example, with $\boldsymbol{x}^{T} = (4,1,3,2)$ and $\boldsymbol{y} = \left( \begin{array}{r} 1 \\ -1 \\ 3 \\ 0 \end{array} \right)$ we have:
+
+\begin{displaymath}
+\left(
+\begin{array}{rrrr}
+4 & 1 & 3 & 2
+\end{array}
+\right) \times
+\left(
+\begin{array}{r}
+1\\
+-1\\
+3\\
+0
+\end{array}
+\right)
+=
+\underbrace{4 \times 1 + 1 \times (-1) + 3 \times 3 + 2 \times 0} = 12
+\end{displaymath}
+
+In \R the inner product can be simply obtained using \verb+%*%+, for example:
+\singlespacing
+\begin{verbatim}
+> x <- c(4, 1, 3, 2)
+> y <- c(1, -1, 3, 0)
+> t(x) %*% y
+     [,1]
+[1,]   12
+\end{verbatim}
+\onehalfspacing
+which returns the answer as a scalar.   Note that using \verb+*+ without the enclosing \verb+%%+ yields a vector of the same length of $\boldsymbol{x}$ and $\boldsymbol{y}$ where each element is the product of the corresponding elements of $\boldsymbol{x}$ and $\boldsymbol{y}$, and may do other unexpected things using vector recycling.
+
+\subsection{Outer product}
+
+Note that if $\boldsymbol{x}^{T}\boldsymbol{y}$ is the inner product of two vectors $\boldsymbol{x}$ and $\boldsymbol{y}$, the \emph{outer} product is given by  $\boldsymbol{x}\boldsymbol{y}^{T}$.   For vectors, it can be computed by \verb+x %*% t(y)+; but as we will find later, outer product operations are defined for arrays of more than one dimension as \verb+x %o% y+ and \verb+outer(x,y)+ 
+
+\subsection{Vector length}
+\label{vectorlength}
+
+An important concept is the length of a vector, also known as the Euclidean norm or the modulus.   It is based on a geometric idea and expresses the distance of a given vector from the origin:
+
+\begin{displaymath}
+|\boldsymbol{x}| = \langle \boldsymbol{x}, \boldsymbol{x} \rangle^{1/2} = \left( \sum_{j=1}^{p} x_{j}^{2} \right)^{1/2}
+\end{displaymath}
+
+A \emph{normalised} vector is one scaled to have unit length, for the vector $\boldsymbol{x}$ this can be found by taking $\frac{1}{|\boldsymbol{x}|} \boldsymbol{x}$ which is trivial in \R:
+\singlespacing
+\begin{verbatim}
+> z <- x / sqrt(t(x) %*% x)
+> z
+[1] 0.7302967 0.1825742 0.5477226 0.3651484
+> t(z) %*% z ## check the length of the normalised vector
+     [,1]
+[1,]    1
+\end{verbatim}
+\onehalfspacing
+
+\subsection{Orthogonality}
+\label{orthogonality}
+
+Two vectors \textbf{x} and \textbf{y}, of order $k \times 1$ are orthogonal if $\boldsymbol{x y} = 0$.   Furthermore, if two vectors $\boldsymbol{x}$ and  $\boldsymbol{y}$ are orthogonal \emph{and} of unit length, i.e. if $\boldsymbol{x y} = 0$,  $\boldsymbol{x}^{T} \boldsymbol{x} = 1$ and  $\boldsymbol{y}^{T} \boldsymbol{y} = 1$ then they are orthonormal.
+
+More formally, a set $\{\boldsymbol{e}_{i}\}$ of vectors in $\mathbb{R}^{p}$ is orthonormal if
+\begin{displaymath}
+\boldsymbol{e}_{i}^{T}\boldsymbol{e}_{j} = \delta_{ij} = \left\{ \begin{array}{ccc} 
+0, && i \neq j\\
+1, && i = j \end{array} \right.
+\end{displaymath}
+Where $\delta_{ij}$ is referred to as the Kronecker delta.
+
+\subsection{Cauchy-Schwartz Inequality}
+\label{cauchyschwartz}
+
+\begin{displaymath}
+\langle \boldsymbol{x}, \boldsymbol{y} \rangle \leq |\boldsymbol{x}|\ |\boldsymbol{y}|, \mbox{ for all } \boldsymbol{x}, \boldsymbol{y} \in \mathbb{R}
+\end{displaymath}
+with equality if and only if $\boldsymbol{x} = \lambda \boldsymbol{y}$ for some $\lambda \in \mathbb{R}$.   Proof of this inequality is given in many multivariate textbooks such as \cite{Bilodeau+Brenner:1999}.   We won't use this result itself, but will actually consider the extended Cauchy-Scwartz inequality later.
+
+\subsection{Angle between vectors}
+\label{angle}
+
+The cosine of the angle between two vectors is given by:
+
+\begin{displaymath}
+\cos(\theta) = \frac{\langle \boldsymbol{x}, \boldsymbol{y} \rangle}{|\boldsymbol{x}|\ |\boldsymbol{y}|}
+\end{displaymath}
+
+It can be conveniently calculated in \R:
+\singlespacing
+\begin{verbatim}
+> cor(x,y)
+\end{verbatim}
+\onehalfspacing
+
+
+
+\section{Matrices}
+\label{matrices}
+
+%\begin{quotation}
+%Points in this section:
+%\begin{itemize}
+%\item Matrices can be denoted by a bold capital letter (vectors by a bold lower case letter).
+%\item Matrix dimensions are given as rows $\times$ columns
+%\item How to transpose matrices
+%\end{itemize}
+%\end{quotation}
+
+We now consider some basic properties of matrices, and consider some basic operations on them that will become essential as we progress.   Consider the data matrix $\boldsymbol{X}$, containing the \verb+USArrests+ data, a $50 \times 4$ matrix, i.e. with $n=50$ rows refering to States and $p=4$ columns refering to the variables measuring different arrest rates.   To indicate the order of this matrix it could be described fully as $\boldsymbol{X}_{50,4}$; this convention is followed in \R as a call to \verb+dim(USArrests)+ will confirm.   Each element in this matrix can be denoted by $x_{ij}$ where $i$ denotes the particular row (here state) and $j$ the particular column (here arrest rate).   Hence $x_{6\ 3} = 38.7$.
+
+In order to create a matrix in \R the dimension has to be specified in the call to \verb+matrix()+.   It should be very carefully noted that the default is to fill a matrix by columns, as indicated here:
+\singlespacing
+\begin{verbatim}
+> mydata <- c(1,2,3,4,5,6)
+> A <- matrix(mydata, 3,2)
+> A
+     [,1] [,2]
+[1,]    1    4
+[2,]    2    5
+[3,]    3    6
+\end{verbatim}
+\onehalfspacing
+If this is not convenient, \R can be persuaded to fill matrices by rows rather than by columns by including the argument \verb+byrow = TRUE+ in the call to \verb+matrix+.   It is also possible to coerce other objects (such as data frames) to a matrix using \verb+as.matrix()+ and \verb+data.matrix()+; the former producing a character matrix if there are any non-numeric variables present, the latter coercing everything to a numeric format.
+
+\subsection{Transposing matrices}
+\label{matrixtranspose}
+
+Transposing matrices simply involves turning the first column into the first row.   A transposed matrix is denoted by a superscripted $T$, in other words $\mathbf{A^{T}}$ is the transpose of $\mathbf{A}$.
+
+\begin{displaymath}
+If\ \mathbf{A} = \left(
+\begin{array}{rr}
+3 &   1\\
+5 &    6\\
+4 &   4
+\end{array}
+\right)
+\ \mbox{then}\ \mathbf{A^{T}} =
+\left( \begin{array}{rrr}
+3 &   5 &   4\\
+1 &   6  &  4
+\end{array}
+\right)
+\end{displaymath}
+
+As with vectors, transposing matrices in \textbf{R} simply requires a call to \verb+t()+, the dimensions can be checked with  \verb+dim()+.
+
+\singlespacing
+\begin{verbatim}
+> Atrans <- t(A)
+> Atrans
+     [,1] [,2] [,3]
+[1,]    1    2    3
+[2,]    4    5    6
+> dim(Atrans)
+[1] 2 3
+\end{verbatim}
+\onehalfspacing
+
+
+\subsection{Some special matrices}
+\label{specialmatrix}
+
+\subsection{Symmetric matrices}
+
+We mention a few ``special'' matrix forms that will be encountered.   We firstly note that \emph{symmetric} matrices are symmetric around the diagonal $i=j$.  For matrix $\boldsymbol{A}$, it is symmetric whenever $a_{ij} = a_{ji}$.    The correlation matrix and the variance-covariance matrix are the most common symmetric matrices we will encounter, we will look at them in more detail later, for now note that we can obtain the (symmetric) correlation matrix as follows:
+\begin{verbatim}
+> cor(USArrests)
+             Murder   Assault   UrbanPop      Rape
+Murder   1.00000000 0.8018733 0.06957262 0.5635788
+Assault  0.80187331 1.0000000 0.25887170 0.6652412
+UrbanPop 0.06957262 0.2588717 1.00000000 0.4113412
+Rape     0.56357883 0.6652412 0.41134124 1.0000000
+\end{verbatim}
+
+\subsection{Diagonal Matrices}
+
+Given it's name, it is perhaps obvious that a diagonal matrix has elements on the diagonal (where $i = j$) and zero elsewhere (where $i \neq j$).   For example, the matrix $\boldsymbol{A}$ given as follows:
+\begin{displaymath}
+\mathbf{A} = 
+\left( \begin{array}{rrr}
+13 & 0 & 0\\
+0 & 27 &  0\\
+0 & 0 & 16
+\end{array}
+\right)
+\end{displaymath}
+is a diagonal matrix.   To save paper and ink, $\boldsymbol{A}$ can also be written as:
+\begin{displaymath}
+\mathbf{A} = 
+diag \left( \begin{array}{rrr}
+13 & 27 & 16
+\end{array}
+\right)
+\end{displaymath}
+
+It is worth noting that the \verb+diag()+ command in \R, as shown below, lets you both \emph{overwrite} the diagonal elements of matrix and \emph{extract} the diagonal elements depending how it is used:
+\singlespacing
+\begin{verbatim}
+> mydataD <- c(13, 27, 16)
+> B <- diag(mydataD)
+> B
+     [,1] [,2] [,3]
+[1,]   13    0    0
+[2,]    0   27    0
+[3,]    0    0   16
+> diag(B)
+[1] 13 27 16
+\end{verbatim}
+\onehalfspacing
+It is also worth noting that when ``overwriting'', the size of the matrix to be over-written can be inferred from the dimensionality of diagonal.   
+
+\subsection{Identity Matrix}
+
+One special diagonal matrix is the identity matrix, which has a value of 1 at each position on the diagonal and 0 elsewhere.   Here, all we need to know is the size.   So $\mathbf{I_{4}}$ tells us that we have the following matrix:
+\begin{displaymath}
+\mathbf{I_{4}} = 
+\left( \begin{array}{rrrr}
+1 & 0 & 0 & 0\\
+0 & 1 &  0 & 0\\
+0 & 0 & 1 & 0\\
+0 & 0 & 0 & 1
+\end{array}
+\right)
+\end{displaymath}
+
+This can be created in a variety of ways in \R, such as \verb+I4 <- diag(rep(1,4))+
+
+\subsection{Ones}
+
+We also need to define a vector of ones; $\boldsymbol{1}_{p}$, a $p \times 1$ matrix containing only the value 1.   There is no inbuilt function in \textbf{R} to create this vector, it is easily added:
+\singlespacing
+\begin{verbatim}
+> ones <- function(p){
+  Ones <- matrix(1,p,1)
+  return(Ones)
+}
+\end{verbatim}
+\onehalfspacing
+
+\subsection{Zero matrix}
+
+Finally, $\mathbf{0}$ denotes the zero matrix, a matrix of zeros.   Unlike the previously mentioned matrices this matrix can be any shape you want.   So, for example:
+\begin{displaymath}
+\mathbf{0_{2\ 3}} = 
+\left( \begin{array}{rrr}
+0 & 0 & 0 \\
+0 & 0 &  0 \\
+\end{array}
+\right)
+\end{displaymath}
+
+
+\subsection{Equality and addition}
+\label{matrixaddition}
+
+%\begin{quotation}
+%Ensure you are happy with:
+%\begin{itemize}
+%\item Equality of matrices
+%\item Addition and subtraction of matrices
+%\end{itemize}
+%\end{quotation}
+
+A little more care is needed in defining basic mathematical operations on matrices.   Considering the two matrices $\boldsymbol{A}$ and $\boldsymbol{B}$, we consider their equality $\boldsymbol{A} = \boldsymbol{B}$ if any only if:
+\begin{itemize}
+\item $\boldsymbol{A}$ and $\boldsymbol{B}$ have the same size, and
+\item the $ij$th element of $\boldsymbol{A}$ is equal to the $ij$th element of $\boldsymbol{A}$ for all $1 \leq i \leq r$ and $1 \leq j \leq n$
+\end{itemize}
+
+A consequence of this is that the following two matrices are equal:
+\begin{displaymath}
+\left[ \begin{array}{rrr}
+138.8149 & 187.52 & 394.86\\
+187.5200 & 267.00 &  559.00\\
+394.8600 & 559.00 & 1200.00\
+\end{array}
+\right]
+= 
+\left[ \begin{array}{rrr}
+138.8149 & 187.52 & 394.86\\
+187.5200 & 267.00 &  559.00\\
+394.8600 & 559.00 & 1200.00\
+\end{array}
+\right]
+\end{displaymath}
+(which seems like an obvious and fussy thing to say) \emph{but} the following two zero matrices are not equal:
+\begin{displaymath} 
+\left( \begin{array}{rrr}
+0 & 0 & 0 \\
+0 & 0 &  0 \\
+0 & 0 & 0 \\
+\end{array}
+\right)
+\neq
+\left( \begin{array}{rrr}
+0 & 0 & 0 \\
+0 & 0 &  0 \\
+\end{array}
+\right)
+\end{displaymath}
+
+%\subsection{Matrix addition}
+
+ Adding and subtracting are fairly straightforward.   Provided $\boldsymbol{A}$ and $\boldsymbol{A}$ have the same size, $\boldsymbol{A} + \boldsymbol{B}$ and $\boldsymbol{A} - \boldsymbol{B}$ are defined by each of these operations being carried out on individual elements of the matrix.   For example:
+\begin{displaymath}
+\left( \begin{array}{rrr}
+1 & 3 & 5\\
+2 & 4 &  6\\
+\end{array}
+\right)
++
+\left( \begin{array}{rrr}
+0 & 2 & 3\\
+-1 & -2 &  -3\\
+\end{array}
+\right)
+=
+\left( \begin{array}{rrr}
+1 + 0 & 3 + 2 & 5 + 3\\
+2 + -1 & 4 + -2 &  6 + -3\\
+\end{array}
+\right) = 
+\left( \begin{array}{rrr}
+1 & 5 & 8\\
+1 & 2 &  3\\
+\end{array}
+\right)
+\end{displaymath}
+and
+\begin{displaymath}
+\left( \begin{array}{rrr}
+1 & 3 & 5\\
+2 & 4 &  6\\
+\end{array}
+\right)
+-
+\left( \begin{array}{rrr}
+0 & 2 & 3\\
+-1 & -2 &  -3\\
+\end{array}
+\right)
+=
+\left( \begin{array}{rrr}
+1 & 1 & 2\\
+3 & 6 &  9\\
+\end{array}
+\right)
+\end{displaymath}
+
+
+Addition and subtraction are straightforward enough in \R:
+\singlespacing
+\begin{verbatim}
+> A <- matrix(c(1,2,3,4,5,6),2,3)
+> A
+     [,1] [,2] [,3]
+[1,]    1    3    5
+[2,]    2    4    6
+> B <- matrix(c(0,-1,2,-2,3,-3),2,3)
+> B
+     [,1] [,2] [,3]
+[1,]    0    2    3
+[2,]   -1   -2   -3
+> A + B
+     [,1] [,2] [,3]
+[1,]    1    5    8
+[2,]    1    2    3
+> A - B
+     [,1] [,2] [,3]
+[1,]    1    1    2
+[2,]    3    6    9
+\end{verbatim}
+\onehalfspacing
+
+Matrix addition follows all the normal arithmetic rules, i.e.
+\begin{eqnarray*}
+\mbox{Commutative law} && \mathbf{A} + \mathbf{B} = \mathbf{B} + \mathbf{A}\\
+\mbox{Associative law} && \mathbf{A} + (\mathbf{B} + \mathbf{C}) = (\mathbf{A} + \mathbf{B}) + \mathbf{C}
+\end{eqnarray*}
+
+Matrix multiplication however follows vector multiplication and therefore does not follow the same rules as basic multiplication.
+
+\subsection{Multiplication}
+
+%\subsection{Scalar multiplication}
+%\subsection{Scalars}
+ 
+A scalar is a matrix with just one row and one column, i.e. a single number.   In other words, 0.4 could be a scalar or a $1\times1$ matrix.   It's worth re-capping that multiplication by a scalar is easy enough, we just multiply every element in the matrix by the scalar.
+
+So if $\mathbf{k} = 0.4$, and 
+\begin{displaymath}
+\mathbf{A} = 
+\left( \begin{array}{rrr}
+1 & 5 & 8\\
+1 & 2 &  3\\
+\end{array}
+\right)
+\end{displaymath}
+
+we can calculate $\mathbf{kA}$ as:
+
+\begin{displaymath}
+\mathbf{kA} = 0.4 \times
+\left( \begin{array}{rrr}
+1 & 5 & 8\\
+1 & 2 &  3\\
+\end{array}
+\right)
+=
+\left( \begin{array}{rrr}
+0.4 & 2 & 3.2\\
+0.4 & 0.8 &  1.6\\
+\end{array}
+\right)
+\end{displaymath}
+
+%\subsection{Matrix multiplication}
+
+When multiplying two matrices, it should be noted first that they must be conformable.   The number of columns in the first matrix must match the number of rows in the second.   As matrix multiplication has been defined, the result will be a matrix with as many rows as the first matrix and as many columns as the second.   For example, with our vectors above in section \ref{vectormult} , we had $\boldsymbol{A_{1\ 4}} \times \boldsymbol{B_{4\ 1}} = \boldsymbol{C_{1\ 1}}$.   More generally multiplication proceeds with matrix size as follows: $\boldsymbol{A_{m\ n}} \times \boldsymbol{B_{n\ p}} = \boldsymbol{C_{m\ p}}$.
+
+It \emph{may} help to think about the vector operations and extend them to matrices.   There are other ways of thinking about matrix multiplication, most multivariate text books have an appendix on matrix algebra and there are vast tomes available covering introductory linear algebra.   However, one explanation of matrix multiplication is given here.   We want to find $\boldsymbol{A} \times  \boldsymbol{B}$ where
+\begin{displaymath}
+\mathbf{A} = 
+\left( \begin{array}{rr}
+1 & 5 \\
+1 & 2 \\
+3 & 8 \\
+\end{array}
+\right)
+\ \mbox{and}\ \mathbf{B} = 
+\left( \begin{array}{rr}
+1 & 4 \\
+3 & 2 \\
+\end{array}
+\right)
+\end{displaymath}
+
+If \textbf{A} is of size $m \times n$ it could be considered as consisting of a row of vectors $\boldsymbol{a_{1}^{T}}, \boldsymbol{a_{1}^{T}}, \ldots, \boldsymbol{a_{m}^{T}}$, which in this case corresponds to $\boldsymbol{a_{1}^{T}} = (1,5), \boldsymbol{a_{2}^{T}} = (1,2)$ and $\boldsymbol{a_{3}^{T}} = (3,8)$.   Likewise, we can consider $\mathbf{B}$ consisting of $\boldsymbol{b_{1}} = \left( \begin{array}{r} 1\\4 \end{array} \right)$ and  $\boldsymbol{b_{1}} = \left( \begin{array}{r} 3\\2 \end{array} \right)$.   In other words, we are trying to multiply together:
+\begin{displaymath}
+\mathbf{A} = 
+\left( \begin{array}{r}
+a_{1}^{T} \\
+a_{2}^{T}\\
+a_{3}^{T}\\
+\end{array}
+\right)
+\mbox{and}\ \mathbf{B} = 
+\left( \begin{array}{rr}
+b_{1} & b_{2}
+\end{array}
+\right)
+\end{displaymath}
+
+
+We can define the multiplication operation for matrices generally as:
+
+\begin{displaymath}
+\mathbf{AB} = 
+\left( \begin{array}{r}
+a_{1}^{T} \\
+a_{2}^{T}\\
+\ldots\\
+a_{m}^{T}\\
+\end{array}
+\right)
+\left( \begin{array}{rrrr}
+b_{1} & b_{2} & \ldots & b_{p}
+\end{array}
+\right)
+=
+\left( \begin{array}{rrrr}
+a_{1}^{T}b_{1} & a_{1}^{T}b_{2} & \ldots & a_{1}^{T}b_{p} \\
+a_{2}^{T}b_{1} & a_{2}^{T}b_{2} & \ldots &  a_{1}^{T}b_{p}\\
+\vdots & \vdots & & \vdots  \\
+a_{3}^{T}b_{1} & a_{3}^{T}b_{2} & \ldots &  a_{m}^{T}b_{p}\\
+\end{array}
+\right)
+\end{displaymath}
+
+In other words, we need to multiply row $i$ of $\boldsymbol{A}$ by column $j$ of $\boldsymbol{B}$ to give element $ij$ of the result.   For example, note that $\boldsymbol{a_{1}^T}\boldsymbol{b_{1}} = \left(\begin{array}{rr}1 & 5  \end{array}\right) \left( \begin{array}{r}1 \\4 \end{array}\right) = 1 \times 1 + 5 \times 3 = 16$.   Carrying out this operation on our matrices above gives:
+\begin{displaymath}
+\mathbf{AB} = 
+\left( \begin{array}{rr}
+1 & 5 \\
+1 & 2 \\
+3 & 8 \\
+\end{array}
+\right)
+\left( \begin{array}{rr}
+1 & 4 \\
+3 & 2 \\
+\end{array}
+\right)
+=
+\left(
+\begin{array}{rr}
+ 16 &  14\\
+ 7  &  8\\
+ 27 &  28
+\end{array}
+\right)
+\end{displaymath}
+
+
+In \R, we only need to use the \verb+%*%+ operator to ensure we are getting matrix multiplication:
+\singlespacing
+\begin{verbatim}
+> A <- matrix(c(1,1,3,5,2,8),3,2)
+> A
+     [,1] [,2]
+[1,]    1    5
+[2,]    1    2
+[3,]    3    8
+> B <- matrix(c(1,3,4,2),2,2)
+> B
+     [,1] [,2]
+[1,]    1    4
+[2,]    3    2
+> A %*% B
+     [,1] [,2]
+[1,]   16   14
+[2,]    7    8
+[3,]   27   28
+\end{verbatim}
+\onehalfspacing
+
+Note that you can't multiply non-conformable matrices; this is one place in \R where you get a clearly informative error message:
+\singlespacing
+\begin{verbatim}
+> B %*% A
+Error in B %*% A : non-conformable arguments
+\end{verbatim}
+\onehalfspacing
+
+It is particularly important to use the correct \emph{matrix multiplication} argument.   Depending on the matrices you are working with (if they both have the same dimensions), using the usual \verb+*+ multiplication operator will give you the Hadamard product, the element by element product of the two matrices which is rarely what you want:
+\singlespacing
+\begin{verbatim}
+> C <- matrix(c(1,1,3,5),2,2)
+> C %*% B ## correct call for matrix multiplication
+     [,1] [,2]
+[1,]   10   10
+[2,]   16   14
+> C * B ## Hadamard Product!!!
+     [,1] [,2]
+[1,]    1   12
+[2,]    3   10
+\end{verbatim}
+\onehalfspacing
+
+
+
+%\subsection{Some slightly obscure stuff}
+
+We saw earlier that matrix addition was commutative and associative.   But as you can imagine, given the need for comformability some differences may be anticipated between conventional multiplication and matrix multiplication.   Generally speaking, matrix multiplication is not commutative (you may like to think of exceptions):
+
+\begin{eqnarray*}
+\mbox{(non-commutative)} &&\mathbf{A} \times \mathbf{B} \neq \mathbf{B} \times \mathbf{A}\ \\
+\mbox{Associative law} && \mathbf{A} \times (\mathbf{B} \times \mathbf{C}) = (\mathbf{A} \times \mathbf{B}) \times \mathbf{C}
+\end{eqnarray*}
+
+And the distributive laws of multiplication over addition apply as much to matrix as conventional multiplication:
+
+\begin{eqnarray*}
+\mathbf{A} \times (\mathbf{B} + \mathbf{C}) = (\mathbf{A} \times \mathbf{B}) + (\mathbf{A} \times \mathbf{C}) \\
+(\mathbf{A} + \mathbf{B}) \times \mathbf{C} = (\mathbf{A} \times \mathbf{C}) + (\mathbf{B} \times \mathbf{C})
+\end{eqnarray*}
+
+
+But there are a few pitfalls if we start working with transposes.   Whilst
+\begin{displaymath}
+(\mathbf{A} + \mathbf{B})^{T} = \mathbf{A}^{T} + \mathbf{B}^{T}
+\end{displaymath}
+note that:
+\begin{displaymath}
+(\mathbf{A} \times \mathbf{B})^{T} = \mathbf{B}^{T} \times \mathbf{A}^{T}
+\end{displaymath}
+
+
+
+\subsection{Trace of a matrix}
+
+The trace of a matrix is the quite simply the sum of its diagonal elements.   This is an interesting concept in many ways, but it turns out in one specific context, when applied to the covariance matrix, this has an interpretation as the total sample variance.   There is no inbuilt function in \R to calculate this value, you need to use \verb+sum(diag(X))+
+
+Note that if you have two conformable matrices $\boldsymbol{A}$ $\mbox{e.g.}\ \left( \begin{array}{rr} 2 & 5 \\ 0 & 7 \\ 4 & 3\\ \end{array} \right)$ and $\boldsymbol{B}$ $\mbox{e.g.}\ \left( \begin{array}{rrr} 4 & 2 & 1 \\ 6 & 3 & 2 \end{array} \right)$, $trace(\boldsymbol{AB}) = trace(\boldsymbol{BA})$
+
+
+
+\section{Crossproduct matrix}
+
+Given the data matrix $\boldsymbol{X}$, the crossproduct, sometimes more fully referred to as the ``sum of squares and crossproducts'' matrix is given by $\boldsymbol{X}^{T}\boldsymbol{X}$.   The diagonals of this matrix are clearly the sum of squares of each column.   Whilst this can be computed in \R using \verb+X %*% t(X)+ there are some computational advantages in using the dedicated function \verb+crossprod(X)+   For example, coercing the \verb+USArrests+ data to a matrix we can obtain the sum of squares and crossproducts matrix for these data as follows:
+\singlespacing
+\begin{verbatim}
+B <- crossprod(as.matrix(USArrests))
+\end{verbatim}
+\onehalfspacing
+
+So if $\boldsymbol{X}$ is the \verb+USArrests+ data, 
+
+\begin{displaymath}
+\boldsymbol{X^{T}X} = \left[ \begin{array}{rrrr}
+3962.20 & 80756.00 & 25736.20 & 9394.32 \\
+80756.00 & 1798262.00 & 574882.00 & 206723.00 \\
+25736.20 & 574882.00 & 225041.00 & 72309.90 \\
+9394.32 & 206723.00 & 72309.90 & 26838.62 \\
+\end{array}
+\right]
+\end{displaymath}
+
+%(If you square each of the values for murder arrests, and then sum them you get 3962.2.   If you multiply the murder arrests by the corresponding assault arrests you get 80756.0 and so on).   Firstly, note that this matrix is square (there as many columns as rows).  But also note that this is an example of a symmetric matrix.  For example, the bottom left element is the same as the top right element, the second element in the first column is the same as the second element in the first row (you may also note that the line of symmetry runs from top left to bottom right).   Another example of a square matrix (we will be using it a lot) is the dispersion, or ``variance-covariance'' matrix.   Here:
+
+If we define some sample estimators as follows:
+
+\begin{equation}
+\bar{\boldsymbol{x}} = \frac{1}{n} \sum_{i=1}^{n} \boldsymbol{x}_{i} = \frac{1}{n} \boldsymbol{X}^{T}\boldsymbol{1}
+\end{equation}
+
+So for example we can find the sample mean for the USArrests data as:
+\singlespacing
+\begin{verbatim}
+> n <- dim(USArrests)[1] ## extract n; here 50
+> one <- ones(n)
+> 1/n * t(USArrests) %*% one
+> mean(USArrests) ## check results against in-built function
+\end{verbatim}
+\onehalfspacing
+
+We can use matrix algebra to obtain an unbiased estimate of the sample covariance matrix $\boldsymbol{S}$ as follows:
+\begin{eqnarray*}
+\boldsymbol{S} &=& \frac{1}{n-1} \sum_{i=1}^{n} (\boldsymbol{x}_{i} - \boldsymbol{\bar{x}})^{T} (\boldsymbol{x}_{i} - \boldsymbol{\bar{x}}) \\
+&=&   \sum_{i=1}^{n} \boldsymbol{x}_{i} \sum_{i=1}^{n} \boldsymbol{x}_{i}^{T} - \boldsymbol{\bar{x}}  \boldsymbol{\bar{x}}^{T}\\
+ &=& \frac{1}{n-1}\boldsymbol{X}^{T}\boldsymbol{X} - \boldsymbol{\bar{x}}  \boldsymbol{\bar{x}}^{T} \\
+&=& \frac{1}{n-1} \left( \boldsymbol{X}^{T}\boldsymbol{X} - \frac{1}{n} \boldsymbol{X}^{T} \boldsymbol{1} \boldsymbol{1}^{T} \boldsymbol{X} \right)
+\end{eqnarray*}
+
+From this, we can define the centering matrix $\boldsymbol{H}$:
+\begin{displaymath}
+\boldsymbol{H} = \boldsymbol{I} - \frac{1}{n} \boldsymbol{1}\boldsymbol{1}^{T}
+\end{displaymath}
+and so arrive at an alternative expression for $\boldsymbol{S}$ using this centering matrix:
+
+\begin{equation}
+\boldsymbol{S} = \frac{1}{n-1}\boldsymbol{X}^{T}\boldsymbol{H} \boldsymbol{X}
+\end{equation}
+
+\subsection{Idempotent matrices}
+
+It may be noted that $\boldsymbol{H}$ is idempotent, i.e.  $\boldsymbol{H} = \boldsymbol{H}^{T}$ and  $\boldsymbol{H} = \boldsymbol{H}^{2}$.
+
+In calculating $\boldsymbol{H}$ in $\R$ it might be clearer to set the steps out in a function:
+\singlespacing
+\begin{verbatim}
+centering <- function(n){
+ I.mat <- diag(rep(1, n)) 
+ Right.mat <- 1/n * ones(n) %*% t(ones(n))
+ H.mat <- I.mat - Right.mat
+ return(H.mat)
+}
+\end{verbatim}
+\onehalfspacing
+
+And our matrix method for finding an estimate of the sample covariance using this centering procedure can also be set out in a function:
+\singlespacing
+\begin{verbatim}
+S.mat <- function(X, H){
+n <- dim(X)[1] ## number of rows
+H.mat <- centering(n)
+S <- 1/(n-1) * t(X) %*% H.mat %*% X
+return(S)
+}
+\end{verbatim}
+\onehalfspacing
+
+So, to estimate the sample covariance with this function we need to make sure our data are in the form of matrix.   We also compare the results with the inbuilt function \verb+cov()+:
+\singlespacing
+\begin{verbatim}
+X <- as.matrix(USArrests)
+S.mat(X)
+cov(USArrests)
+\end{verbatim}
+\onehalfspacing
+
+It may be worth clarifying the information contained in the matrix we have just obtained.   The covariance matrix (more fully referred to as the variance-covariance matrix) contains information on the variance of each of the variables as well as information on pairwise covariance.   We will formalise our understanding of estimators later, but for now note that it could be considered as an estimate of:
+\begin{displaymath}
+\boldsymbol{\Sigma} = \boldsymbol{V} \left( 
+\begin{array}{c} 
+X_{1} \\ X_{2} \\ X_{3} \\ X_{4}
+\end{array} \right) = 
+\left( 
+\begin{array}{llll}
+var(X_{1}) & cov(X_{1},X_{2})  & cov(X_{1},X_{3}) & cov(X_{1},X_{4})\\
+cov(X_{2},X_{1}) & var(X_{2}) & cov(X_{2},X_{3}) & cov(X_{2},X_{4})\\
+cov(X_{3},X_{1})  & cov(X_{3},X_{2})\ & var(X_{3}) & cov(X_{3},X_{4})\\
+cov(X_{4},X_{1})  & cov(X_{4},X_{2})\ &  cov(X_{4},X_{3}) & var(X_{4}) \\
+\end{array} 
+\right)
+\end{displaymath}
+
+
+For the US Arrests data, as we have seen:
+\begin{displaymath}
+\boldsymbol{S} = 
+\left( 
+\begin{array}{rrrr}
+18.97 & 291.06 & 4.39 & 22.99 \\
+291.06 & 6945.17 & 312.28 & 519.27 \\
+4.39 & 312.28 & 209.52 & 55.77 \\
+22.99 & 519.27 & 55.77 & 87.73 \\
+\end{array} 
+\right)
+\end{displaymath}
+
+
+
+
+
+\subsection{Powers of matrices}
+
+We set out some definitions of matrix powers as they will come in useful later.For all matrices, we define $\mathbf{A^0} = \mathbf{I}$, the identity matrix and $\mathbf{A^1} = \mathbf{A}$.  We will next define $\mathbf{A^2} = \mathbf{AA}$ (if you think about it a bit you could see that $\mathbf{A}$ must be a square matrix, otherwise we couldn't carry out this multiplication).   Using these definitions for matrix powers means that all the normal power arithmetic applies.   For example, $\mathbf{A^m} \times \mathbf{A^n} =  \mathbf{A^n} \times \mathbf{A^m} = \mathbf{A^{m+n}}$.   If you look closely, you can also see that the powers of a matrix are commutative which means that we can do fairly standard algebraic factorisation.   For example:
+\begin{displaymath}
+\mathbf{I} - \mathbf{A^2} = (\mathbf{I} + \mathbf{A})(\mathbf{I} - \mathbf{A})
+\end{displaymath} 
+which is a result we can use later.
+
+
+
+
+\subsection{Determinants}
+
+The determinant of a \emph{square} $p\times p$ matrix \textbf{A} is denoted as $\lvert \boldsymbol{A} \rvert$.   Finding the determinant of a $2 \times 2$ matrix is easy:
+
+\begin{displaymath}
+\lvert \boldsymbol{A} \rvert = det \left(\begin{array}{rr} a_{11} & a_{21} \\ a_{12} & a_{22} \end{array} \right) = a_{11} a_{22} - a_{12} a_{21}
+\end{displaymath}
+
+For matrices of order $>2$, partitioning the matrix into ``minors'' and ``cofactors'' is necessary.   Consider the following $3 \times 3$ matrix.
+
+\begin{displaymath}
+\boldsymbol{A} = \left( \begin{array}{rrr} a_{11} & a_{12} & a_{13} \\
+ a_{21} & a_{22} & a_{23} \\
+ a_{31} & a_{32} & a_{13} \end{array} \right)
+\end{displaymath}
+
+Any element $a_{ij}$ of this matrix has a corresponding square matrix formed by eliminating the row ($i$) and column ($j$) containing $a_{ij}$.   So if we were considering $a_{11}$, we would be interested in the square matrix $\boldsymbol{A_{-11}} =  \left( \begin{array}{rr} 
+ a_{22} & a_{23} \\
+ a_{32} & a_{13} \end{array} \right)$.   The determinant of this reduced matrix, $\lvert \boldsymbol{A_{-11}} \rvert$ is called the minor of $a_{11}$, and the product $c_{ij} = (-1)^{i+j}\lvert A_{-ij} \rvert = -1^{1+1} \lvert A_{-11}\rvert = \lvert A_{11} \rvert$ is called the cofactor of $a_{11}$.   The determinant of $\boldsymbol{A}$ can be expressed as the sum of minors and cofactors of any row or column of $\boldsymbol{A}$.
+
+Thus:
+\begin{displaymath}
+\lvert \boldsymbol{A} \rvert = \Sigma_{j = 1}^{p} a_{ij} c_{ij}
+\end{displaymath}
+and as can be seen, this can get terribly recursive if you're working by hand!   Working an example through:
+\begin{displaymath}
+\mbox{If} \boldsymbol{A} = \left( \begin{array}{rrr} 3 & 4 & 6 \\
+ 1 & 2 & 3 \\
+ 5 & 7 & 9 \end{array} \right)
+\end{displaymath}
+
+Then $\lvert \boldsymbol{A} \lvert = a_{i1}c_{i1} +  a_{i2}c_{i2} +  a_{i3}c_{i3}$.   If $i=1$ then:
+
+\begin{eqnarray*}
+c_{11} &=& (-1)^{1+1} \left| \begin{array}{rr} 2 & 3 \\7 & 9 \end{array} \right| = (18-21) = -3\\ 
+c_{11} &=& (-1)^{1+2} \left| \begin{array}{rr} 1 & 3 \\5 & 9 \end{array} \right| = -(9-15) = 6\\
+c_{11} &=& (-1)^{1+1} \left| \begin{array}{rr} 1 & 2 \\5 & 7 \end{array} \right| = (7-10) = -3
+\end{eqnarray*}
+
+So $\lvert \boldsymbol{A}  \rvert = 3(-3) + 4(6) + 6(-3) = -3$.
+
+%\begin{displaymath}
+%|\boldsymbol{A}| = \Sigma_{j = 1}^{p} a_{1j}|\boldsymbol{A_{1j}}|(-1)^{1+j}
+%\end{displaymath}
+
+%where $k > 1$.
+
+
+In \R, \texttt{det()} tries to find the determinant of a matrix.
+
+\singlespacing
+\begin{verbatim}
+> D <- matrix(c(5,3,9,6),2,2)
+> D
+     [,1] [,2]
+[1,]    5    9
+[2,]    3    6
+> det(D)
+[1] 3
+> E <- matrix(c(1,2,3,6),2,2)
+> E
+     [,1] [,2]
+[1,]    1    3
+[2,]    2    6
+> det(E)
+[1] 0
+\end{verbatim}
+\onehalfspacing
+
+Some useful properties of determinants:
+
+\begin{itemize}
+\item The determinant of a diagonal matrix (or a triangular matrix for that matter) is the product of the diagonal elements.   (Why?).   
+\item For any scalar $k$, $|k\boldsymbol{A}| = k^{n}|\boldsymbol{A}|$, where $\boldsymbol{A}$ has size $n \times n$.   
+\item If two rows or columns of a matrix are interchanged, the sign of the determinant changes.   
+\item If two rows or columns are equal or proportional (see material on rank later), the determinant is zero.   
+\item The determinant is unchanged by adding a multiple of some column (row) to any other column (row).   
+\item If all the elements or a column / row are zero then the determinant is zero.   
+\item If two $n \times n$ matrices are denoted by $\boldsymbol{A}$ and $\boldsymbol{B}$, then $|\boldsymbol{AB}| = |\boldsymbol{A}|.|\boldsymbol{B}|$.
+\end{itemize}
+
+The determinant of a variance-covariance has a rather challenging interpretation as the generalised variance.
+
+%\section{Rank, determinants, inversion, positive and semi-positive definite matrices}
+%\label{rankpd}
+
+%\section{Eigen decomposition}
+%\label{eigen}
+
+%\section{Singular Value decomposition}
+%\label{svd}
+
+%\section{Outline of other matrix decompositions, square roots (e.g. LD / cholesky)}
+%\label{other}
+
+\subsection{Rank of a matrix}
+
+Rank denotes the number of linearly independent rows or columns.   For example:
+
+\begin{displaymath}  
+\left( \begin{array}{rrr} 1 & 1 & 1 \\ 2 & 5 & -1 \\ 0 & 1 & -1 \end{array} \right)
+\end{displaymath}
+
+This matrix has dimension $3 \times 3$, but only has rank 2.   The second column $\boldsymbol{a_{2}}$ can be found from the other two columns as   $\boldsymbol{a_{2}}= 2 \boldsymbol{a_{1}} - \boldsymbol{a_{3}}$.
+
+If all the rows and columns of a square matrix \textbf{A} are linearly independent it is said to be of full rank and non-singular.
+
+If \textbf{A} is singular, then $\lvert \boldsymbol{A} \rvert = 0$.
+
+
+
+\section{Matrix inversion}
+
+If \textbf{A} is a non-singular $p \times p$ matrix, then there is a unique matrix \textbf{B} such that $\boldsymbol{A B} = \boldsymbol{B A} = \boldsymbol{I}$, where \textbf{I} is the identity matrix given earlier.   In this case, \textbf{B} is the inverse of \textbf{A}, and denoted $\boldsymbol{A^{-1}}$.
+
+
+Inversion is quite straightforward for a $2 \times 2$ matrix.   
+
+\begin{displaymath}
+\mbox{If}\ \boldsymbol{A} = \left( \begin{array}{rr} a_{11} & a_{12} \\ a_{21} & a_{22} \end{array} \right)\ \mbox{then}\ \boldsymbol{A}^{-1} = \frac{1}{|\boldsymbol{A}|} \left( \begin{array}{rr} a_{22} & -a_{12} \\ -a_{21} & a_{11} \end{array} \right)
+\end{displaymath}
+
+More generally for a matrix of order $n \times n$, the (j,k)th entry of $\boldsymbol{A^{-1}}$ is given by:
+\begin{displaymath}
+\left[\frac{\lvert \boldsymbol{A_{-jk}} \rvert}{\lvert \boldsymbol{A}\rvert}\right]^{(-1)^{j+k}},
+\end{displaymath}
+where $\boldsymbol{A_{-jk}}$ is the matrix formed by deleting the $j$th row and $k$th column of $\boldsymbol{A}$.   Note that a singular matrix has no inverse since its determinant is 0.
+
+In \R, we use \texttt{solve()} to invert a matrix (or solve a system of equations if you have a second matrix in the function call, if we don't specify a second matrix R assumes we want to solve against the identity matrix, which mean finding the inverse).
+
+\singlespacing
+\begin{verbatim}
+> D <- matrix(c(5,3,9,6),2,2)
+> solve(D)
+     [,1]      [,2]
+[1,]    2 -3.000000
+[2,]   -1  1.666667
+\end{verbatim}
+\onehalfspacing
+
+Some properties of inverses:
+
+\begin{itemize}
+\item The inverse of a symmetric matrix is also symmetric.  
+\item The inverse of the transpose of $\boldsymbol{A}$ is the transpose of $\boldsymbol{A}^{-1}$.   
+\item The inverse of the product of several square matrices is a little more subtle:   $(\boldsymbol{A} \boldsymbol{B} \boldsymbol{C})^{-1} = \boldsymbol{C}^{-1} \boldsymbol{B}^{-1} \boldsymbol{A}^{-1}$.   If c is a non-zero scalar then $(c\boldsymbol{A})^{-1} = c^{-1}\boldsymbol{A}^{-1}$.   
+\item The inverse of a diagonal matrix is really easy - the reciprocals of the original elements.
+\end{itemize}
+
+%\section{Length, Orthogonality and Normalisation}
+
+%\subsection{Length}
+
+%The length of a vector is based on a geometrical idea - the distance from the origin.   It is given by the Pythagorean forumula:
+
+%\begin{displaymath}
+%L = \sqrt{x_{1}^{2} + x_{2}^{2} \ldots x_{p}^{2}}
+%\end{displaymath}
+
+%Using matrix (well vector) operations you could find this with $\sqrt{\boldsymbol{x}^{T}\boldsymbol{x}}$.
+
+
+
+%\subsection{Normalisation}
+
+%A vector \textbf{x} is normalised if $\boldsymbol{x}^{T} \boldsymbol{x} = 1$.   Any vector $\boldsymbol{x}$ can be normalised by diving each element of $\boldsymbol{x}$ by $\sqrt{\boldsymbol{x}^{T} \boldsymbol{x}}$ (i.e. the square root of the sum of squares of the elements.
+
+
+
+
+\section{Eigen values and eigen vectors}
+
+These decompositions will form the core of at least half our multivariate methods (although we need to mention at some point that we actually tend to use the singular value decomposition as a means of getting to these values).   If $\boldsymbol{A}$ is a square $p \times p$ matrix, the eigenvalues (latent roots, characteristic roots) are the roots of the equation:
+
+\begin{displaymath}
+|\boldsymbol{A} - \lambda \boldsymbol{I}| = \boldsymbol{0}
+\end{displaymath}
+
+This (characteristic) equation is a polynomial of degree $p$ in $\lambda$.   The roots, the eigenvalues of $\boldsymbol{A}$ are denoted by $\lambda_{1}, \lambda_{2}, \ldots, \lambda_{p}$.   For each eigen value $\lambda_{i}$ there is a corresponding eigen vector $\boldsymbol{e}_{i}$ which can be found by solving:
+
+\begin{displaymath}
+(\boldsymbol{A} - \lambda_{i} \boldsymbol{I})\boldsymbol{e_{i}} = \boldsymbol{0}
+\end{displaymath}
+
+There are many solutions for $\boldsymbol{e_{i}}$.   For our (statistical) purposes, we usually set it to have length 1, i.e. we obtain a normalised eigenvector for $\lambda_{i}$ by $\boldsymbol{a_{i}} = \frac{\boldsymbol{e_{i}}}{\sqrt{\boldsymbol{e_{i}}^{T}\boldsymbol{e_{i}}}}$
+
+We pause to mention a couple of results that will be explored in much more detail later:
+\begin{itemize}
+\item[(a)] $trace(\boldsymbol{A}) = \Sigma_{i = 1}^{p} \lambda_{i}$
+
+\item[(b)] $|\boldsymbol{A}| = \prod_{i = 1}^{p} \lambda_{i}$
+\end{itemize}
+
+Also, if $\boldsymbol{A}$ is symmetric:
+
+\begin{itemize}
+\item[(c)] The normalised eigenvectors corresponding to unequal eigenvalues are orthonormal   (this is a bit of circular definition, if the eigenvalues are equal the corresponding eigenvectors are not unique, and one ``fix'' is to choose orthonormal eigenvectors).
+\item[(d)] Correlation and covariance matrices: are symmetric positive definite (or semi-definite).   If such a matrix is of full rank $p$ then all the eigen values are positive.   If the matrix is of rank $m < p$ then there will be $m$ positive eigenvalues and $p-m$ zero eigenvalues.
+\end{itemize}
+
+We will look at the \texttt{eigen()} function in \R to carry out these decompositions later.
+
+
+\section{Singular Value Decomposition}
+\label{svd}
+
+To be added.
+
+%We wish to examine $p$ variables measured on $N$ objects.   These are usually denoted by the $n \times p$ matrix $\boldsymbol{X}$, a swarm of $n$ points in $p-$dimensional space.   Typically we assume that the measurements follow a Multivariate Normal Distribution
+
+%\begin{itemize}
+%\item In many situations the MVN has been found to be an acceptable approximation to the true distribution
+%\item THe central limit theorem imples that variables may follow MVN
+%\item Normal theory is amenable to exact mathematical treatment
+%\end{itemize}
+
+%Multivariate normality can be assessed, and where necessary transofmral attempted.   However, calls to the CLT are often made.
+
+
+\section{Extended Cauchy-Schwarz Inequality}
+
+We met the rather amazing Cauchy Schwartz inequality earlier in section \ref{cauchyschwartz}.   Beautiful as this result may be, we actually need to use the \emph{extended} Cauchy Schwartz inequality.   For any non-zero vectors $\boldsymbol{x} \in \mathbb{R}$ and $\boldsymbol{y} \in \mathbb{R}$, with any positive definite $p \times p$ matrix $\boldsymbol{S}$:
+\begin{displaymath}
+\langle \boldsymbol{x}, \boldsymbol{y} \rangle^{2} \leq (\boldsymbol{x}^{T}\boldsymbol{S} \boldsymbol{x})(\boldsymbol{y}^{T}\boldsymbol{S}^{-1} \boldsymbol{y}), \mbox{ for all } \boldsymbol{x}, \boldsymbol{y} \in \mathbb{R}
+\end{displaymath}
+with equality if and only if $\boldsymbol{x} = \lambda \boldsymbol{S}\boldsymbol{y}$ for some $\lambda \in \mathbb{R}$.  Proofs are available for this result [page 291] \cite{Flury:1997}.   We will use this result when developing methods for discriminant analysis.
+
+\section{Partitioning}
+
+Finally, note that we can partition a large matrix into smaller ones:
+\begin{displaymath}
+\left( \begin{array}{rr|r} 2 & 5 & 4 \\
+\hline 
+0 & 7 & 8 \\ 
+4 & 3 & 4\\ 
+\end{array} 
+\right)
+\end{displaymath}
+
+So we could work with submatrices such as $\left(\begin{array}{rr} 0 & 7 \\ 4 & 3 \end{array} \right)$.
+
+e.g. If $\boldsymbol{X}$ was partitioned as $\left( \begin{array}{r} \boldsymbol{X_{1}} \\ \boldsymbol{X_{2}} \end{array} \right)$ and $\left( \begin{array}{rrr} \boldsymbol{Y_{1}} & \boldsymbol{Y_{2}} & \boldsymbol{Y_{3}} \end{array} \right)$ then:
+
+\begin{displaymath}
+\boldsymbol{XY} = \left( \begin{array}{rrr} \boldsymbol{X_{1}Y_{1}} & \boldsymbol{X_{1}Y_{2}} & \boldsymbol{X_{1}Y_{3}} \\
+ \boldsymbol{X_{2}Y_{1}} & \boldsymbol{X_{2}Y_{2}} & \boldsymbol{X_{2}Y_{3}}
+\end{array} \right)
+\end{displaymath}
+
+
+
+%More generally, if $\boldsymbol{x} = \left( \begin{array}{r} height \\ weight \end{array} \right)$ then $E(\boldsymbol{x}) = \left( \begin{array}{r} E(height) \\ E(weight) \end{array} \right) = \left( \begin{array}{r} \hat{\mu_{1}} \\ \hat{\mu_{2}} \end{array} \right) = \boldsymbol{\hat{\mu}}$.   Likewise:
+
+%\begin{displaymath}
+%Var(\boldsymbol{x}) = \left( \begin{array}{rr} Var(height) & Cov(height,weight) \\ Cov(weight,height) & Var(weight) \end{array} \right) = \boldsymbol{\hat{\Sigma}}
+%\end{displaymath}
+
+%Note that:
+
+%\begin{displaymath}
+%Var(\boldsymbol{x}) = E[(\boldsymbol{x} - \boldsymbol{\mu})(\boldsymbol{x} - \boldsymbol{\mu})^{T}]
+%\end{displaymath}
+
+%As we will find, we use linear combinations a lot in multivariate methods.   Therefore it may be worth noting that if $\boldsymbol{y} = \boldsymbol{a}^{T}\boldsymbol{x}$
+
+%\begin{displaymath}
+%E(\boldsymbol{y}) = E(\boldsymbol{a}^{T}\boldsymbol{x}) = \boldsymbol{a}^{T}E(\boldsymbol{x}) = \boldsymbol{a}^{T}\boldsymbol{\mu}
+%\end{displaymath}
+
+%And also therefore that:
+
+%\begin{displaymath}
+%Var(\boldsymbol{y}) = E(\boldsymbol{y} - \boldsymbol{\bar{y}}) = E(\boldsymbol{a}^{T}\boldsymbol{x} - \boldsymbol{a}^{T}\boldsymbol{\mu}) 
+%\end{displaymath}
+
+%= \boldsymbol{a}^{T}E(\boldsymbol{x}) - \boldsymbol{\mu}) = \boldsymbol{a}^{T}E(\boldsymbol{x}) - \boldsymbol{\mu})][[\boldsymbol{a}^{T}(\boldsymbol{x}) - \boldsymbol{\mu})]
+
+
+
+
+\section{Exercises}
+
+\begin{enumerate}
+\item Which of the following are orthogonal to each other:
+
+\begin{displaymath}
+\boldsymbol{x} = \left( \begin{array}{r} 1 \\ -2 \\ 3 \\ -4 \end{array} \right)
+\boldsymbol{y} = \left( \begin{array}{r} 6 \\ 7 \\ 1 \\ -2 \end{array} \right)
+\boldsymbol{z} = \left( \begin{array}{r} 5 \\ -4 \\ 5 \\ 7 \end{array} \right)
+\end{displaymath}
+
+Normalise each of the two orthogonal vectors.
+
+
+\item Find vectors which are orthogonal to:
+
+
+\begin{displaymath}
+\boldsymbol{u} =  \left( \begin{array}{r} 1 \\ 3 \end{array} \right)
+\boldsymbol{v} = \left( \begin{array}{r} 2 \\ 4 \\ -1 \\ 2 \end{array} \right)
+\end{displaymath}
+
+\item Find vectors which are orthonormal to:
+
+
+\begin{displaymath}
+\boldsymbol{x} =  \left( \begin{array}{r} \frac{1}{\sqrt{2}} \\ 0 \\ -\frac{1}{\sqrt{2}} \end{array} \right)
+\boldsymbol{y} = \left( \begin{array}{r} \frac{1}{2} \\ \frac{1}{6} \\ \frac{1}{6} \\ \frac{5}{6} \end{array} \right)
+\end{displaymath}
+
+
+\item What are the determinants of:
+
+\begin{displaymath}
+(a) \left( \begin{array}{rr} 1 & 3 \\ 6 & 4 \end{array} \right)
+(b) \left( \begin{array}{rrr} 3 & 1 & 6 \\ 7 & 4 & 5 \\ 2 & -7 & 1 \end{array} \right)
+\end{displaymath}
+
+\item Invert the following matrices:
+
+\begin{displaymath}
+(a) \left( \begin{array}{rrr} 3 & 0 & 0 \\ 0 & 4 & 0 \\ 0 & 0 & 9 \end{array} \right)
+(b) \left( \begin{array}{rr} 2 & 3 \\ 1 & 5  \end{array} \right)
+(c) \left( \begin{array}{rrr} 3 & 2 & -1 \\ 1 & 4 & 7 \\ 0 & 4 & 2 \end{array} \right)
+(d) \left( \begin{array}{rrr} 1 & 1 & 1 \\ 2 & 5 & -1 \\ 3 & 1 & -1 \end{array} \right)
+\end{displaymath}
+
+
+\item Find eigenvalues and corresponding eigen vectors for the following matrices:
+
+
+\begin{displaymath}
+\boldsymbol{a} = \left( \begin{array}{rr} 1 & 4\\ 2 & 3 \end{array} \right)
+\boldsymbol{b} = \left( \begin{array}{rr} 1 & 2 \\ 3 & 2  \end{array} \right)
+\boldsymbol{c} = \left( \begin{array}{rr} 2 & -2 \\ -2 & 5 \end{array} \right)
+\boldsymbol{d} = \left( \begin{array}{rr} 2 & 2 \\ 2 & 5 \end{array} \right)
+\end{displaymath}
+
+\begin{displaymath}
+\boldsymbol{e} = \left( \begin{array}{rrr} 1 & 4 & 0\\ 4 & 1 & 0 \\ 0 & 0 & 1 \end{array} \right)
+\boldsymbol{f} = \left( \begin{array}{rrr} 4 & 0 & 0 \\ 0  & 9 & 0 \\ 0 & 0 & 1  \end{array} \right)
+\boldsymbol{g} = \left( \begin{array}{rrr} 13 & -4 & 2\\ -4 & 13 & -2 \\ 2 & -2 & 10 \end{array} \right)
+\end{displaymath}
+
+
+
+
+\item Convert the following covariance matrix (you've seen it earlier) to a correlation matrix, calculate the eigenvalues and eigenvectors and verify that the eigen vectors are orthogonal.
+
+\begin{displaymath}
+\boldsymbol{g} = \left( \begin{array}{rrr} 13 & -4 & 2\\ -4 & 13 & -2 \\ 2 & -2 & 10 \end{array} \right)
+\end{displaymath}
+
+\end{enumerate}
+
+
+
+%%% Local Variables: ***
+%%% mode:latex ***
+%%% TeX-master: "../book.tex"  ***
+%%% End: ***

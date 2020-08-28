@@ -1,0 +1,2586 @@
+#!/bin/sh
+# This is a shell archive (shar 3.32)
+# made 08/04/1993 18:07 UTC by ranger@nord.IRO.UMontreal.CA
+# Source directory /home/nord/ranger/domouSe/export/domouSe
+# *** Remove everything above the #!/bin/sh line.
+# *** Save the resulting text in a file.
+# *** Execute the file with /bin/sh to create the files.
+#
+# existing files WILL be overwritten
+#
+# This shar contains:
+# length  mode       name
+# ------ ---------- ------------------------------------------
+#   4348 -rw-r--r-- README
+#    434 -rwxr--r-- init
+#  21606 -rw-r--r-- S.source
+#    915 -rw-r--r-- Help/dom.dyn.load2
+#    964 -rw-r--r-- Help/eigen2
+#   1122 -rw-r--r-- Help/fquad
+#    723 -rw-r--r-- Help/gen.comb
+#    349 -rw-r--r-- Help/infl.A
+#   1436 -rw-r--r-- Help/infl.mult
+#   2098 -rw-r--r-- Help/influence
+#    407 -rw-r--r-- Help/robuste
+#    535 -rw-r--r-- Help/rohlf
+#    997 -rw-r--r-- Help/rv
+#    100 -rw-r--r-- Help/trace.mat
+#    671 -rw-r--r-- Help/varinfl
+#    815 -rw-r--r-- Help/wilks
+#   3430 -rw-r--r-- fquad.f
+#  28356 -rw-r--r-- robstS.f
+#
+if touch 2>&1 | fgrep 'amc' > /dev/null
+ then TOUCH=touch
+ else TOUCH=true
+fi
+# ============= README ==============
+echo "x - extracting README (Text)"
+sed 's/^X//' << 'SHAR_EOF' > README &&
+X		*****  Notes on domouSe library  *****
+X
+X***  Installation  ***
+X
+XTo install the domouSe library:
+X
+X1) Verify (and, if need, change) the first three lines (variables SS,
+X   F77C and LDRDO) of the file init to ensure that they are compatible
+X   with your environment.
+X
+X2) Execute this file.  Type:
+X	init
+X  Note: Under certain environments, the FORTRAN compilation step causes
+X         these messages:
+Xfquad.f:
+XWarning on line 99 of fquad.f: there is a branch to label 24 from outside block
+XWarning on line 108 of fquad.f: there is a branch to label 25 from outside block
+XrobstS.f:
+Xas1: Warning: , line 0: Floating exception in conversion to binary
+X
+X3) After some preliminary verifications, you can remove some files:
+X	rm -r Help S.source
+X
+X4) Try the library with S or S-PLUS
+X
+X***  S functions  ***
+X
+XThis library contains 13 functions useful in detection of multivariate
+Xoutliers:
+X1) Main functions
+Xinfl.mult:      influence function of all subsets of size k of a data matrix or
+X                a given subset of size k
+Xinfluence:      influence function of a data matrix with various vector
+X                correlation coefficients.
+Xrobuste:        robust estimation of the covariance matrix and mean vector
+Xrv:             computation of a vector correlation coefficient (4 possible
+X                values, see below)
+X2) Utility functions for detection of outliers
+Xrohlf:          Generalised Gap Test for multivariate outliers (Rohlf)
+Xwilks:          Wilks's test and Rohlf's distance in detection of multivariate
+X                statistical outliers
+X3) Utility functions
+Xdom.dyn.load2:  function for the dynamic loading of the object file domouSe.o
+X		before calling the functions fquad() or robuste().  This is a
+X		version of the S-PLUS function dyn.load2()
+Xeigen2:		eigen analysis of real matrix
+Xfquad:		approximation of the distribution function F(x) = P(Q <= x)
+X		where Q is a linear combination of Chi-square variables
+Xgen.comb:	to generate from a "combination" the "next combination"
+Xinfl.A:		used in the computation of the variance of the influence
+X		function
+Xtrace.mat:	trace of a matrix
+Xvarinfl:	variance of the influence function
+X
+X***  Theory  ***
+X
+XRV coefficients
+X
+X	The four vector correlation coefficients are:
+X
+X          tr(S  S  )
+X              12 21
+XRV = --------------------
+X              2      2
+X     sqrt[tr(S  )tr(S  )]
+X              11     22
+X
+X
+X           tr[sqrt(S  S  )]
+X                    12 21
+XRVls =   --------------------
+X         sqrt[tr(S  )tr(S  )]
+X                  11     22
+X
+X
+X                     -1    2
+X        sqrt{tr[(S  S  S  ) ]}
+X                  12 22 21
+XRVreg = ----------------------
+X                     2
+X            sqrt[tr(S  )]
+X                     11
+X
+X
+X             -1 
+X      tr(S  S  S  )
+X          12 22 21
+XRVi = -------------
+X         tr(S  )
+X             11
+Xwhere
+X	tr() means trace of a matrix,
+X                                   _      _
+X                                  |        |
+X                                  | S   S  |
+X        the covariance matrix S = |  11  12|
+X                                  | S   S  |
+X                                  |  21  22|
+X                                  |_      _|
+Xand  S   is the covariance matrix between the vector X and X
+X      ij                                              i     j
+X
+X
+XSee also these references:
+X
+X- Cleroux, R., Helbling, J.-M., Ranger, N., DOMOUSE: Detection Of Multivariate 
+X 	Outliers Using S Environment, Proceedings. of COMPSTAT 10, Vol 1,
+X	Physica-Verlag 1992, 71-75.
+X- Cleroux, R., Helbling, J.-M., Ranger, N., Detection d'ensembles de donnees
+X	aberrantes en analyse des donnees multivariees, Revue Statistique
+X	Appliquee, XXXVIII (1), 1990,  5-21.
+X- Cleroux, R., Helbling, J.-M., Ranger, N., Influential Subsets Diagnostics 
+X	Based on Multiple Correlation, Computational Statistics Quartely 2,
+X	1989, 99-117.
+X- Cleroux, R., Helbling, J.-M., Ranger, N., Some Methods of Detecting
+X	Multivariate Outliers, Computational Statistics Quartely 3, 1986,
+X	177-195.
+X
+X***  Notes  ***
+X
+XThese functions were written for our own needs, no warrantee of any kind
+Xis given.  No copyright is claimed but the software can be freely used for
+Xnon-commercial purposes and may be freely distributed with mentions
+Xof the authors.
+X
+XFor information or problems with these functions, e-mail to:
+X		ranger@iro.umontreal.ca
+X		helbling@masg6.epfl.ch
+X
+X
+SHAR_EOF
+$TOUCH -am 0804132793 README &&
+chmod 0644 README ||
+echo "restore of README failed"
+set `wc -c README`;Wc_c=$1
+if test "$Wc_c" != "4348"; then
+	echo original size 4348, current size $Wc_c
+fi
+# ============= init ==============
+echo "x - extracting init (Text)"
+sed 's/^X//' << 'SHAR_EOF' > init &&
+X#!/bin/csh
+Xset SS = "S" # or the Splus command
+Xset F77C = "f77 -c" # Compile and create object files in FORTRAN
+X		    # Under certain environments, try "f77 -c -G 0"
+Xset LDRDO = "ld -r -d -o" # Construct a single relocatable object file by
+X                          # combining the individual object files
+Xmkdir .Data ; mkdir .Data/.Help
+Xcp Help/* .Data/.Help/.
+X$SS < S.source
+X$F77C fquad.f robstS.f
+X$LDRDO domouSe.o fquad.o robstS.o
+SHAR_EOF
+$TOUCH -am 0804132893 init &&
+chmod 0744 init ||
+echo "restore of init failed"
+set `wc -c init`;Wc_c=$1
+if test "$Wc_c" != "434"; then
+	echo original size 434, current size $Wc_c
+fi
+# ============= S.source ==============
+echo "x - extracting S.source (Text)"
+sed 's/^X//' << 'SHAR_EOF' > S.source &&
+X"dom.dyn.load2"<-
+Xfunction(names, userlibs = "", syslibs = NULL, size = 100000, path = NULL)
+X{
+X# function dom.dyn.load2
+X#
+X# This function is a version of the original S function dyn.load.  Taken
+X# from the S NEWS and programmed by Bill Dunlap and adapted (argument path).
+X#
+X# names : the names of object files
+X# userlibs : the names of libraries like -limsl or -llinpack
+X# syslibs : libraries that almost everyone wants
+X#		(warning: machine implementation)
+X# size : the expected size (in bytes) of code added to S
+X#        (If this is insufficient, ld will be rerun after allocating
+X#         more space.)
+X	if(length(names) == 0) return(char(0))
+X	if(!is.null(path))
+X		names <- paste(path, names, sep = "")
+X	ld.tail <- paste(sep = " ", collapse = " ", names, userlibs, syslibs)
+X	method <- 1	# use 'ld -A ...'
+X	invisible(.Internal(dyn.load(ld.tail, size, method), "S_dynload"))
+X}
+X"eigen2"<-
+Xfunction(x, symmetric = all(t(x) == x))
+X{
+X# function eigen2
+X#
+X# This is the function eigen adapted for a real non-symetric matrix.
+X# Tahen from S-NEWS network
+X#
+X	x <- as.matrix(x)
+X	storage.mode(x) <- "double"
+X	d <- dim(x)
+X	p <- d[1]
+X	if(p != d[2])
+X		stop("Eigenvalues only defined for square matrices")
+X	if(!symmetric) {
+X		z <- .Fortran("rg",
+X			as.integer(p),
+X			as.integer(p),
+X			x,
+X			values = double(p),
+X			ivalues = double(p),
+X			T,
+X			vectors = x,
+X			integer(p),
+X			double(p),
+X			error.code = integer(1))
+X		if(z$error.code)
+X			stop(paste("Eigen algorithm (rg) returned error code", 
+X				z$error.code))
+X		w <- seq(p)[z$ivalues > 0]
+X		n <- length(w)
+X		if(n > 0) {
+X			z$vectors[, w] <- z$vectors[, w] + (1i) * z$vectors[, w +
+X				1]
+X			z$vectors[, w + 1] <- Conj(z$vectors[, w])
+X			z$values <- z$values + (1i) * z$ivalues
+X		}
+X		ord <- rev(order(Mod(z$values)))
+X	}
+X	else {
+X		z <- .Fortran("crs",
+X			x,
+X			as.integer(d),
+X			T,
+X			values = double(p),
+X			vectors = matrix(0, p, p),
+X			double(p),
+X			double(p),
+X			error.code = integer(1))
+X		if(z$error.code)
+X			stop(paste("Eigen algorithm (crs) returned error code", 
+X				z$error.code))
+X		ord <- p:1
+X	}
+X	return(list(values = z$values[ord], vectors = z$vectors[, ord]))
+X}
+X"fquad"<-
+Xfunction(coef, x, mult = rep(1, length(coef)), delta = rep(0, length(coef)))
+X{
+X# function fquad
+X#
+X# Computes P(Q < x) where Q = sum of Chi-square with multiplicity mult and
+X#	the non-centrality parameters delta.
+X# From the FORTRAN subroutine fquad in the chapter 9 of:
+X#       'ON THE THEORY AND APPLICATION OF THE GENERAL LINEAR MODEL' DE
+X#       J. KOERTS ET A.P.J. ABRAHAMSE, ROTTERDAM UNIVERSITY PRESS, 1969.
+X#     METHOD : THE INTEGRAL DERIVED BY IMHOF IS USED AND NUMERICALLY
+X#              INTEGRATED BY SIMPSON'S RULE
+X#     REFERENCE : 'COMPUTING THE DISTRIBUTION OF QUADRATIC FORMS IN
+X#                  NORMAL VARIABLES' BY J.P. IMHOF
+X#                  BIOMETRIKA (1961), 48, 3 AND 4, P. 419
+X#
+X	if(any(abs(coef) <= 1e-08)) {
+X		warning(paste("\007\n Warning: the algorithm of fquad is not ``efficient'' for\n some small values of the coefficients < abs(1e-8)\nThese coefficients are forced to zeroes\nVector of coefficients:",
+X			paste(coef, collapse = ",")))
+X		coef <- coef[abs(coef) > 1e-08]
+X	}
+X	if(length(coef) == 1)
+X		stop("\007\n Warning: FQUAD is not good for the sum of 1 Chi-square.\n Try the S function pchisq..."
+X			)
+X	nc <- length(coef)
+X	storage.mode(coef) <- "single"
+X	storage.mode(mult) <- "integer"
+X	storage.mode(delta) <- "single"	#
+X# We assume that the object UNIX file fquad.o loaded by the function dyn.load2
+X	prob <- .Fortran("fquad",
+X		d = coef,
+X		nr = as.integer(nc),
+X		mult = mult,
+X		fd = as.single(0),
+X		eps1 = as.single(0.0001),
+X		eps2 = as.single(0.0001),
+X		delta = delta,
+X		xkrit = as.single(x))$fd
+X	prob <- ifelse(prob < 0, 0, prob)
+X	prob <- ifelse(prob > 1, 1, prob)
+X	prob
+X}
+X"gen.comb"<-
+Xfunction(vect, i, n, p)
+X{
+X# fonction gen.comb
+X#
+X# fonction utilitaire generant a partir d'une combinaison dans vect, la 
+X# combinaison "suivante" parmi les nombres 1 a n pris p a la fois
+X#
+X	if(vect[i] == n - p + i) {
+X		if(i == 1)
+X			vect <- (1:p)
+X		else vect <- gen.comb(vect, i - 1, n, p)
+X	}
+X	else {
+X		vect[i] <- vect[i] + 1
+X		if(i != p)
+X			for(j in ((i + 1):p))
+X				vect[j] <- vect[j - 1] + 1
+X	}
+X	vect
+X}
+X"infl.A"<-
+Xfunction(type, rv, cov, p)
+X{
+X# function infl.A
+X#
+X	if(!is.matrix(cov)) {
+X		if(is.list(cov) && any(names(cov) == "covariance"))
+X			cov <- cov$covariance
+X		else stop("\nThe argument cov is not a matrix or a list with an element named covariance!!!"
+X				)
+X	}
+X	i1 <- (1:p)
+X	i2 <- ((p + 1):nrow(cov))
+X	switch(type,
+X		rv = {
+X			A <- cov
+X			denom <- trace.mat(cov[i1, i2] %*% cov[i2, i1])
+X			A[i1, i1] <- .Uminus(A[i1, i1])/trace.mat(cov[i1, i1] %*% 
+X				cov[i1, i1])
+X			A[i1, i2] <- A[i1, i2]/denom
+X			A[i2, i1] <- A[i2, i1]/denom
+X			A[i2, i2] <- .Uminus(A[i2, i2])/trace.mat(cov[i2, i2] %*% 
+X				cov[i2, i2])
+X		}
+X		,
+X		rvreg = {
+X			B <- cov[i1, i2] %*% solve(cov[i2, i2])
+X			S11 <- B %*% cov[i2, i1]
+X			trS11S11 <- trace.mat(S11 %*% S11)
+X			A <- matrix(nrow = nrow(cov), ncol = nrow(cov))
+X			A[i1, i1] <- .Uminus(cov[i1, i1])/trace.mat(cov[i1, i1] %*%
+X				cov[i1, i1])
+X			A[i1, i2] <- S11 %*% B/trS11S11
+X			A[i2, i1] <- t(A[i1, i2])
+X			A[i2, i2] <- .Uminus(A[i2, i1]) %*% B
+X		}
+X		,
+X		rvls = {
+X			A <- matrix(nrow = nrow(cov), ncol = nrow(cov))
+X			temp <- eigen(cov[i1, i2] %*% cov[i2, i1])
+X			if(length(temp$values) == 1) {
+X				temp$vectors <- as.matrix(temp$vectors)
+X				temp$values <- as.matrix(temp$values)
+X			}
+X			if(any(temp$values < 0)) {
+X				warning(paste(
+X				  "\007\n Some eigenvalues are < 0\n Eigenvalues are:",
+X				  paste(temp$values, collapse = ","), 
+X				  "\n Negative eigenvalues > -1.E-7 were forced to zeroes\n"
+X				  ))
+X				temp$values[temp$values > 
+X				  -9.9999999999999995e-08 & temp$values < 0] <- 
+X				  0
+X			}
+X			H <- temp$vectors %*% diag(sqrt(temp$values)) %*% t(
+X				temp$vectors)
+X			H.1 <- solve(H) %*% cov[i1, i2]
+X			trH <- trace.mat(H)
+X			A[i1, i1] <- (.Uminus(diag(p)))/trace.mat(cov[i1, i1])
+X			A[i1, i2] <- H.1/trH
+X			A[i2, i1] <- t(H.1)/trH
+X			A[i2, i2] <- (.Uminus(diag(length(i2))))/trace.mat(cov[
+X				i2, i2])
+X			A <- A/2
+X		}
+X		,
+X		rvi = {
+X			A <- matrix(nrow = nrow(cov), ncol = nrow(cov))
+X			B <- cov[i1, i2] %*% solve(cov[i2, i2])
+X			Setoile <- B %*% cov[i2, i1]
+X			trSetoile <- trace.mat(Setoile)
+X			A[i1, i1] <- (.Uminus(diag(p)))/trace.mat(cov[i1, i1])
+X			A[i1, i2] <- B/trSetoile
+X			A[i2, i1] <- t(A[i1, i2])
+X			A[i2, i2] <- .Uminus((t(B) %*% B))/trSetoile
+X		}
+X		)
+X	A * rv
+X}
+X"infl.mult"<-
+Xfunction(type, x, p, cov, ntuple, extrem = ceiling(0.10000000000000001 * nrow(x
+X	)))
+X{
+X# function infl.mult
+X#
+X	n <- nrow(x)
+X	rv <- rv(type, cov, p, T)
+X	A <- infl.A(type, rv, cov, p)
+X	lrobust <- ifelse(is.list(cov) && any(names(cov) == "covariance"), T, F
+X		)
+X	if(is.list(ntuple)) {
+X		l <- NULL
+X		for(i in ntuple)
+X			l <- c(l, length(i))
+X		maxl <- max(l)
+X		resul <- vector("list", maxl)
+X		for(i in ntuple) {
+X			l <- length(i)
+X			x.tuple <- apply(matrix(x[i,  ], nrow = l), 2, mean)
+X			infl <- l * influence(type, x, p, cov, x.tuple, graph
+X				 = F, cal.A = F, A = A)$infl
+X			resul[[l]] <- rbind(resul[[l]], c(i, infl))
+X		}
+X		final <- list()
+X		for(i in resul)
+X			if(!is.null(i)) {
+X				final[[length(final) + 1]] <- i
+X				lf <- length(final)
+X				names(final)[lf] <- paste(ncol(i) - 1, ".tuple",
+X				  sep = "")
+X				dimnames(final[[lf]]) <- list(rep("", nrow(
+X				  final[[lf]])), c(rep("No.", ncol(final[[lf]]) -
+X				  1), "Influence"))
+X			}
+X	}
+X	else {
+X		comb <- ((n + 1 - ntuple):n)
+X		l <- prod(comb/(1:length(comb)))
+X		cat("\007\n It will take many seconds (minutes?, hours?) to compute all the influence functions...\n Be patient...\n"
+X			)
+X		min.ext <- matrix(rep(c(rep(NA, ntuple), 10000000000), extrem), 
+X			byrow = T, nrow = extrem)
+X		max.ext <- .Uminus(min.ext)
+X		for(i in (1:l)) {
+X			comb <- gen.comb(comb, ntuple, n, ntuple)
+X			xcomb <- apply(matrix(x[comb,  ], nrow = ntuple), 2, 
+X				mean)
+X			infl <- ntuple * influence(type, x, p, cov, xcomb, 
+X				graph = F, cal.A = F, A = A)$infl
+X			position <- infl < min.ext[, ntuple + 1]
+X			if(any(position)) {
+X				pos <- min((1:extrem)[position])
+X				if(pos == 1)
+X				  min.ext <- rbind(c(comb, infl), min.ext[
+X				    .Uminus(extrem),  ])
+X				else {
+X				  if(pos == extrem)
+X				    min.ext <- rbind(min.ext[.Uminus(extrem),  
+X				      ], c(comb, infl))
+X				  else min.ext <- rbind(min.ext[1:(pos - 1),  ],
+X				      c(comb, infl), min.ext[pos:(extrem - 1),  
+X				      ])
+X				}
+X			}
+X			position <- infl > max.ext[, ntuple + 1]
+X			if(any(position)) {
+X				pos <- max((1:extrem)[position])
+X				if(pos == 1)
+X				  max.ext <- rbind(c(comb, infl), max.ext[-1,  
+X				    ])
+X				else {
+X				  if(pos == extrem)
+X				    max.ext <- rbind(max.ext[-1,  ], c(comb, 
+X				      infl))
+X				  else max.ext <- rbind(max.ext[2:pos,  ], c(
+X				      comb, infl), max.ext[(pos + 1):extrem,  ]
+X				      )
+X				}
+X			}
+X		}
+X		dimnames(min.ext) <- list(rep("", extrem), c(rep("No.", ntuple),
+X			"Influence"))
+X		dimnames(max.ext) <- dimnames(min.ext)
+X		final <- list(min = min.ext, max = max.ext)
+X	}
+X	attr(final, "Information.domouSe") <- c(paste("Data: object", deparse(
+X		substitute(x))), paste("Correlation:", type))
+X	if(lrobust)
+X		attr(final, "Information.domouSe") <- c(attributes(final)$
+X			Information.domouSe, "Robust estimation")
+X	final
+X}
+X"influence"<-
+Xfunction(type, x, p, cov, xsub = NULL, sub = NULL, graph = T, label = T, extrem
+X	 = if(label & is.null(xsub)) ceiling(0.025000000000000001 * nrow(x)), 
+X	cal.A = T, A = NULL)
+X{
+X# function influence
+X#
+X	if(is.list(cov) && any(names(cov) == "covariance")) {
+X		lrobust <- T
+X		mean.rob <- cov$mean
+X		cov <- cov$covariance
+X	}
+X	else lrobust <- F
+X	if(is.null(xsub))
+X		xxsub <- x
+X	else xxsub <- xsub
+X	if(is.matrix(xxsub)) {
+X		n <- nrow(xxsub)
+X		if(is.null(sub))
+X			sub <- (1:n)
+X		sub <- sort(sub)
+X		if(sub[1] < 1 | sub[length(sub)] > n)
+X			stop("\007\n Error in the argument sub")
+X		if(lrobust)
+X			z <- t(apply(xxsub, 1, "-", mean.rob))[sub,  ]
+X		else z <- t(apply(xxsub, 1, "-", apply(x, 2, mean)))[sub,  ]
+X	}
+X	else {
+X		n <- 1
+X		if(lrobust)
+X			z <- t(apply(matrix(xxsub, nrow = 1), 1, "-", mean.rob)
+X				)
+X		else z <- t(apply(matrix(xxsub, nrow = 1), 1, "-", apply(x, 2, 
+X				mean)))
+X		sub <- 1
+X	}
+X	rv <- rv(type, cov, p, T)
+X	if(cal.A)
+X		A <- infl.A(type, rv, cov, p)
+X	else A <- A
+X	infl <- diag(z %*% A %*% t(z))
+X	var <- 2 * trace.mat(A %*% cov %*% A %*% cov)
+X	lsub <- length(sub)
+X	if(graph) {
+X		par(oma = c(0, 0, 3, 0))
+X		plot(1:lsub, infl, axes = F, xlab = "Sequence Number", ylab = 
+X			"Influence")
+X		mtext(paste("Influences (", type, ") (data: object ", deparse(
+X			substitute(x)), ")", sep = ""), 3, 3)
+X		if(lrobust)
+X			mtext("(Robust estimation)", 3, 2, cex = 
+X				0.69999999999999996)
+X		abline(h = 0)
+X		limite <- 3 * sqrt(var)
+X		if(limite < par("usr")[4])
+X			abline(h = limite, lty = 3)
+X		else cat("Any observation has an influence > 3 * sqrt(Var(Infl))\n"
+X				)
+X		if(.Uminus(limite) > par("usr")[3])
+X			abline(h = .Uminus(limite), lty = 3)
+X		else cat("Any observation has an influence < -3 * sqrt(Var(Infl))\n"
+X				)
+X		axis(2)
+X		axis(1, 1:lsub, paste(sub))
+X		box()
+X		mtext(paste(type, "=", round(rv, 3), " ; Var(Infl(X;", type, 
+X			"))=", round(var, 3), sep = ""), 3, 1)
+X		if(label) {
+X			ordre <- order(infl)
+X			inflo <- infl[ordre]
+X			seq <- sub[ordre]	#if(length(dimnames(x)[[1]]) > 0) {
+X			if(length(dimnames(xxsub)[[1]]) > 0) {
+X				etiq <- dimnames(xxsub)[[1]][sub]
+X				etiq <- etiq[ordre]
+X			}
+X			else etiq <- paste(seq)
+X			names(sub) <- etiq
+X			if(lsub == n) {
+X				ext <- c((1:extrem), ((n + 1 - extrem):n))
+X				text(seq[ext], inflo[ext], paste("    ", etiq[
+X				  ext]))
+X			}
+X		}
+X		par(oma = rep(0, 4))
+X		invisible(list(x = sub, y = infl))
+X	}
+X	else {
+X		if(n <= 1)
+X			prob.ext <- NULL
+X		else {
+X			valprop <- eigen2(cov %*% A, F)$values
+X			if(any(abs(Im(valprop)) > 1.0000000000000001e-15))
+X				stop(
+X				  "\007\n Warning, one of the eigenvales of the matrix SA has a non-zero imaginary part!!!"
+X				  )
+X			else valprop <- Re(valprop)
+X			ordre <- order(infl)
+X			if(is.null(dimnames(xxsub)[[1]]))
+X				info <- c(paste("(Data #", ordre[1], ")", sep
+X				   = ""), paste("(Data #", ordre[lsub], ")", 
+X				  sep = ""))
+X			else {
+X				nom <- dimnames(xxsub)[[1]][sub]
+X				info <- c(paste("(", nom[ordre[1]], ")", sep = 
+X				  ""), paste("(", nom[ordre[lsub]], ")", sep = 
+X				  ""))
+X			}
+X			prob.ext <- matrix(ncol = 3, nrow = 2, dimnames = list(
+X				c(paste("Min.", info[1]), paste("Max.", info[2]
+X				)), c("Infl.", "F(Infl.)", "Prob.")))
+X			prob.ext[, 1] <- c(infl[ordre[1]], infl[ordre[lsub]])
+X			prob.ext[, 2] <- c(fquad(valprop, prob.ext[1, 1]), 
+X				fquad(valprop, prob.ext[2, 1]))
+X			if(prob.ext[1, 2] < 0) {
+X				warning(
+X				  "The value of the influence function is too small...\n The probabibility is fixed to 0"
+X				  )
+X				prob.ext[1, 2] <- 0
+X			}
+X			if(prob.ext[2, 2] > 1) {
+X				warning(
+X				  "The value of the influence function is too large...\n The probabibility is fixed to 1"
+X				  )
+X				prob.ext[2, 2] <- 1
+X			}
+X			prob.ext[, 3] <- c(1 - (1 - prob.ext[1, 2])^lsub, 
+X				prob.ext[2, 2]^lsub)
+X		}
+X		if(is.null(dimnames(xxsub)[[1]]))
+X			names(infl) <- paste("Data #", sub, sep = "")
+X		else names(infl) <- dimnames(xxsub)[[1]][sub]
+X		resul <- list(rv = rv, var = var, infl = infl, prob.ext = 
+X			prob.ext)
+X		attr(resul, "Information.domouSe") <- c(paste("Data: object", 
+X			deparse(substitute(x))), paste("Correlation:", type), 
+X			attributes(cov)$Information.domouSe)
+X		attr(resul$rv, "Information.domouSe") <- NULL
+X		attr(resul$var, "Information.domouSe") <- NULL
+X		resul
+X	}
+X}
+X"robuste"<-
+Xfunction(x)
+X{
+X# function robuste
+X#
+X# Subroutine robsts computes the robust estimation of the covariance matrix
+X# of Huber et programmed by Marazzi (program ROBETH).
+X#
+X	x <- as.matrix(x)
+X	nobs <- nrow(x)
+X	nvar <- ncol(x)
+X	ncov <- (nvar * (nvar + 1))/2
+X	storage.mode(x) <- "single"	
+X	# We assume that the object UNIX file robstS.o loaded by the function
+X#	dyn.load2
+X	resul <- .Fortran("robsts",
+X		x = x,
+X		nobs = as.integer(nobs),
+X		nvar = as.integer(nvar),
+X		sz = single(nvar),
+X		ncov = as.integer(ncov),
+X		a = single(ncov),
+X		b = single(nvar),
+X		ainv = single(ncov),
+X		cov = single(ncov),
+X		sc1 = single(nvar),
+X		sc2 = single(ncov),
+X		istop = integer(2),
+X		messag = character(1))
+X	if(resul$istop[1] != -1) {
+X		if(resul$istop[2] == 0)
+X			warning(paste(
+X				"\007\n The FORTRAN subroutine robusts\n found one(or more) non fatal error message nb.",
+X				resul$istop[1], "in the subroutine", resul$
+X				messag, 
+X				"\n Check the source file of the subroutine robusts..."
+X				))
+X		else stop(paste("\007\n Warning: The FORTRAN subroutine robusts\n fatal found a fatal error message nb.",
+X				resul$istop[1], "in the subroutine", resul$
+X				messag, 
+X				"\n Check the source file of the subroutine robusts..."
+X				))
+X	}
+X	covect <- resul$cov
+X	covmat <- matrix(ncol = nvar, nrow = nvar, dimnames = list(dimnames(x)[[
+X		2]], dimnames(x)[[2]]))
+X	n <- 1
+X	for(i in (1:nvar)) {
+X		n <- n + i - 1
+X		covmat[i,  ] <- c(covect[n:(n + i - 1)], rep(0, nvar - i))
+X		if(i != 1)
+X			covmat[(1:(i - 1)), i] <- covmat[i, (1:(i - 1))]
+X	}
+X	meanvect <- resul$b
+X	names(meanvect) <- dimnames(x)[[2]]
+X	resul <- list(mean = meanvect, covariance = covmat)
+X	attr(resul$mean, "Information.domouSe") <- 
+X		"Robust estimation of the mean vector"
+X	attr(resul$covariance, "Information.domouSe") <- 
+X		"Robust estimation of the covariance matrix"
+X	resul
+X}
+X"rohlf"<-
+Xfunction(x, graph = T, titl = paste("data: objet", deparse(substitute(x))))
+X{
+X# function rohlf
+X#
+X# GENERALISED GAP TEST for multivariate outliers
+X# Based on "minimal spanning tree" algorithm.  Ref.:
+X# ROHLF,F.J.[1975].GENERALIZATION OF THE GAP TEST FOR
+X#	 THE DETECTION OF MULTIVARIATE OUTLIERS.BIOMETRICS 31, 93-101.
+X#
+X	mst <- mstree(t(t(x)/sqrt(apply(x, 2, var))))
+X	distance <- sqrt((mst$x[seq(mst$mst)] - mst$x[mst$mst])^2 + (mst$y[seq(
+X		mst$mst)] - mst$y[mst$mst])^2)
+X	n1 <- nrow(x) - 1
+X	distance <- matrix(c((1:n1), mst$mst, distance), ncol = 3, dimnames = 
+X		list(rep("", n1), c("Data #", "Data #", "Distance")))
+X	if(graph) {
+X		plot(mst, type = "n", main = paste("Rohlf's Test (", titl, ")", 
+X			sep = ""), xlab = "", ylab = "")
+X		text(mst)
+X		segments(mst$x[seq(mst$mst)], mst$y[seq(mst$mst)], mst$x[mst$
+X			mst], mst$y[mst$mst])
+X		max <- order(distance[, 3])[n1]
+X		if(distance[max, 3] <= 1)
+X			npoints <- 2
+X		else npoints <- ceiling(distance[max, 3]) * 3
+X		if(mst$x[distance[max, 1]] == mst$x[distance[max, 2]])
+X			xp <- rep(mst$x[distance[max, 1]], npoints)
+X		else xp <- seq(mst$x[distance[max, 1]], mst$x[distance[max, 2]],
+X				length = npoints)
+X		if(mst$y[distance[max, 1]] == mst$y[distance[max, 2]])
+X			yp <- rep(mst$y[distance[max, 1]], npoints)
+X		else yp <- seq(mst$y[distance[max, 1]], mst$y[distance[max, 2]],
+X				length = npoints)
+X		points(xp[.Uminus(c(1, npoints))], yp[.Uminus(c(1, npoints))])
+X		if(is.null(dimnames(x)[[1]]))
+X			noms <- c("", "")
+X		else noms <- c(paste("(", dimnames(x)[[1]][distance[max, 1]], 
+X				")", sep = ""), paste("(", dimnames(x)[[1]][
+X				distance[max, 2]], ")", sep = ""))
+X		mtext(paste("Maximum distance:", round(distance[max, 3], 2), 
+X			"between data", distance[max, 1], noms[1], "and", 
+X			distance[max, 2], noms[2]), 3)
+X		invisible(mst)
+X	}
+X	else {
+X		attr(distance, "Information.domouSe") <- paste("Data: object", 
+X			deparse(substitute(x)))
+X		distance
+X	}
+X}
+X"rv"<-
+Xfunction(type, x, p, cov = F, robust = F)
+X{
+X# function rv
+X#
+X	if(!cov) {
+X		if(nrow(x) < ncol(x))
+X			warning("\007\nNumber of rows of x < number of columns !!!"
+X				)
+X		if(robust)
+X			x <- robuste(x)$covariance
+X		else x <- var(x)
+X	}
+X	else if(is.list(x) && any(names(x) == "covariance"))
+X		x <- x$covariance
+X	dimnames(x) <- NULL
+X	i1 <- (1:p)
+X	i2 <- ((p + 1):nrow(x))
+X	rv <- switch(type,
+X		rv = {
+X			trace.mat(x[i1, i2] %*% x[i2, i1])/sqrt(trace.mat(x[i1, 
+X				i1] %*% x[i1, i1]) * trace.mat(x[i2, i2] %*% x[
+X				i2, i2]))
+X		}
+X		,
+X		rvreg = {
+X			num <- x[i1, i2] %*% solve(x[i2, i2]) %*% x[i2, i1]
+X			sqrt(trace.mat(num %*% num)/trace.mat(x[i1, i1] %*% x[
+X				i1, i1]))
+X		}
+X		,
+X		rvls = {
+X			propre <- eigen(x[i1, i2] %*% x[i2, i1])
+X			if(p == 1 | length(i2) == 1) {
+X				propre$vectors <- as.matrix(propre$vectors)
+X				propre$values <- as.matrix(propre$values)
+X			}
+X			if(any(propre$values < 0)) {
+X				warning(paste(
+X				  "\007\n Some eigenvalues are < 0\n Eigenvalues are:",
+X				  paste(propre$values, collapse = ","), 
+X				  "\n Negative eigenvalues > -1.E-7 were forced to zeroes\n"
+X				  ))
+X				propre$values[propre$values > 
+X				  -9.9999999999999995e-08 & propre$values < 0] <- 
+X				  0
+X			}
+X			trace.mat(propre$vectors %*% diag(sqrt(propre$values)) %*% 
+X				t(propre$vectors))/sqrt(trace.mat(x[i1, i1]) * 
+X				trace.mat(x[i2, i2]))
+X		}
+X		,
+X		rvi = trace.mat(x[i1, i2] %*% solve(x[i2, i2]) %*% x[i2, i1])/
+X			trace.mat(x[i1, i1]),
+X		stop("\007 \n Argument type must be one of these values:\n rv rvreg rvls rvi"
+X			))
+X	info <- ifelse(cov, "covariance matrix:", "data:")
+X	attr(rv, "Information.domouSe") <- c(paste("Based on", info, "object", 
+X		deparse(substitute(x))), paste("Correlation:", type))
+X	rv
+X}
+X"trace.mat"<-
+Xfunction(mat)
+X{
+X# function trace.mat: trace of a matrix
+X#
+X	sum(diag(as.matrix(mat)))
+X}
+X"varinfl"<-
+Xfunction(type, rv, cov, p)
+X{
+X# function varinfl
+X#
+X	A <- infl.A(type, rv, cov, p)
+X	if(is.list(cov) && any(names(cov) == "covariance"))
+X		var <- 2 * trace.mat(A %*% cov$covariance %*% A %*% cov$
+X			covariance)
+X	else var <- 2 * trace.mat(A %*% cov %*% A %*% cov)
+X	attr(var, "Information.domouSe") <- attr(rv, "Information.domouSe")
+X	var
+X}
+X"wilks"<-
+Xfunction(x, robust = F, graph = T, titl = paste("data: object", deparse(
+X	substitute(x))))
+X{
+X# function wilks 
+X# REFERENCES:
+X# WILKS,S.S.[1963].MULTIVARIATE STATISTICAL OUTLIERS.
+X#       SANKHYA SER. A 25, 407-426.
+X# For the  statistique D(I):
+X# ROHLF,F.J.[1975].GENERALIZATION OF THE GAP TEST FOR THE
+X#       DETECTION OF MULTIVARIATE OUTLIERS.  BIOMETRICS 31,98.
+X#
+X	n <- nrow(x)
+X	if(robust)
+X		varx <- substitute(function(i)
+X		robuste(i)$covariance)
+X	else varx <- substitute(function(i)
+X		var(i))
+X	deter <- prod(diag(chol(varx(x) * (n - 1))))^2
+X	w <- vector("numeric", n)
+X	d <- w
+X	for(i in (1:n)) {
+X		covar <- varx(x[.Uminus(i),  ]) * (n - 2)
+X		w[i] <- prod(diag(chol(covar)))
+X		if(robust)
+X			sx <- x[i,  ] - robuste(x[.Uminus(i),  ])$mean
+X		else sx <- x[i,  ] - apply(x[.Uminus(i),  ], 2, mean)
+X		names(sx) <- NULL
+X		d[i] <- sx %*% solve(covar) %*% sx
+X	}
+X	w <- (w^2)/deter
+X	if(graph) {
+X		par(oma = c(0, 0, 5, 0), mfrow = c(2, 1))
+X		plot(1:n, w, type = "l", xlab = "Sequence number", ylab = "W", 
+X			ticks = F)
+X		axis(1, 1:n)
+X		axis(2)
+X		mtext("Wilks's Test and Rohlf's Distance", 3, 3, T, cex = 1.3)
+X		mtext(paste("(", titl, ")", ifelse(robust, 
+X			" (Robust estimation)", ""), sep = ""), 3, 2, T)
+X		title("Determinants Ratio (Wilks)", cex = 0.80000000000000004)
+X		indic <- order(w)[1]
+X		if(is.null(dimnames(x)[[1]]))
+X			nomi <- ""
+X		else nomi <- paste("(", dimnames(x)[[1]][indic], ")", sep = "")
+X		text(indic, w[indic], paste("    ", indic, nomi))
+X		plot(1:n, d, type = "l", xlab = "Sequence number", ylab = "D", 
+X			ticks = F)
+X		axis(1, 1:n)
+X		axis(2)
+X		title("Rohlf's Distance", cex = 0.80000000000000004)
+X		indic <- order(d)[n]
+X		if(is.null(dimnames(x)[[1]]))
+X			nomi <- ""
+X		else nomi <- paste("(", dimnames(x)[[1]][indic], ")", sep = "")
+X		text(indic, d[indic], paste("    ", indic, nomi))
+X		par(mfg = c(1, 1, 1, 1), oma = rep(0, 4), new = F)
+X		invisible()
+X	}
+X	else {
+X		if(!is.null(dimnames(x)[[1]])) {
+X			names(w) <- dimnames(x)[[1]]
+X			names(d) <- names(w)
+X		}
+X		resul <- list(w = w, d = d)
+X		attr(resul$w, "w") <- "Determinants Ratio (Wilks)"
+X		attr(resul$d, "d") <- "Rohlf's Distance"
+X		attr(resul, "Information.domouSe") <- paste("Data: object", 
+X			deparse(substitute(x)))
+X		if(robust)
+X			attr(resul, "Information.domouSe") <- c(attr(resul, 
+X				"Information.domouSe"), "Robust estimation")
+X		resul
+X	}
+X}
+SHAR_EOF
+$TOUCH -am 0804134393 S.source &&
+chmod 0644 S.source ||
+echo "restore of S.source failed"
+set `wc -c S.source`;Wc_c=$1
+if test "$Wc_c" != "21606"; then
+	echo original size 21606, current size $Wc_c
+fi
+# ============= Help/dom.dyn.load2 ==============
+if test ! -d 'Help'; then
+    echo "x - creating directory Help"
+    mkdir 'Help'
+fi
+echo "x - extracting Help/dom.dyn.load2 (Text)"
+sed 's/^X//' << 'SHAR_EOF' > Help/dom.dyn.load2 &&
+X.BG
+X.FN dom.dyn.load2
+X.TL
+XDynamic loading of an object file
+X.CS
+Xdom.dyn.load2(names, userlibs = "", syslibs = NULL, size = 100000, path = NULL)
+X.AG names
+Xthe names of object files.
+X.AG userlibs
+Xthe names of libraries like -limsl or -llinpack
+X.AG syslibs
+Xlibraries that almost everyone wants.
+X.AG size
+Xthe expected size (in bytes) of code added to S (If this is insufficient, ld will be rerun after allocating more space.)
+X.AG path
+Xpathname of the directory where is the object file.  By default, it's the current working directory.
+X.RT
+XSee dyn.load and/or dyn.load2
+X.SH NOTE
+XIn certain environments, the S function certain.load doesn't work.  This function dom.dyn.load2 comes from the dyn.load2 function of Bill Dunlap (StatSci Inc.) and is very similar to dyn.load2 in S-PLUS.
+X.EX
+Xdom.dyn.load2("test.o")
+Xdom.dyn.load2("fquad.o",path="/home/nord/ranger/lib.f77/objet/fquad.o")
+Xdom.dyn.load2("toto.o","-lnag")
+X.WR
+SHAR_EOF
+$TOUCH -am 0804133793 Help/dom.dyn.load2 &&
+chmod 0644 Help/dom.dyn.load2 ||
+echo "restore of Help/dom.dyn.load2 failed"
+set `wc -c Help/dom.dyn.load2`;Wc_c=$1
+if test "$Wc_c" != "915"; then
+	echo original size 915, current size $Wc_c
+fi
+# ============= Help/eigen2 ==============
+echo "x - extracting Help/eigen2 (Text)"
+sed 's/^X//' << 'SHAR_EOF' > Help/eigen2 &&
+X.BG
+X.FN eigen2
+X.TL
+XEigen Analysis of Real Matrix
+X.CS
+Xeigen2(x, symmetric=all(x==t(x)))
+X.AG x
+Xmatrix to be decomposed. Must be square and real.
+X.AG symmetric
+Xlogical controlling which algorithm should be used:
+Xif `TRUE', `x' is forced to be symmetric and an algorithm
+Xfor symmetric matrices is used; otherwise a general
+Xalgorithm is used.
+X.RT
+Xa list containing the eigenvalues and eigenvectors of `x'.
+XIn the nonsymmetric case, these may turn out to be complex,
+Xeven if `x' is only slightly nonsymmetric.
+XTherefore, if `x' should be symmetric as the result of
+Xprevious computations, `symmetric=TRUE' should be used.
+X.RC values
+Xvector of eigenvalues in descending order of modulus.
+X.RC vectors
+Xmatrix like `x' giving the eigenvectors corresponding to the
+Xeigenvalues in `values'.
+X.PP
+X.SH NOTE
+XThis function comes from Allan R. Wilks. in S-NEWS.
+X.SA
+X`svd'.
+X.EX
+Xcors <- cor(x,y,trim=.1)
+Xpprcom <- eigen(cors,TRUE)
+Xeigen(matrix(runif(9),3,3))
+X.KW array
+X.KW algebra
+X.WR
+SHAR_EOF
+$TOUCH -am 1119132492 Help/eigen2 &&
+chmod 0644 Help/eigen2 ||
+echo "restore of Help/eigen2 failed"
+set `wc -c Help/eigen2`;Wc_c=$1
+if test "$Wc_c" != "964"; then
+	echo original size 964, current size $Wc_c
+fi
+# ============= Help/fquad ==============
+echo "x - extracting Help/fquad (Text)"
+sed 's/^X//' << 'SHAR_EOF' > Help/fquad &&
+X.BG
+X.FN fquad
+X.TL
+XApproximation of the distribution function F(x) = P(Q <= x) where Q is a linear combination of Chi-square variables
+X.CS
+Xfquad(coef, x, mult = rep(1, length(coef)), delta = rep(0, length(coef)))
+X.AG coef
+Xvector of the non-zero coefficients of Chi-square variables.  If some values are <= 1E-08, they are forced to zeroes.  Length(coef) > 1.
+X.AG x
+Xvalue to compute F(x).
+X.AG mult
+Xvector of the orders of multiplicity of the corresponding Chi-square variables.
+X.AG delta
+Xvector of the non-centrality parameters.
+X.RT
+Xvalue of F(x) = P(Q <= x) where Q is a linear combination of Chi-square variables.
+X.EX
+X# computes P(-X + Y < 0) where X and Y ~ Chi-square(df=1).
+Xfx <- fquad(c(-1,1),0)
+X# computes P(2.3*X -1.5*Y +3*Z < lim) where X and Z ~ Chi-square(df=1)
+X#  and Y ~ Chi-square(df=1, non-central parameter=2)
+Xresul <- fquad(c(2.3,-1.5,3),lim,delta=c(0,2,0))
+X.SH COMMENT
+Xthe algorithm of fquad is not "efficient" for some small values of the coefficients < abs(1e-8).  These coefficients are forced to zeroes.
+X.SH REMARKS
+Xuses the FORTRAN subroutine fquad.
+X.SH REFERENCES
+XSee the source of the function.
+X.WR
+SHAR_EOF
+$TOUCH -am 1223112192 Help/fquad &&
+chmod 0644 Help/fquad ||
+echo "restore of Help/fquad failed"
+set `wc -c Help/fquad`;Wc_c=$1
+if test "$Wc_c" != "1122"; then
+	echo original size 1122, current size $Wc_c
+fi
+# ============= Help/gen.comb ==============
+echo "x - extracting Help/gen.comb (Text)"
+sed 's/^X//' << 'SHAR_EOF' > Help/gen.comb &&
+X.BG
+X.FN gen.comb
+X.TL
+XUtility function to generate from a "combination" the "next combination"
+X.CS
+Xgen.comb(vect, i, n, p)
+X.AG vect
+Xvector of the elements of the initial combination.  The elements of vect must be in ascending order.
+X.AG i
+Xinteger value of the subscript where begins the computation of the next combination.  1 <= i <= p but usually equals to p.
+X.AG n
+Xallowed maximum value of the elements of vect.
+X.AG p
+Xallowed length of vect.  p = length(vect) <= n.
+X.RT
+Xa vector of the next "combination".
+X.EX
+Xresul <- gen.comb(c(1,3,4),3,5,3) # resul will be equal to c(1,3,5)
+Xsuiv <- gen.comb(c(2,7,8,10),4,10,4) # suiv will be equal to c(2,7,9,10)
+Xnext <- gen.comb(c(4,8,9),3,9,3) # next will be equal to c(5,6,7)
+X.WR
+SHAR_EOF
+$TOUCH -am 1209095692 Help/gen.comb &&
+chmod 0644 Help/gen.comb ||
+echo "restore of Help/gen.comb failed"
+set `wc -c Help/gen.comb`;Wc_c=$1
+if test "$Wc_c" != "723"; then
+	echo original size 723, current size $Wc_c
+fi
+# ============= Help/infl.A ==============
+echo "x - extracting Help/infl.A (Text)"
+sed 's/^X//' << 'SHAR_EOF' > Help/infl.A &&
+X.BG
+X.FN infl.A
+X.TL
+XUtility function used in the computation of the variance of the influence function
+X.CS
+Xinfl.A(type, rv, cov, p)
+X.AG type,rv,cov,p
+Xsee the function varinfl.
+X.RT
+Xa matrix noted A used in the computation of the variance of the influence function.
+X.SH REFERENCES
+XSee the User's Guide about the variance of the influence function.
+X.WR
+SHAR_EOF
+$TOUCH -am 1223084792 Help/infl.A &&
+chmod 0644 Help/infl.A ||
+echo "restore of Help/infl.A failed"
+set `wc -c Help/infl.A`;Wc_c=$1
+if test "$Wc_c" != "349"; then
+	echo original size 349, current size $Wc_c
+fi
+# ============= Help/infl.mult ==============
+echo "x - extracting Help/infl.mult (Text)"
+sed 's/^X//' << 'SHAR_EOF' > Help/infl.mult &&
+X.BG
+X.FN infl.mult
+X.TL
+XInfluence function of all subsets of size k of a data matrix or a given subset of size k
+X.CS
+Xinfl.mult(type, x, p, cov, ntuple, extrem = ceiling(.1 * nrow(x)))
+X.AG type
+Xcharacter string describing vector correlation coefficient.  Possible values are "rv", "rvreg", "rvls", "rvi".
+X.AG x
+Xdata matrix.
+X.AG p
+Xnumber of variables (columns) of the submatrix of x (noted x(1)); 1 <= p < nol(x).
+X.AG cov
+Xcovariance matrix of x.  Can be a list returned by the function robuste.
+X.AG ntuple
+Xinteger value or list.  If ntuple is an integer, the function computes the influence function of ALL subsets of size ntuple of x.  If ntuple is a list containing some vectors, the function computes the influence function of each subset (vector) of this list.
+X.AG extrem
+Xthe number of extreme values of influence function returned.  To be used when the argument ntuple is an integer.
+X.RT
+Xa list of the two elements (named $min and $max).  Each element contains the lowest (or highest) values of the influence function of the computed subsets.  If the argument ntuple is an integer, each element contains "extrem" values".
+X.EX
+Xinfl.mult("rv",sales.dat,2,var(sales.dat),3)
+X# computes the influence function of 3 subsets
+Xinfl.mult("rvreg",w1.mat,4,robuste(w1.mat),
+X+	list(c(1,3,12),c(3,5),c(11,24)))
+X# The 5 lowest and highest values of the influence function of all
+X#	subsets	of size 3
+Xinfl.mult("rv",sales.dat,2,var(sales.dat),3,5)
+X.WR
+SHAR_EOF
+$TOUCH -am 1209114292 Help/infl.mult &&
+chmod 0644 Help/infl.mult ||
+echo "restore of Help/infl.mult failed"
+set `wc -c Help/infl.mult`;Wc_c=$1
+if test "$Wc_c" != "1436"; then
+	echo original size 1436, current size $Wc_c
+fi
+# ============= Help/influence ==============
+echo "x - extracting Help/influence (Text)"
+sed 's/^X//' << 'SHAR_EOF' > Help/influence &&
+X.BG
+X.FN influence
+X.TL
+XInfluence function of a data matrix with various vector correlation coefficients
+X.CS
+Xinfluence(type, x, p, cov, xsub = NULL, sub = NULL, graph = T, label = T, extrem = if(label & is.null(xsub)) ceiling(0.025 * nrow(x)), cal.A = T, A = NULL)
+X.AG type
+Xcharacter string describing vector correlation coefficient.  Possible values are "rv", "rvreg", "rvls", "rvi".
+X.AG x
+Xdata matrix.
+X.AG p
+Xnumber of variables (columns) of the submatrix of x (noted x(1)); 1 <= p < ncol(x).
+X.AG cov
+Xcovariance matrix of x.  Can be a list returned by the function robuste.
+X.AG xsub
+Xmatrix utility argument giving a submatrix of x for the computations of the influence function.  Usually used by the function infl.mult.
+X.AG sub
+Xvector utility argument giving the rows of matrix x (or xsub) to compute the influence function.  Usually used by the function infl.mult.
+X.AG graph
+Xif TRUE, a graphic of the influence will be plotted with 2 lines representing + or - 3*sqrt[Var(Influence function)]; if FALSE, a list of many elements will be returned (see below).
+X.AG label
+Xif TRUE, the "extrem" points in the graphic will be indicated with their names (dimnames(x)[[1]]). 
+X.AG extrem
+Xthe number of extreme (lowest and highest) values of influence function indicated in the graphic.
+X.AG cal.A,A
+Xutility arguments used by the other functions.  A represents the A matrix used in the computations of the influence function.  See the references.
+X.RT
+Xif graph is TRUE, a graphic of the influence function.  If FALSE, returns a list with components:
+X.RC rv
+Xvalue of the vector correlation coefficient.
+X.RC var
+Xvariance of the influence function.
+X.RC infl
+Xvalues of the influence function.
+X.RC prob.ext
+Xmatrix 2 x 3 with the minimum and maximum values of the influence function.  The 3 columns represent the value of the influence function INFL., the value of the probability function F(INFL.) and the probability associated to F(INFL.).
+X.SH REFERENCES
+XSee the User's Guide about the influence function.
+X.EX
+Xinfluence("rv",sales.dat,2,var(sales.dat))
+Xinfluence("rvreg",w1.mat,4,robuste(w1.mat),graph=F)$infl
+X.WR
+SHAR_EOF
+$TOUCH -am 1223090892 Help/influence &&
+chmod 0644 Help/influence ||
+echo "restore of Help/influence failed"
+set `wc -c Help/influence`;Wc_c=$1
+if test "$Wc_c" != "2098"; then
+	echo original size 2098, current size $Wc_c
+fi
+# ============= Help/robuste ==============
+echo "x - extracting Help/robuste (Text)"
+sed 's/^X//' << 'SHAR_EOF' > Help/robuste &&
+X.BG
+X.FN robuste
+X.TL
+XRobust estimation of the covariance matrix and mean vector
+X.CS
+Xrobuste(x)
+X.AG x
+Xdata matrix.
+X.RT
+Xa list with components:
+X.RC mean
+Xrobust estimation of the mean vector
+X.RC covariance
+Xrobust estimation of the covariance matrix.
+X.SH REMARKS
+Xuses the FORTRAN subroutine robsts adapted from the subroutine programmed by A. Marazzi from the algorithm of P.J. Huber.
+X.EX
+Xrobuste(notes.dat)
+X.WR
+SHAR_EOF
+$TOUCH -am 1222154592 Help/robuste &&
+chmod 0644 Help/robuste ||
+echo "restore of Help/robuste failed"
+set `wc -c Help/robuste`;Wc_c=$1
+if test "$Wc_c" != "407"; then
+	echo original size 407, current size $Wc_c
+fi
+# ============= Help/rohlf ==============
+echo "x - extracting Help/rohlf (Text)"
+sed 's/^X//' << 'SHAR_EOF' > Help/rohlf &&
+X.BG
+X.FN rohlf
+X.TL
+XGENERALISED GAP TEST for multivariate outliers (Rohlf)
+X.CS
+Xrohlf(x, graph = T, titl = paste("data: objet", deparse(substitute(x))))
+X.AG x
+Xdata matrix.
+X.AG graph
+Xif TRUE, a graphic of the distances between data of x based on "minimal spanning tree" algorithm; if FALSE, a matrix of the distances
+X.AG titl
+Xcharacter string for a title of the graphic.
+X.RT
+Xa graphic or a matrix (see the argument graph).
+X.SH REFERENCES
+XSee the source of the function.
+X.EX
+Xrohlf(job.dat, titl="Gen. GAP Test (Rohlf) on job.dat data")
+X.WR
+SHAR_EOF
+$TOUCH -am 1223090992 Help/rohlf &&
+chmod 0644 Help/rohlf ||
+echo "restore of Help/rohlf failed"
+set `wc -c Help/rohlf`;Wc_c=$1
+if test "$Wc_c" != "535"; then
+	echo original size 535, current size $Wc_c
+fi
+# ============= Help/rv ==============
+echo "x - extracting Help/rv (Text)"
+sed 's/^X//' << 'SHAR_EOF' > Help/rv &&
+X.BG
+X.FN rv
+X.TL
+XVector correlation coefficient
+X.CS
+Xrv(type, x, p, cov = F, robust = F)
+X.AG type
+Xcharacter string describing vector correlation coefficient.  Possible values are "rv" (Escoufier), "rvreg" (Robert, Escoufier), "rvls" (Lingoes, Schoneman), "rvi" (Stewart, Love).
+X.AG x
+Xdata matrix or a covariance matrix or a list returned by the function robuste.
+X.AG p
+Xnumber of variables (columns) of the submatrix of x (noted x(1)); 1 <= p < ncol(x).
+X.AG cov
+Xif TRUE, the argument x is a covariance matrix or a list returned by the function robuste; if FALSE, the argument x is the data matrix.
+X.AG robust
+Xif TRUE, the function computes the robust estimation (see the function robuste) of the covariance matrix and mean vector.  Used when the argument cov is FALSE.
+X.RT
+Xthe value of the vector correlation coefficient.
+X.SH REFERENCES
+XSee the User's Guide about the rv coefficient.
+X.EX
+Xrv("rvreg",w1.mat,4)
+Xrv("rv",robuste(milk.dat),3,T) # identical to the next one
+Xrn("rv",milk.dat,3,robust=T)
+X.WR
+SHAR_EOF
+$TOUCH -am 0205090393 Help/rv &&
+chmod 0644 Help/rv ||
+echo "restore of Help/rv failed"
+set `wc -c Help/rv`;Wc_c=$1
+if test "$Wc_c" != "997"; then
+	echo original size 997, current size $Wc_c
+fi
+# ============= Help/trace.mat ==============
+echo "x - extracting Help/trace.mat (Text)"
+sed 's/^X//' << 'SHAR_EOF' > Help/trace.mat &&
+X.BG
+X.FN trace.mat
+X.TL
+XTrace of a matrix
+X.CS
+Xtrace.mat(mat)
+X.AG mat
+Xmatrix
+X.RT
+Xtrace of a matrix
+X.WR
+SHAR_EOF
+$TOUCH -am 1223085192 Help/trace.mat &&
+chmod 0644 Help/trace.mat ||
+echo "restore of Help/trace.mat failed"
+set `wc -c Help/trace.mat`;Wc_c=$1
+if test "$Wc_c" != "100"; then
+	echo original size 100, current size $Wc_c
+fi
+# ============= Help/varinfl ==============
+echo "x - extracting Help/varinfl (Text)"
+sed 's/^X//' << 'SHAR_EOF' > Help/varinfl &&
+X.BG
+X.FN varinfl
+X.TL
+XUtility function computing the variance of the influence function
+X.CS
+Xvarinfl(type, rv, cov, p)
+X.AG type
+Xcharacter string describing vector correlation coefficient.  Possible values are "rv", "rvreg", "rvls", "rvi".
+X.AG rv
+Xvector correlation coefficient returned by the function rv.
+X.AG cov
+Xcovariance matrix or a list returned by the function robuste.
+X.AG p
+Xnumber of variables (columns) of the submatrix of x (noted x(1)); 1 <= p < ncol(x).
+X.RT
+Xthe value of the variance of the influence function.
+X.SH REFERENCES
+XSee the User's Guide about the variance of the influence function.
+X.EX
+Xvarinfl("rvls",rv("rvls",sales,3,robust=T),robuste(sales),3)
+X.WR
+SHAR_EOF
+$TOUCH -am 1223084592 Help/varinfl &&
+chmod 0644 Help/varinfl ||
+echo "restore of Help/varinfl failed"
+set `wc -c Help/varinfl`;Wc_c=$1
+if test "$Wc_c" != "671"; then
+	echo original size 671, current size $Wc_c
+fi
+# ============= Help/wilks ==============
+echo "x - extracting Help/wilks (Text)"
+sed 's/^X//' << 'SHAR_EOF' > Help/wilks &&
+X.BG
+X.FN wilks
+X.TL
+XWilks's Test and Rohlf's Distance in detection of multivariate statistical outliers
+X.CS
+Xwilks(x, robust = F, graph = T, titl = paste("data: object", deparse(substitute(x))))
+X.AG x
+Xdata matrix.
+X.AG robust
+Xif TRUE, the function computes the robust estimation (see the function robuste) of the covariance matrix and mean vector.
+X.AG graph
+Xif TRUE, a graphic of the Wilks's Test and a graphic of Rohlf's Distance Test; if FALSE, a list of two elements will be returned (see below).
+X.AG titl
+Xcharacter string for a title of the graphic.
+X.RT
+Xif graph is TRUE, two graphics.  If FALSE, returns a list with components:
+X.RC w
+Xvector of the values of Wilks's Test (Determinants Ratio)
+X.RC d
+Xvector of the values of Rohlf's Distance.
+X.SH REFERENCES
+XSee the source of the function.
+X.EX
+Xwilks(tobacco,T,F)
+X.WR
+SHAR_EOF
+$TOUCH -am 1223093592 Help/wilks &&
+chmod 0644 Help/wilks ||
+echo "restore of Help/wilks failed"
+set `wc -c Help/wilks`;Wc_c=$1
+if test "$Wc_c" != "815"; then
+	echo original size 815, current size $Wc_c
+fi
+# ============= fquad.f ==============
+echo "x - extracting fquad.f (Text)"
+sed 's/^X//' << 'SHAR_EOF' > fquad.f &&
+X      SUBROUTINE FQUAD(D,NR,MULT,FD,EPS1,EPS2,DELTA,XKRIT)
+X 
+XC       This subroutine comes from the chapter 9 of:
+XC         'ON THE THEORY AND APPLICATION OF THE GENERAL LINEAR MODEL' DE
+XC         J. KOERTS ET A.P.J. ABRAHAMSE, ROTTERDAM UNIVERSITY PRESS, 1969.
+X 
+XC       PURPOSE : FIND THE DISTRIBUTION FUNCTION F(X) = P(Q<=X) OF 
+XC                 QUADRATIC FORMS IN NORMAL VARIABLES
+X
+XC	Note: We suggest EPS1 = EPS2 = .0001
+X 
+XC     DESCRIPTION OF PARAMETERS
+X 
+XC       D     = A VECTOR OF LENGTH NR CONTAINING THE NON-ZERO LATENT ROOTS
+XC       NR    = NUMBER OF NON-ZERO LATENT ROOTS
+XC       MULT  = A VECTOR OF LENGTH NR CONTAINING THE ORDERS OF MULTIPLICITY
+XC               OF THE CORRESPONDING ROOTS
+XC       FD    = VALUE OF THE DISTRIBUTION FUNCTION
+XC       EPS1  = DESIRED TRUNCATION ERROR TU
+XC       EPS2  = DESIRED ACCURACY OF NUMERICAL INTEGRATION
+XC       DELTA = A VECTOR OF LENGTH NR CONTAINING THE NON-CENTRALITY PARAMETERS
+XC       XKRIT = VALUE OF X
+X 
+XC     METHOD : THE INTEGRAL DERIVED BY IMHOF IS USED AND NUMERICALLY 
+XC              INTEGRATED BY SIMPSON'S RULE
+X 
+XC     REFERENCE : 'COMPUTING THE DISTRIBUTION OF QUADRATIC FORMS IN
+XC                  NORMAL VARIABLES' BY J.P. IMHOF
+XC                  BIOMETRIKA (1961), 48, 3 AND 4, P. 419
+X 
+X      DIMENSION D(NR),DELTA(NR),MULT(NR)
+X 
+X      XK=0.
+X      SLAM=0.
+X      SDELT=0.
+X      DO 6 I=1,NR
+X        XK=XK+0.5*MULT(I)
+X        SLAM=SLAM+0.5*MULT(I)*ALOG(ABS(D(I)))
+X        SDELT=SDELT+0.5*DELTA(I)
+X6     CONTINUE
+XC         COMPUTATION OF THE UPPER-BOUND OF THE INTEGRAL GIVEN THE 
+XC         TRUNCATION ERROR
+X      UB=EXP(-(ALOG(EPS1*XK)+1.14472989+(SLAM+SDELT))/XK)
+X7     SUM=0.
+X      DO 8 I=1,NR
+X        DD=(D(I)*UB)**2
+X        SUM=SUM+DELTA(I)*DD/(1.+DD)
+X8     CONTINUE
+X      SUM=0.5*SUM
+X      TU=EXP(1.14472989+ALOG(XK)+(SLAM+SUM)+XK*ALOG(UB))
+X      IF(1./TU-EPS1) 20,9,9
+X9     UB=UB+5./XK
+X      GOTO 7
+XC         COMPUTATION OF THE INTEGRAND GIVEN THE VALUE OF U
+X10    IF(U) 15,15,11
+X11    TETA=0.
+X      SUM=0.
+X      RHO=1.
+X      DO 14 I=1,NR
+X        C1=D(I)*U
+X        C2=1.+C1**2
+X        TETA=TETA+MULT(I)*ATAN(C1)+DELTA(I)*C1/C2
+X        SUM=SUM+DELTA(I)*C1**2/C2
+X        RHO=RHO*(C2**(0.25*MULT(I)))
+X14    CONTINUE
+X      TETA=0.5*(TETA-XKRIT*U)
+X      RHO=RHO*EXP(0.5*SUM)
+X      FBL=SIN(TETA)/(RHO*U)
+X      GOTO 18
+X15    FBL=0.
+X      DO 16 I=1,NR
+X16    FBL=FBL+D(I)*(MULT(I)+DELTA(I))
+X      FBL=0.5*(FBL-XKRIT)
+X18    GOTO (21,22,23,24,25), KSKIP
+XC         EVALUATION OF THE INTEGRAL BY SIMPSON'S RULE
+X20    RANGE=UB
+X      MH=1
+X      U=RANGE*0.5
+X      KSKIP=1
+X      GOTO 10
+X21    SUMK=FBL*RANGE*2./3.
+X      U=0.
+X      KSKIP=2
+X      GOTO 10
+X22    VINT2=SUMK+FBL*RANGE/6.
+X      U=UB
+X      KSKIP=3
+X      GOTO 10
+X23    VINT2=VINT2+FBL*RANGE/6.
+X      FD=0.5-.318309886*VINT2
+X      DO 28 NIT=1,14
+X        FD1=FD
+X        VINT2=(VINT2-SUMK*0.5)*0.5
+X        MH=2*MH
+X        STEP=RANGE/MH
+X        U=STEP*0.5
+X        KSKIP=4
+X        GOTO 10
+X24      SUMK=FBL
+Xc		Modification of the original source for best results on
+Xc		many platforms...
+Xc        DO 25 K=2,MH
+X	k=1
+X2525	k=k+1
+X          U=U+STEP
+X          KSKIP=5
+X          GOTO 10
+X25      SUMK=SUMK+FBL
+Xc               Modification of the original source for best results on
+Xc               many platforms...
+X	if(k.lt.mh) goto 2525
+X        SUMK=SUMK*STEP*2./3.
+X        VINT2=VINT2+SUMK
+X        FD=0.5-.318309886*VINT2
+X        IF(NIT-3) 28,28,27
+X27    IF(ABS(FD1-FD)-EPS2) 29,28,28
+X28    CONTINUE
+X29    RETURN
+X      END
+SHAR_EOF
+$TOUCH -am 0507103793 fquad.f &&
+chmod 0644 fquad.f ||
+echo "restore of fquad.f failed"
+set `wc -c fquad.f`;Wc_c=$1
+if test "$Wc_c" != "3430"; then
+	echo original size 3430, current size $Wc_c
+fi
+# ============= robstS.f ==============
+echo "x - extracting robstS.f (Text)"
+sed 's/^X//' << 'SHAR_EOF' > robstS.f &&
+X      SUBROUTINE ROBSTS(X,NOBS,NVAR,SZ,NCOV,A,B,AINV,COV,SC1,SC2,
+X     @			istop,messag)
+X 
+X      PARAMETER (NFIRST=10)
+XC
+XC  ROBUST AFFINE INVARIANT COVARIANCES
+XC
+X      DIMENSION X(NOBS,NVAR),SZ(NVAR),A(NCOV),B(NVAR),AINV(NCOV)
+X     @            ,COV(NCOV),SC1(NVAR),SC2(NCOV),SC(NFIRST)
+X	dimension istop(2)
+X	character*6 messag,messg
+Xc **      EXTERNAL WGTF0
+X      COMMON/UCVPR/IUCV,A2,B2,CHK,CKW,BB,BETA,CW
+X	common /berr1/istp(2)
+X	common /berr2/messg
+X 
+X      DATA ILOC,MAXIT,NITMON,EPS,TOL/ 1 , 100 , 5 , 0.1 , 0.0001 /
+XC
+XC  SET CONSTANTS
+XC
+X      MDX=NOBS
+X      IUCV=1
+X	istp(1)=-1
+X	istp(2)=-1
+XC
+XC  COMPUTE CONSTANTS FOR WEIGHT FUNCTIONS
+XC
+X      CALL CICLOC(EPS,TOL,CW)
+X      CALL CIA2B2(EPS,NVAR,TOL,MAXIT,A2,B2)
+X      CALL CIBEAT(A2,B2,NVAR,BETA)
+X      T2=1.
+XC
+XC  COMPUTE ROBUST COVARIANCES USING CYWALG
+XC
+X      CALL CIMEDV(X,NOBS,NVAR,NCOV,MDX,NFIRST,ILOC,A,B,SC)
+Xc **      CALL CYWALG(X,A,B,WGTF0,NOBS,NVAR,NCOV,MDX,MAXIT,NITMON,
+X      CALL CYWALG(X,A,B,NOBS,NVAR,NCOV,MDX,MAXIT,NITMON,
+X     1            TOL,ILOC,NIT,SZ,SC1,SC2)
+X      CALL CFRCOV(A,NVAR,NCOV,T2,AINV,COV)
+X	istop(1)=istp(1)
+X        if(istp(1).ne.-1) then
+X		istop(2)=istp(2)
+X		messag=messg
+X	endif
+X      END
+X      SUBROUTINE CHISQ(KODE,FN,X,PR)
+X      LOGICAL EVEN,BIGX,ODD,SMLX
+X      DATA XLSPI,YLSPI/0.572364942925,0.564189583548/
+XC
+X      S=1.
+X      IF (X.LE.0..OR.FN.LT.1.) GOTO 99
+X      NU=IFIX(FN+.5)
+X      CALL MACH(3,EXMIN)
+X      A=0.5*X
+X      BIGX=.FALSE.
+X      IF (-A.LE.EXMIN) BIGX=.TRUE.
+X      SMLX=.NOT.BIGX
+X      EVEN=(2*(NU/2).EQ.NU)
+X      ODD=.NOT.EVEN
+X      IF ((EVEN.OR.NU.GT.2).AND.SMLX) S=EXP(-A)
+X      IF (BIGX) S=0.
+X      Y=S
+X      IF (EVEN) GOTO 10
+X      SX=-SQRT(X)
+X      CALL NORM(1,SX,ANS)
+X      S=2.0*ANS
+XC
+XC  NU.LE.2
+XC
+X   10 IF (NU.LE.2) GOTO 99
+XC
+XC  NU.GT.2
+XC
+X      X1=0.5*(FN-1.0)
+X      IF (EVEN) Z=1.0
+X      IF (ODD ) Z=0.5
+X      IF (SMLX) GOTO 30
+X      IF (EVEN) E=0.0
+X      IF (ODD ) E=XLSPI
+X      C=ALOG(A)
+X   20 E=ALOG(Z)+E
+X      IF (C*Z-A-E.GT.EXMIN) S=EXP(C*Z-A-E)+S
+X      Z=Z+1.0
+X      IF (Z.LE.X1) GOTO 20
+X      GOTO 99
+X   30 IF (EVEN) E=1.0
+X      IF (ODD ) E=YLSPI/SQRT(A)
+X      C=0.0
+X   40 E=E*A/Z
+X      C=C+E
+X      Z=Z+1.0
+X      IF (Z.LE.X1) GOTO 40
+X      S=C*Y+S
+X   99 PR=S
+X      IF (KODE.EQ.1) PR=1.0-PR
+X      RETURN
+X      END
+X      SUBROUTINE CIA2B2(EPS,NVAR,TOL,MAXIT,A2,B2)
+XC
+X      COMMON/EPSCPR/IP,TL
+X      EXTERNAL EPSC
+X      LOGICAL NPRCHK
+XC
+XC  PARAMETER CHECK
+XC
+X      NPRCHK=EPS.GT.0..AND.EPS.LT.1..AND.TOL.GT.0..AND.NVAR.GT.0
+X     1       .AND.MAXIT.GT.0
+X      IF (.NOT.NPRCHK) then
+X	CALL MESSGE(500,'CIA2B2',1)
+X	return
+X      endif
+XC
+X      IP=NVAR
+X      XP=FLOAT(IP)
+X      EP=1./(1.-EPS)
+X      TL=TOL
+X      A=1.
+X      B=1.
+X   20 FB=EPSC(B)-EP
+X      IF (FB.LT.0.) GOTO 30
+X      A=B
+X      B=B+1.
+X      GOTO 20
+X   30 FA=EPSC(A)-EP
+X      IF (FA.GT.0.) GOTO 40
+X      B=A
+X      A=A/2.
+X      GOTO 30
+X   40 CALL RGFL(EPSC,EP,A,B,ROOT,TOL,MAXIT,ITERM)
+X      IF (ITERM.EQ.1) GOTO 50
+X      CALL MESSGE(101,'CIA2B2',0)
+X   50 CAP=ROOT
+X      A2=AMAX1(XP-CAP,0.)
+X      B2=XP+CAP
+X      RETURN
+X      END
+X      SUBROUTINE CIBEAT(A2,B2,NVAR,BT)
+XC
+X      COMMON/EXPUPR/XP,A21,B21
+X      LOGICAL NPRCHK
+XC
+XC  PARAMETER CHECK
+XC
+X      NPRCHK=A2.GE.0..AND.B2.GT.0..AND.NVAR.GT.0
+X      IF (.NOT.NPRCHK) then
+X	CALL MESSGE(500,'CIBEAT',1)
+X	return
+X      endif
+XC
+X      A21=A2
+X      B21=B2
+X      XP=FLOAT(NVAR)
+X      TAU2=1.
+X      BT=EXPU(TAU2)/XP
+X      RETURN
+X      END
+X      SUBROUTINE CICLOC(EPS,TOL,C)
+XC
+X      LOGICAL NPRCHK
+XC
+XC  PARAMETER CHECK
+XC
+X      NPRCHK=EPS.GT.0..AND.EPS.LT.1..AND.TOL.GT.0.
+X      IF (.NOT.NPRCHK) then
+X	CALL MESSGE(500,'CICLOC',1)
+X        return
+X      endif
+XC
+X      CONST=(EPS-2.)/(1.-EPS)/2.
+X      C=0.
+X   20 CALL XERF(1,C,EX)
+X      CALL NORM(1,C,PH)
+X      F=EX+C*(PH+CONST)
+X      IF (ABS(F).LT.TOL) GOTO 30
+X      FP=PH+CONST
+X      C=C-F/FP
+X      GOTO 20
+X   30 RETURN
+X      END
+X      SUBROUTINE CIMEDV(X,NOBS,NVAR,NCOV,MDX,NFIRST,ILOC,A,B,SC)
+XC
+XC  INITIAL VALUES FOR A AND B
+XC
+X      DIMENSION X(MDX,NVAR),A(NCOV),B(NVAR),SC(NFIRST)
+X      LOGICAL NPRCHK
+X      DATA TL/1.E-7/
+XC
+XC  PARAMETER CHECK AND INITIALIZATION
+XC
+X      NN=NVAR*(NVAR+1)/2
+X      NPRCHK=NVAR.GT.0.AND.NOBS.GE.NVAR.AND.NN.EQ.NCOV.AND.NFIRST.GT.0
+X     1       .AND.MDX.GE.NOBS.AND.(ILOC.EQ.0.OR.ILOC.EQ.1)
+X      IF (.NOT.NPRCHK) then
+X	CALL MESSGE(500,'CIMEDV',1)
+X        return
+X      endif
+XC
+XC  COMPUTE INITIAL VALUES FOR A AND B
+XC
+X      N0=MIN0(NFIRST,NOBS)
+X      DO 20 I=1,NCOV
+X   20 A(I)=0.
+X      DO 50 J=1,NVAR
+X      CALL LMDD(X(1,J),SC,N0,1,XME,XMD,XSD)
+X      IF (ILOC.EQ.1) B(J)=XME
+X      SQDEV2=SQRT(XSD**2+(XME-B(J))**2)
+X      JJ=(J*J+J)/2
+X      IF (SQDEV2.GT.TL) GOTO 45
+X      CALL MESSGE(301,'CIMEDV',0)
+X      A(JJ)=9999.
+X      GOTO 50
+X   45 A(JJ)=1./SQDEV2
+X   50 CONTINUE
+X      RETURN
+X      END
+X      SUBROUTINE CFRCOV(A,NVAR,NCOV,TAU2,AINV,COV)
+XC
+X      DIMENSION A(NCOV),AINV(NCOV),COV(NCOV)
+X      LOGICAL NPRCHK
+X      DATA TL/1.E-7/
+XC
+XC  PARAMETER CHECK
+XC
+X      NN=NVAR*(NVAR+1)/2
+X      NPRCHK=NVAR.GT.0.AND.NCOV.EQ.NN.AND.TAU2.GE.0.
+X      IF (.NOT.NPRCHK) CALL MESSGE(500,'CFRCOV',0)
+XC
+XC  COMPUTE INVERSE OF A
+XC
+X      DO 20 I=1,NCOV
+X   20 AINV(I)=A(I)
+X      CALL MINV(AINV,NVAR,NCOV,TL,ISING)
+X      IF (ISING.NE.1) GOTO 30
+X      CALL MESSGE(401,'CFRCOV',0)
+X      RETURN
+X   30 CONTINUE
+XC
+XC  COMPUTE COVARIANCE MATRIX
+XC
+X      CALL MTT2(AINV,COV,NVAR,NCOV)
+X      CALL SCAL(COV,TAU2,NCOV,1,NCOV)
+X      RETURN
+X      END
+X      SUBROUTINE CYWALG (X,A,B,NOBS,NVAR,NCOV,MDX,
+Xc **  SUBROUTINE CYWALG (X,A,B,EXWGHT,NOBS,NVAR,NCOV,MDX,
+X     1                   MAXIT,NITMON,TOL,ILOC,NIT,SZ,SC1,SC2)
+XC
+XC  REWEIGHTING ALGORITHM FOR ROBUST COVARIANCES
+XC
+X      DIMENSION X(MDX,NVAR),SZ(NVAR),A(NCOV),B(NVAR),SC1(NVAR),SC2(NCOV)
+X      LOGICAL NPRCHK
+X      DOUBLE PRECISION U,V,W
+Xc **      EXTERNAL EXWGHT
+X      DATA TL,BLIJ,BUIJ,BLII,BUII/1.E-7,-0.9,0.9,-0.9,0.9/
+XC
+XC  PARAMETER CHECK AND INITIALIZATION
+XC
+X      NN=NVAR*(NVAR+1)/2
+X      NPRCHK=NVAR.GT.0
+X      NPRCHK=NVAR.GT.0.AND.NN.EQ.NCOV.AND.MDX.GE.NOBS
+X     1      .AND.NOBS.GE.NVAR.AND.TOL.GT.0..AND.MAXIT.GT.0
+X     2      .AND.(ILOC.EQ.0.OR.ILOC.EQ.1)
+X      IF (.NOT.NPRCHK) then
+X	CALL MESSGE(500,'CYMALG',1)
+X        return
+X      endif
+X      NIT=0
+XC
+XC  ITERATIONS
+XC
+X   20 NIT=NIT+1
+XC
+XC  COMPUTE AVERAGES
+XC
+X      IF (ILOC.EQ.0) GOTO 40
+X      DO 30 I=1,NVAR
+X   30 SC1(I)=0.
+X   40 DO 50 I=1,NCOV
+X   50 SC2(I)=0.
+X      SW=0.
+X      SV=0.
+X      DO 100 L=1,NOBS
+X      DO 60 J=1,NVAR
+X   60 SZ(J)=X(L,J)-B(J)
+X      CALL MLY(A,SZ,NVAR,NCOV,NVAR,1)
+X      CALL NRM2(SZ,NVAR,1,NVAR,ZNR)
+X      CALL EXWGHT(ZNR,U,V,W)
+X      IF (ILOC.EQ.1)SW=SW+W
+X      SV=SV+V
+X      IJ=0
+X      DO 70 I=1,NVAR
+X      IF (ILOC.EQ.1) SC1(I)=SC1(I)+(X(L,I)-B(I))*W
+X      DO 70 J=1,I
+X      IJ=IJ+1
+X   70 SC2(IJ)=SC2(IJ)+(SZ(I)*U)*SZ(J)
+X  100 CONTINUE
+Xc **      WRITE(3,*) SW,TL,ILOC,SV
+X      NPRCHK=(ABS(SW).GT.TL.OR.ILOC.EQ.0)
+X     1       .AND.ABS(SV).GT.TL
+X      IF (NPRCHK) GOTO 101
+X      CALL MESSGE(401,'CYMALG',0)
+X      RETURN
+X  101 CONTINUE
+XC
+XC  FIND IMPROVEMENT MATRIX (SC2) FOR A AND IMPROVEMENT
+XC  VECTOR (SC1) FOR B    TRUNCATE IF NECESSARY; FIND MAXIMUM IMPROVEMENT
+XC
+X      BMAX=0.
+X      SMAX=0.
+X      IJ=0
+X      DO 130 I=1,NVAR
+X      IF (ILOC.EQ.0) GOTO 105
+X      SC1(I)=SC1(I)/SW
+X      BMAX=AMAX1(BMAX,ABS(SC1(I)))
+X  105 IF (I.EQ.1) GOTO 120
+X      I1=I-1
+X      DO 110 J=1,I1
+X      IJ=IJ+1
+X      SC2(IJ)=-AMIN1(AMAX1(SC2(IJ)/SV,BLIJ),BUIJ)
+X  110 SMAX=AMAX1(SMAX,ABS(SC2(IJ)))
+X  120 IJ=IJ+1
+X      C=-AMIN1(AMAX1((SC2(IJ)/SV-1.)/2.,BLII),BUII)
+X      SMAX=AMAX1(SMAX,ABS(C))
+X  130 SC2(IJ)=C+1.
+XC
+XC  FIND NEW TRANSFORMATION MATRIX A AND NEW LOCATION VECTOR B
+XC
+X      IF (ILOC.EQ.0) GOTO 145
+X      DO 140 I=1,NVAR
+X  140 B(I)=B(I)+SC1(I)
+X  145 CALL MTT3(A,SC2,SC2,NVAR,NCOV)
+X      DO 150 I=1,NCOV
+X  150 A(I)=SC2(I)
+XC
+XC  ITERATION MONITORING
+XC
+X      IF (NITMON.LE.0) GOTO 135
+X      IF (MOD(NIT,NITMON).EQ.0) CALL MONITC(NIT,NVAR,NCOV,B,A,BMAX,SMAX)
+X  135 CONTINUE
+XC
+XC  STOP ITERATIONS IF GIVEN TOLERANCE OR MAXIMUM
+XC  NUMBER OF ITERATIONS IS REACHED
+XC
+X      IF ((SMAX.GE.TOL.OR.BMAX.GE.TOL).AND.NIT.LT.MAXIT) GOTO 20
+X      RETURN
+X      END
+X      FUNCTION DERFC(Y)                                                 MESD0410
+X      DOUBLE PRECISION   DERFC,Y                                        MESD0430
+X      DIMENSION          P(5),Q(4),P1(9),Q1(8),P2(6),Q2(5)              MESD0450
+X      DOUBLE PRECISION   P,Q,P1,Q1,P2,Q2,XMIN,XLARGE,SQRPI,X,           MESD0460
+X     *                   RES,XSQ,XNUM,XDEN,XI,XBIG                      MESD0470
+X      INTEGER            ISW,I                                          MESD0480
+X      DATA               P(1)/113.8641541510502D0/,                     MESD0510
+X     *                   P(2)/377.4852376853020D0/,                     MESD0520
+X     *                   P(3)/3209.377589138469D0/,                     MESD0530
+X     *                   P(4)/.1857777061846032D0/,                     MESD0540
+X     *                   P(5)/3.161123743870566D0/                      MESD0550
+X      DATA               Q(1)/244.0246379344442D0/,                     MESD0560
+X     *                   Q(2)/1282.616526077372D0/,                     MESD0570
+X     *                   Q(3)/2844.236833439171D0/,                     MESD0580
+X     *                   Q(4)/23.60129095234412D0/                      MESD0590
+X      DATA               P1(1)/8.883149794388376D0/,                    MESD0620
+X     *                   P1(2)/66.11919063714163D0/,                    MESD0630
+X     *                   P1(3)/298.6351381974001D0/,                    MESD0640
+X     *                   P1(4)/881.9522212417691D0/,                    MESD0650
+X     *                   P1(5)/1712.047612634071D0/,                    MESD0660
+X     *                   P1(6)/2051.078377826071D0/,                    MESD0670
+X     *                   P1(7)/1230.339354797997D0/,                    MESD0680
+X     *                   P1(8)/2.153115354744038D-8/,                   MESD0690
+X     *                   P1(9)/.5641884969886701D0/                     MESD0700
+X      DATA               Q1(1)/117.6939508913125D0/,                    MESD0710
+X     *                   Q1(2)/537.1811018620099D0/,                    MESD0720
+X     *                   Q1(3)/1621.389574566690D0/,                    MESD0730
+X     *                   Q1(4)/3290.799235733460D0/,                    MESD0740
+X     *                   Q1(5)/4362.619090143247D0/,                    MESD0750
+X     *                   Q1(6)/3439.367674143722D0/,                    MESD0760
+X     *                   Q1(7)/1230.339354803749D0/,                    MESD0770
+X     *                   Q1(8)/15.74492611070983D0/                     MESD0780
+X      DATA               P2(1)/-3.603448999498044D-01/,                 MESD0800
+X     *                   P2(2)/-1.257817261112292D-01/,                 MESD0810
+X     *                   P2(3)/-1.608378514874228D-02/,                 MESD0820
+X     *                   P2(4)/-6.587491615298378D-04/,                 MESD0830
+X     *                   P2(5)/-1.631538713730210D-02/,                 MESD0840
+X     *                   P2(6)/-3.053266349612323D-01/                  MESD0850
+X      DATA               Q2(1)/1.872952849923460D0/,                    MESD0860
+X     *                   Q2(2)/5.279051029514284D-01/,                  MESD0870
+X     *                   Q2(3)/6.051834131244132D-02/,                  MESD0880
+X     *                   Q2(4)/2.335204976268692D-03/,                  MESD0890
+X     *                   Q2(5)/2.568520192289822D0/                     MESD0900
+X      DATA               XMIN/1.0D-7/,XLARGE/6.375D0/                   MESD0920
+X      DATA               XBIG/13.3D0/                                   MESD0940
+X      DATA               SQRPI/.5641895835477563D0/                     MESD0950
+X      X = Y                                                             MESD0970
+X      ISW = 1                                                           MESD0980
+X      IF (X.GE.0.0D0) GO TO 5                                           MESD0990
+X      ISW = -1                                                          MESD1000
+X      X = -X                                                            MESD1010
+X    5 IF (X.LT..477D0) GO TO 10                                         MESD1020
+X      IF (X.LE.4.0D0) GO TO 30                                          MESD1030
+X      IF (ISW .GT. 0) GO TO 40                                          MESD1040
+X      IF (X.LT.XLARGE) GO TO 45                                         MESD1050
+X      RES = 2.0D0                                                       MESD1060
+X      GO TO 70                                                          MESD1070
+X   10 IF (X.LT.XMIN) GO TO 20                                           MESD1100
+X      XSQ = X*X                                                         MESD1110
+X      XNUM = P(4)*XSQ+P(5)                                              MESD1120
+X      XDEN = XSQ+Q(4)                                                   MESD1130
+X      DO 15 I = 1,3                                                     MESD1140
+X         XNUM = XNUM*XSQ+P(I)                                           MESD1150
+X         XDEN = XDEN*XSQ+Q(I)                                           MESD1160
+X   15 CONTINUE                                                          MESD1170
+X      RES = X*XNUM/XDEN                                                 MESD1180
+X      GO TO 25                                                          MESD1190
+X   20 RES = X*P(3)/Q(3)                                                 MESD1200
+X   25 IF (ISW.EQ.-1) RES = -RES                                         MESD1210
+X      RES = 1.0D0-RES                                                   MESD1220
+X      GO TO 70                                                          MESD1230
+X   30 XSQ = X*X                                                         MESD1260
+X      XNUM = P1(8)*X+P1(9)                                              MESD1270
+X      XDEN = X+Q1(8)                                                    MESD1280
+X      DO 35 I=1,7                                                       MESD1290
+X         XNUM = XNUM*X+P1(I)                                            MESD1300
+X         XDEN = XDEN*X+Q1(I)                                            MESD1310
+X   35 CONTINUE                                                          MESD1320
+X      RES = XNUM/XDEN                                                   MESD1330
+X      GO TO 60                                                          MESD1340
+X   40 IF (X.GT.XBIG) GO TO 65                                           MESD1370
+X   45 XSQ = X*X                                                         MESD1380
+X      XI = 1.0D0/XSQ                                                    MESD1390
+X      XNUM= P2(5)*XI+P2(6)                                              MESD1400
+X      XDEN = XI+Q2(5)                                                   MESD1410
+X      DO 50 I = 1,4                                                     MESD1420
+X         XNUM = XNUM*XI+P2(I)                                           MESD1430
+X         XDEN = XDEN*XI+Q2(I)                                           MESD1440
+X   50 CONTINUE                                                          MESD1450
+X      RES = (SQRPI+XI*XNUM/XDEN)/X                                      MESD1460
+X   60 RES = RES*DEXP(-XSQ)                                              MESD1470
+X      IF (ISW.EQ.-1) RES = 2.0D0-RES                                    MESD1480
+X      GO TO 70                                                          MESD1490
+X   65 RES = 0.0D0                                                       MESD1500
+X   70 DERFC = RES                                                       MESD1510
+X      RETURN                                                            MESD1520
+X      END                                                               MESD1530
+X      FUNCTION EPSC(CAP)
+XC
+XC  PURPOSE
+XC  -------
+XC  AUXILIARY SUBROUTINE FOR CIA2B2.
+XC
+X      COMMON/EPSCPR/IP,TL
+XC
+XC  IF CAP=0 SET EPSC EQUAL A POSITIVE NUMBER
+XC
+X      IF (CAP.GT.0.) GOTO 10
+X      EPSC=1000.
+X      RETURN
+X   10 CONTINUE
+XC
+XC  COMPUTE AUXILIARY QUANTITIES
+XC
+X      XP=FLOAT(IP)
+X      A2=AMAX1(XP-CAP,0.)
+X      B2=XP+CAP
+X      A=SQRT(A2)
+X      B=SQRT(B2)
+X      CALL CHISQ(1,XP,A2,PA)
+X      CALL CHISQ(1,XP,B2,PB)
+X      CALL NLGM(IP,XLGM)
+X      XLCP=(1.-XP/2.)*ALOG(2.)-XLGM
+XC
+XC  COMPUTE INTEGRAL PARTS AND EPSC
+XC
+X      XI1=0.
+X      XI3=0.
+X      XI2=PB-PA
+X      IF (A.GT.0.) XI1=EXP(-A2/2.+XP*ALOG(A)-ALOG(XP-A2)+XLCP)
+X      IF (XI2.LT.1.-TL)
+X     1   XI3=EXP(-B2/2.+XP*ALOG(B)-ALOG(B2-XP)+XLCP)
+X      EPSC=XI1+XI2+XI3
+X      RETURN
+X      END
+X      FUNCTION EXPU(TAU2)
+XC
+XC  PURPOSE
+XC  -------
+XC  COMPUTATION OF THE EXPECTED VALUE OF U(TAU*NORM(X))*(NORM(TAU*X)**2)
+XC  WHERE X IS A STANDARD P-VARIATE NORMAL VECTOR AND U IS THE
+XC  HUBER WEIGHT FUNCTION COMPUTED BY THE FUNCTION HBWT.
+XC
+X      COMMON/EXPUPR/XP,A21,B21
+X      A2=A21
+X      B2=B21
+X      IF (TAU2.GT.0.) GOTO 10
+X      EXPU=A2
+X      RETURN
+X   10 AT=A2/TAU2
+X      BT=B2/TAU2
+X      CALL CHISQ(1,XP,AT,P1)
+X      CALL CHISQ(1,XP,BT,P2)
+X      CALL CHISQ(1,XP+2.,BT,P3)
+X      CALL CHISQ(1,XP+2.,AT,P4)
+X      EXPU=A2*P1+B2*(1.-P2)+TAU2*XP*(P3-P4)
+X      RETURN
+X      END
+X      SUBROUTINE LMDD(X,Y,N,ISORT,XME,XMD,XSD)
+XC
+X      DIMENSION X(N),Y(N)
+XC
+X      KM=(N+1)/2
+X      DO 20 I=1,N
+X   20 Y(I)=X(I)
+X      IF (ISORT.NE.0) CALL SRT1(Y,N,1,N)
+X      XME=Y(KM)
+X      IF (KM*2.EQ.N) XME=(XME+Y(KM+1))/2.
+X      K=0
+X      K1=KM
+X      K2=KM
+X      X1=0.
+X      X2=0.
+X   30 IF (K.GE.KM) GOTO 50
+X      K=K+1
+X      IF (X1.GT.X2) GOTO 40
+X      K1=K1-1
+X      IF (K1.EQ.0) GOTO 50
+X      X1=XME-Y(K1)
+X      GOTO 30
+X   40 K2=K2+1
+X      IF (K2.GT.N) GOTO 50
+X      X2=Y(K2)-XME
+X      GOTO 30
+X   50 XMD=AMIN1(X1,X2)
+X      XSD=XMD/.6745
+X      RETURN
+X      END
+X      SUBROUTINE MACH(I,X)
+XC
+XC  MACHINE PARAMETERS
+XC
+X      DATA RADIX,PREC,EXMIN,XLGMN,YLGMN,XBIG,EPMACH
+X     1     /2.,5.960465E-8,-88.4,0.294E-38,-88.72241,1.7E38,1.0E-7/
+XC
+X      IF (I.EQ.1) X=RADIX
+X      IF (I.EQ.2) X=PREC
+X      IF (I.EQ.3) X=EXMIN
+X      IF (I.EQ.4) X=XLGMN
+X      IF (I.EQ.5) X=YLGMN
+X      IF (I.EQ.6) X=XBIG
+X      IF (I.EQ.7) X=EPMACH
+X      RETURN
+X      END
+X      SUBROUTINE MDNORD (Y,P)                                           MDRD0380
+X      DOUBLE PRECISION   P,Y                                            MDRD0400
+X      DOUBLE PRECISION   DERFC,SQR1D2                                   MDRD0420
+X      DATA               SQR1D2/.7071067811865475D0/                    MDRD0430
+X      P = .5D0 * DERFC(-Y*SQR1D2)                                       MDRD0450
+X      RETURN                                                            MDRD0460
+X      END                                                               MDRD0470
+X      SUBROUTINE MESSGE(NUMBER,ITEXT,ISTOP)
+X
+Xc	Cette sous-routine a ete adaptee pour etre appelee dans S
+X
+X      CHARACTER *6 ITEXT,messg
+X
+X	common /berr1/istp(2)
+X	common /berr2/messg
+X
+Xc **      WRITE(*,9000)NUMBER,ITEXT
+X 9000 FORMAT(10H *********,10HMESSAGE N.,I4,4H IN ,A6)
+Xc **      IF (ISTOP.EQ.1) STOP
+X	istp(1)=number
+X	istp(2)=istop
+X	messg=itext
+X      RETURN
+X      END
+X      SUBROUTINE MINV(R,N,NN,TAU,ISING)
+XC
+X      DIMENSION R(NN)
+X      DOUBLE PRECISION SM,DZERO
+X      LOGICAL NPRCHK
+XC
+XC  PARAMETER CHECK
+XC
+X      NPRCHK=N.GT.0.AND.NN.EQ.(N*(N+1)/2).AND.TAU.GE.0.
+X      IF (.NOT.NPRCHK) then
+X	CALL MESSGE(500,'MINV  ',1)
+X        return
+X      endif
+XC
+X      DZERO=0.D0
+X      ISING=0
+X      I1=0
+X      DO 10 I=1,N
+X      I1=I1+I
+Xc **      WRITE(3,*) ISING,I1,R(I1),TAU
+X      IF (ABS(R(I1)).LE.TAU) GOTO 900
+X   10 R(I1)=1./R(I1)
+X      IF (N.EQ.1) RETURN
+X      I1=0
+X      NM1=N-1
+X      DO 40 I=1,NM1
+X      I1=I1+I
+X      J1=I1+I
+X      IP1=I+1
+X      DO 30 J=IP1,N
+X      SM=DZERO
+X      IL=I1
+X      LJ=J1
+X      JM1=J-1
+X      DO 20 L=I,JM1
+X      SM=SM+R(IL)*DBLE(R(LJ))
+X      LJ=LJ+1
+X   20 IL=IL+L
+X      R(J1)=-R(LJ)*SM
+X   30 J1=J1+J
+X   40 CONTINUE
+X      RETURN
+X  900 ISING=1
+X      RETURN
+X      END
+X      SUBROUTINE MLY(A,Y,N,NN,NY,IYE)
+XC
+X      DIMENSION A(NN),Y(NY)
+X      LOGICAL NPRCHK
+X      DOUBLE PRECISION SM,DZERO
+XC
+XC  PARAMETER CHECK
+XC
+X      NPRCHK=N.GT.0.AND.NN.EQ.(N*(N+1)/2)
+X     1       .AND.IYE.GE.0.AND.(NY.GT.IYE.OR.NY.EQ.1)
+X      IF (.NOT.NPRCHK) then
+X	CALL MESSGE(500,'MLY   ',1)
+X        return
+X      endif
+XC
+X      DZERO=0.D0
+X      IA=NN
+X      IY1=N*IYE+1
+X      DO 20 J1=1,N
+X      J=N-J1+1
+X      IY1=IY1-IYE
+X      IY=IY1
+X      SM=DZERO
+X      DO 10 I=1,J
+X      SM=SM+A(IA)*DBLE(Y(IY))
+X      IA=IA-1
+X   10 IY=IY-IYE
+X   20 Y(IY1)=SM
+X      RETURN
+X      END
+X      SUBROUTINE MONITC(NIT,NVAR,NCOV,B,A,TOLB,TOLA)
+X      DIMENSION B(NVAR),A(NCOV)
+X      DATA NEXT,INIT/0,0/
+X      IF (NEXT.NE.NIT) NEXT=0
+X      IF (NEXT.EQ.0) INIT=NIT
+Xc **      IF (NEXT.EQ.0) WRITE(3,1000)
+X      NEXT=NIT+INIT
+Xc **      WRITE(3,1001) NIT,B(1),A(1)
+X      J2=1
+X      DO 100 I=2,NVAR
+X        J1=J2+1
+X        J2=J2+I
+Xc **        WRITE(3,1002) B(I),(A(N),N=J1,J2)
+X  100 CONTINUE
+Xc **      WRITE(3,1003) TOLB,TOLA
+X      RETURN
+X 1000 FORMAT(//,14X,46H* * *  I T E R A T I O N   M O N I T O R I N G,
+X     +7H  * * *,//,4H NIT,8X,1HB,13X,1HA,/)
+X 1001 FORMAT(I4,2(3X,E11.5))
+X 1002 FORMAT(7X,E11.5,(T22,E11.5,1X,E11.5,1X,E11.5,1X,E11.5,1X,E11.5))
+X 1003 FORMAT
+X     +(/,4X,2(3X,E11.5),1X,38H( CONVERGENCE CRITERIONS FOR B AND A ),/)
+X      END
+X      SUBROUTINE MTT2(A,B,N,NN)
+XC
+X      DIMENSION A(NN),B(NN)
+X      DOUBLE PRECISION SM,DZERO
+X      LOGICAL NPRCHK
+XC
+XC  PARAMETER CHECK
+XC
+X      NPRCHK=N.GT.0.AND.NN.EQ.(N*(N+1)/2)
+X      IF (.NOT.NPRCHK) then
+X	CALL MESSGE(500,'MTT2  ',1)
+X        return
+X      endif
+XC
+X      DZERO=0.D0
+X      JJ=NN+N+1
+X      DO 30 J=N,1,-1
+X      JJ=JJ-(J+1)
+X      IAT=JJ+1
+X      DO 20 I=1,J
+X      IB=JJ+1-I
+X      IA=IB+1
+X      SM=DZERO
+X      DO 10 L=1,(J-I+1)
+X      IA=IA-1
+X      IAT=IAT-1
+X   10 SM=SM+A(IA)*DBLE(A(IAT))
+X   20 B(IB)=SM
+X   30 CONTINUE
+X      RETURN
+X      END
+X      SUBROUTINE MTT3(A,B,C,N,NN)
+XC
+X      DIMENSION A(NN),B(NN),C(NN)
+X      DOUBLE PRECISION SM,DZERO
+X      LOGICAL NPRCHK
+XC
+XC  PARAMETER CHECK
+XC
+X      NPRCHK=N.GT.0.AND.NN.EQ.(N*(N+1)/2)
+X      IF (.NOT.NPRCHK) then
+X	CALL MESSGE(500,'MTT3  ',1)
+X        return
+X      endif
+XC
+X      DZERO=0.D0
+X      IC=0
+X      JJ=0
+X      DO 30 J=1,N
+X      II=0
+X      DO 20 I=1,J
+X      II=II+I
+X      IL=II
+X      IC=IC+1
+X      SM=DZERO
+X      DO 10 L=I,J
+X      JL=JJ+L
+X      SM=SM+A(IL)*DBLE(B(JL))
+X   10 IL=IL+L
+X      C(IC)=SM
+X   20 CONTINUE
+X      JJ=JJ+J
+X   30 CONTINUE
+X      RETURN
+X      END
+X      SUBROUTINE NLGM(N,XL)
+XC
+X      DATA PI/3.1415926535898/
+XC
+X      XL2=ALOG(2.)
+X      XL=0.
+X      K=N-2
+X   20 IF (K.LE.1) GOTO 30
+X      XL=XL+ALOG(FLOAT(K))-XL2
+X      K=K-2
+X      GOTO 20
+X   30 IF (K.EQ.1) XL=XL+ALOG(SQRT(PI))-XL2
+X      IF (N.EQ.1) XL=ALOG(SQRT(PI))
+X      RETURN
+X      END
+X      SUBROUTINE NORM(KODE,X,ANS)
+XC
+X      DATA SPI/2.506628275/
+XC
+XC  PREC IS A MACHINE DEPENDENT PARAMETER SPECIFYING THE SMALLEST POSITIVE
+XC  REAL NUMBER SUCH THAT (1.0+PREC).GT.1.0
+XC
+X      CALL MACH(2,PREC)
+X      IF (ABS(X).LE.6.) GOTO 30
+X      IF (X.GT.6.) GOTO 10
+X      IF (X.LT.-6.) GOTO 20
+X   10 ANS=1.
+X      GOTO 900
+X   20 ANS=0.
+X      GOTO 900
+X   30 CONTINUE
+X      X2=X*X
+X      A=X*EXP(-X2/2.)/SPI
+X      Q=1.
+X      SH=A
+X   40 S=SH
+X      Q=Q+2.
+X      A=A*X2/Q
+X      IF (ABS(A).LT.PREC) GOTO 50
+X      SH=S+A
+X      GOTO 40
+X   50 ANS=.5+S
+X  900 IF (KODE.EQ.2) ANS=1.-ANS
+X      RETURN
+X      END
+X      SUBROUTINE NRM2(X,N,INCX,MDX,XNRM)
+XC
+X      DIMENSION X(MDX)
+X      DATA ZERO,ONE/0.0E0,1.0E0/
+X      DATA CUTLO,CUTHI/4.441E-16,1.304E19/
+XC
+X      IF (N.GT.0) GOTO 10
+X      XNRM=ZERO
+X      GOTO 300
+XC
+X   10 ASSIGN 30 TO NEXT
+X      SUM=ZERO
+X      NN=N*INCX
+XC
+XC  BEGIN MAIN LOOP
+XC
+X      I=1
+X   20 GOTO NEXT,(30,50,70,110)
+X   30 IF (ABS(X(I)).GT.CUTLO) GOTO 85
+X      ASSIGN 50 TO NEXT
+X      XMAX=ZERO
+XC
+XC  PHASE1.  SUM IS ZERO
+XC
+X   50 IF (X(I).EQ.ZERO) GOTO 200
+X      IF (ABS(X(I)).GT.CUTLO) GOTO 85
+XC
+XC  PREPARE FOR PHASE 2.
+XC
+X      ASSIGN 70 TO NEXT
+X      GOTO 105
+XC
+XC  PREPARE FOR PHASE 4.
+XC
+X  100 I=J
+X      ASSIGN 110 TO NEXT
+X      SUM=(SUM/X(I))/X(I)
+X  105 XMAX=ABS(X(I))
+X      GOTO 115
+XC
+XC  PHASE 2.  SUM IS SMALL. SCALE TO AVOID DESTRUCTIVE UNDERFLOW.
+XC
+X   70 IF (ABS(X(I)).GT.CUTLO) GOTO 75
+XC
+XC  COMMON CODE FOR PHASE 2 AND 4.
+XC  IN PHASE 4 SUM IS LARGE.  SCALE TO AVOID OVERFLOW.
+XC
+X  110 IF (ABS(X(I)).LE.XMAX) GOTO 115
+X      SUM=ONE+SUM*(XMAX/X(I))**2
+X      XMAX=ABS(X(I))
+X      GOTO 200
+XC
+X  115 SUM=SUM+(X(I)/XMAX)**2
+X      GOTO 200
+XC
+XC  PREPARE FOR PHASE 3.
+XC
+X   75 SUM=(SUM*XMAX)*XMAX
+XC
+XC  SET HITEST=CUTHI/N
+XC
+X   85 HITEST=CUTHI/FLOAT(N)
+XC
+XC  PHASE3.  SUM IS MID-RANGE.  NO SCALING.
+XC
+X      DO 95 J=I,NN,INCX
+X      IF (ABS(X(J)).GE.HITEST) GOTO 100
+X   95 SUM=SUM+X(J)**2
+X      XNRM=SQRT(SUM)
+X      GOTO 300
+XC
+X  200 CONTINUE
+X      I=I+INCX
+X      IF (I.LE.NN) GOTO 20
+XC
+XC  END MAIN LOOP
+XC
+X      XNRM=XMAX*SQRT(SUM)
+X  300 CONTINUE
+X      RETURN
+X      END
+X      SUBROUTINE RGFL(F,Y,A,B,ROOT,TOL,M,ITERM)
+XC
+X      EXTERNAL F
+X      LOGICAL NPRCHK
+X      DATA TL/1.E-7/
+XC
+XC  PARAMETER CHECK
+XC
+X      NPRCHK=A.LE.B.AND.TOL.GT.0..AND.M.GT.1
+X      IF (.NOT.NPRCHK) then 
+X	CALL MESSGE(500,'RGFL  ',1)
+X        return
+X      endif
+XC
+XC  INITIALIZE
+XC
+X      ITR=1
+X      FA=F(A)-Y
+X      FB=F(B)-Y
+XC
+XC  REGULA FALSI ITERATION
+XC
+X   20 IF (ABS(FA-FB).GT.TL) GOTO 30
+X      CALL MESSGE(401,'RGFL  ',0)
+X      RETURN
+X   30 XN=(A*FB-B*FA)/(FB-FA)
+X      FN=F(XN)-Y
+XC
+XC  TEST TO SEE IF MAXIMUM NUMBER OF ITERATIONS HAS BEEN EXECUTED
+XC
+X      IF (ITR.GE.M) GOTO 60
+XC
+XC  TEST TO SEE IF ROOT HAS BEEN FOUND
+XC
+X      IF (ABS(FN).LT.TOL) GOTO 70
+X      IF (FA*FN.LE.0.) GOTO 40
+X      A=XN
+X      FA=FN
+X      GOTO 50
+X   40 B=XN
+X      FB=FN
+XC
+XC  INCREMENT ITERATION COUNTER
+XC
+X   50 ITR=ITR+1
+X      GOTO 20
+XC
+X   60 ITERM=2
+X      ROOT=XN
+X      RETURN
+X   70 ITERM=1
+X      ROOT=XN
+X      RETURN
+X      END
+X      SUBROUTINE SCAL(X,SA,N,INCX,MDX)
+XC
+X      DIMENSION X(MDX)
+XC
+X      IF (N.LE.0) RETURN
+X      IF (INCX.EQ.1) GOTO 20
+XC
+XC  CODE FOR INCREMENT NOT EQUAL TO 1
+XC
+X      NINCX=N*INCX
+X      DO 10 I=1,NINCX,INCX
+X      X(I)=SA*X(I)
+X   10 CONTINUE
+X      RETURN
+XC
+XC  CODE FOR INCREMENT EQUAL TO 1
+XC
+X   20 M=MOD(N,5)
+X      IF (M.EQ.0) GOTO 40
+X      DO 30 I=1,M
+X      X(I)=SA*X(I)
+X   30 CONTINUE
+X      IF (N.LT.5) RETURN
+X   40 MP1=M+1
+X      DO 50 I=MP1,N,5
+X      X(I)=SA*X(I)
+X      X(I+1)=SA*X(I+1)
+X      X(I+2)=SA*X(I+2)
+X      X(I+3)=SA*X(I+3)
+X      X(I+4)=SA*X(I+4)
+X   50 CONTINUE
+X      RETURN
+X      END
+X      SUBROUTINE SRT1(A,N,K1,K2)
+XC
+X      DIMENSION A(N)
+X      LOGICAL NPRCHK
+XC
+X      NPRCHK=N.GT.0.AND.K1.GE.1.AND.K2.GE.K1.AND.K2.LE.N
+X      IF (.NOT.NPRCHK) then
+X	CALL MESSGE(500,'SRT1  ',1)
+X        return
+X      endif
+X      N1=K2-K1+1
+X      I=1
+X   10 I=I+I
+X      IF (I.LE.N1) GOTO 10
+X      M=I-1
+X   20 M=M/2
+X      IF (M.EQ.0) RETURN
+X      K=N1-M
+X      DO 40 J=1,K
+X      L=J
+X   50 IF (L.LT.1) GOTO 40
+X      LPM=L+M
+X      LPM1=LPM+K1-1
+X      L1=L+K1-1
+X      IF (A(LPM1).GE.A(L1)) GOTO 40
+X      X=A(LPM1)
+X      A(LPM1)=A(L1)
+X      A(L1)=X
+X      L=L-M
+X      GOTO 50
+X   40 CONTINUE
+X      GOTO 20
+X      END
+X      SUBROUTINE EXWGHT(X,U,V,W)
+Xc **      SUBROUTINE WGTF0(X,U,V,W)
+XC
+XC  PURPOSE
+XC  -------
+XC  WEIGHT FUNCTIONS U,V,W
+XC  FOR AFFINE INVARIANT COVARIANCES
+XC
+X      DOUBLE PRECISION U,V,W,X2,Q,Q2,PD,PC,DEXP,DSPI
+X      COMMON/UCVPR/IUCV,A2,B2,CHK,CKW,BB,BT,CW
+X      DATA GAM,DSPI/1.E-3,2.50662827463100/
+X      IUC=IABS(IUCV)
+X      U=1.D0
+X      V=DBLE(BT)
+X      W=1.D0
+X      IF (IUC.EQ.0) RETURN
+X      IF (IUC.EQ.1) GOTO 100
+X      IF (IUC.EQ.2) GOTO 200
+X      IF (IUC.EQ.3) GOTO 300
+X      IF (IUC.EQ.4) GOTO 400
+X  100 Y=X
+X      IF (X.GT.GAM.OR.A2.EQ.0.) GOTO 110
+X      CALL MESSGE(201,'WGTF1 ',0)
+X      X=GAM
+X  110 X2=DBLE(X)*X
+X      IF (X2.GT.B2) U=B2/X2
+X      IF (X2.LT.A2) U=A2/X2
+X      IF (Y.GT.GAM.OR.Y.LT.CW) GOTO 120
+X      CALL MESSGE(202,'WGTF1 ',0)
+X      Y=GAM
+X      X=GAM
+X  120 IF (Y.GT.CW) W=CW/DBLE(Y)
+X      RETURN
+X  200 IF (X.LE.0.) RETURN
+X      Q=CHK/DBLE(X)
+X      CALL MDNORD(Q,PC)
+X      U=2.D0*PC-1.D0
+X      RETURN
+X  300 IF (X.LE.0.) RETURN
+X      Q=CKW/DBLE(X)
+X      Q2=Q*Q
+X      CALL MDNORD(Q,PC)
+X      PD=DEXP(-Q2/2.D0)/DSPI
+X      U=Q2+(1.D0-Q2)*(2.D0*PC-1.D0)-2.D0*Q*PD
+X      RETURN
+X  400 IF (X.GT.GAM.OR.X.LT.BB) GOTO 410
+X      CALL MESSGE(203,'WGTF0 ',0)
+X      X=GAM
+X  410 IF (X.GT.BB) U=BB/DBLE(X)
+X      RETURN
+X      END
+X      SUBROUTINE XERF(KODE,X,ANS)
+XC
+X      DATA SPI/2.506628274631/
+XC
+XC  EXMIN IS A MACHINE DEPENDENT PARAMETER SPECIFYING THE LARGEST NEGATIVE
+XC  REAL VALUE SUCH THAT EXP(EXMIN) CAN BE SUCCESSFULLY EVALUATED WITHOUT
+XC  UNDERFLOW.
+XC
+X      CALL MACH(3,EXMIN)
+X      X2=-X*X/2.
+X      ANS=0.
+X      IF (X2.GE.EXMIN)ANS=EXP(X2)
+X      IF (KODE.EQ.1)ANS=ANS/SPI
+X      RETURN
+X      END
+SHAR_EOF
+$TOUCH -am 0205103393 robstS.f &&
+chmod 0644 robstS.f ||
+echo "restore of robstS.f failed"
+set `wc -c robstS.f`;Wc_c=$1
+if test "$Wc_c" != "28356"; then
+	echo original size 28356, current size $Wc_c
+fi
+exit 0

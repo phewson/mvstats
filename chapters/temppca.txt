@@ -1,0 +1,84 @@
+\section{Simple Components}
+
+When confronted with a large number p of variables measuring different aspects of a same theme, the practitionner may like to summarize the information into a limited number q of components. A component is a linear combination of the original variables, and the weights in this linear combination are called the loadings. Thus, a system of components is defined by a p times q dimensional matrix of loadings. 
+
+Among all systems of components, principal components (PCs) are optimal in many ways. In particular, the first few PCs extract a maximum of the variability of the original variables and they are uncorrelated, such that the extracted information is organized in an optimal way: we may look at one PC after the other, separately, without taking into account the rest. 
+
+Unfortunately PCs are often difficult to interpret. The goal of Simple Component Analysis is to replace (or to supplement) the optimal but non-interpretable PCs by suboptimal but interpretable simple components. The proposal of Rousson and Gasser (2003) is to look for an optimal system of components, but only among the simple ones, according to some definition of optimality and simplicity. The outcome of their method is a simple matrix of loadings calculated from the correlation matrix S of the original variables. 
+
+Simplicity is not a guarantee for interpretability (but it helps in this regard). Thus, the user may wish to partly modify an optimal system of simple components in order to enhance interpretability. While PCs are by definition 100% optimal, the optimal system of simple components proposed by the procedure sca may be, say, 95%, optimal, whereas the simple system altered by the user may be, say, 93% optimal. It is ultimately to the user to decide if the gain in interpretability is worth the loss of optimality. 
+
+The interactive procedure sca is intended to assist the user in his/her choice for an interptetable system of simple components. The algorithm consists of three distinct stages and proceeds in an interative way. At each step of the procedure, a simple matrix of loadings is displayed in a window. The user may alter this matrix by clicking on its entries, following the instructions given there. If all the loadings of a component share the same sign, it is a ``block-component''. If some loadings are positive and some loadings are negative, it is a ``difference-component''. Block-components are arguably easier to interpret than difference-components. Unfortunately, PCs almost always contain only one block-component. In the procedure sca, the user may choose the number of block-components in the system, the rationale being to have as many block-components such that correlations among them are below some cut-off value (typically .3 or .4). 
+
+Simple block-components should define a partition of the original variables. This is done in the first stage of the procedure sca. An agglomerative hierarchical clustering procedure is used there. 
+
+The second stage of the procedure sca consists in the definition of simple difference-components. Those are obtained as simplified versions of some appropriate ``residual components''. The idea is to retain the large loadings (in absolute value) of these residual components and to shrink to zero the small ones. For each difference-component, the interactive procedure sca displays the loadings of the corresponding residual component (at the right side of the window), such that the user may know which variables are especially important for the definition of this component. 
+
+At the third stage of the interactive procedure sca, it is possible to remove some of the difference-components from the system. 
+
+For many examples, it is possible to find a simple system which is 90% or 95% optimal, and where correlations between components are below 0.3 or 0.4. When the structure in the correlation matrix is complicated, it might be advantageous to invert the sign of some of the variables in order to avoid as much as possible negative correlations. This can be done using the option `invertsigns=TRUE'. 
+
+In principle, simple components can be calculated from a correlation matrix or from a variance-covariance matrix. However, the definition of simplicity used is not well adapted to the latter case, such that it will result in systems which are far from being 100% optimal. Thus, it is advised to define simple components from a correlation matrix, not from a variance-covariance matrix. 
+
+
+
+Rousson, V. and Gasser, Th. (2003) Simple Component Analysis. Submitted. 
+
+Rousson, V. and Gasser, Th. (2003) Some Case Studies of Simple Component Analysis. Manuscript. 
+
+Gervini, D. and Rousson, V. (2003) Some Proposals for Evaluating Systems of Components in Dimension Reduction Problems. Submitted. 
+
+
+\section{Kernel Based Methods}
+
+\cite{Schoelkopf+etal:1998} made proposals for the use of kernels in eigen analysis which can be used as a form of non-linear principal component analysis.   This method has been made available within the \verb+kernlab+ library \cite{Karatzoglou+etal:2005} in \textbf{R}.
+   
+Any kernel  function which computes a dot product between two vectors can be used, these are either specified by the name of a user defined function or by using one of the inbuilt kernel functions which include \verb+rbfdot+, a Gaussian radial basis kernel function and  \verb+laplacedot+, a Laplacian kernel function.   These  both require the inverse kernel width \verb+sigma+ to be specified by \verb+par = list(sigma)+.  Other kernels include \verb+polydot+, a polynomial kernel function requiring the parameters \verb+kpar = list(degree, scale, offset)+; \verb+vanilladot+,a linear kernel function; \verb+tanhdot+, a hyperbolic tangent kernel function which requires \verb+kpar = list(scale, offset)+ to be set; \verb+besseldot+, a Bessel kernel function requiring  \verb+kpar = list(sigma, order, degree)+ to be set.
+
+A couple of points need to be noted.   \verb+features+ specifies the number of features to be retained, as  kernel method these aren't the same as the conventional form of principal components.   The default value of \verb+0+ therefore produces rather a large number of components, which can be limited by an argument to \verb+th+, set by default to 0.0001.   Again, this can't be considered in the same way as for say, the Kaiser criterion. 
+
+
+
+
+
+Consider an example with Fisher's Iris data.   We extract two principal components (\verb+features=2+), and select a Gaussian kernel with an inverse kernel width of 0.2
+
+\begin{verbatim}
+\library(kernlab)
+data(iris)
+test <- sample(1:150,20)
+
+kpc <- kpca(~.,data=iris[-test,-5],
+    kernel="rbfdot", kpar=list(sigma=0.2), features=2)
+pc <- prcomp(~.,data=iris[-test,-5] )
+
+par(mfrow = c(1,2))
+plot(pc$x[,1], pc$x[,2], col = as.integer(iris[-test,5]), 
+    xlab="1st Principal Component",ylab="2nd Principal Component",
+    main = "Conventional pca")
+
+emb <- predict(pc, iris[test, -5])
+points(emb,pch=as.numeric(iris[test,5]))
+
+plot(rotated(kpc), col=as.integer(iris[-test,5]),
+    xlab="1st Principal Component",ylab="2nd Principal Component",
+    main = "Kernel PCA")
+
+emb <- predict(kpc,iris[test,-5])
+points(emb,pch=as.numeric(iris[test,5]))
+\end{verbatim}
+
+It should be noted that the \verb+kernlab+ package has been set out following S4 classes.   Therefore, whilst it is possible to extract eigenvalues from conventional principal components using \verb+pc$sdev^2+ (note that, as implied by its name, \verb+sdev+ returns the square roots of the eigenvalues), when using \verb+kernlab+ the extractor functons have to be used.   Therefore, \verb+eig(kpc)+ will give the eigenvalues from the kernel based decomposition.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width = 0.8\textwidth]{images/kernelpca}
+\caption{Projection from conventional and kernal pca}
+\label{kernpca}
+\end{center}
+\end{figure}
+
+%%% Local Variables: ***
+%%% mode:latex ***
+%%% TeX-master: "../book.tex"  ***
+%%% End: ***

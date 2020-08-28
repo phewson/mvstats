@@ -1,0 +1,70 @@
+
+S-PLUS instructions for Chapter 6.5
+**********************************
+
+last updated: june 18, 1997
+
+
+We will illustrate the computation of standard errors, associated
+t-statistics, and related quantities for the coefficients of a
+linear discriminant function using the fleabeetle data from 
+Example 6.5.3. As you will see, this is surprisingly simple if
+we use the proper S-PLUS notation. First we replicate some basic
+calculations from Section 5.3:
+
+> rawdat <- matrix(scan("c:\\multidat\\tab53_2.dat", ncol = 5, byrow = T)
+> x <- rawdat[, 1]
+> Y <- rawdat[, 2:5]
+> Y1 <- Y[x == 1,]
+> N1 <- dim(Y1)[1]
+> ybar1 <- apply(Y1, 2, mean)
+> S1 <- var(Y1)
+> Y2 <- Y[x == 2,]
+> N2 <- dim(Y2)[1]
+> ybar2 <- apply(Y2, 2, mean)
+> S2 <- var(Y2)
+> S <- ((N1-1) * S1 + (N2-1) * S2) / (N1 + N2 - 2)
+> Sinv <- solve(S)
+> b <- Sinv %*% (ybar1 - ybar2)
+> d <- sqrt(t(b) %*% (ybar1 - ybar2))
+> dim(d) <- NULL
+
+At this point, the vector b contains the discriminant function 
+coefficients, and d is the multivariate standard distance. Next we
+use equation (10) to compute the squared standard distances with
+individual variables left out. Note that the a[j,j] of equation (10)
+are the diagonal elements of the inverse of S, which we can extract
+into a vector with the "diag" function. Recall also that "/" means
+elementwise division. Thus the following single line will do the job:
+
+> d2minus <- d^2 - b^2 / diag(Sinv)
+
+The preceding command has created a vector "d2minus" which contains 
+the squared standard distances with the respective variable omitted. 
+The rest is a piece of cake: calculate the constant m from equation 
+(9), then the standard errors (12), and finally the t-statistics
+of equation (13):
+
+> m <- (N1 + N2) * (N1 + N2 - 2) / (N1 * N2)
+> p <- dim(Y)[2]
+> se <- sqrt((diag(Sinv) * (m + d2minus)) / (N1 + N2 - p - 1))
+> tstat <- b / se
+
+We can also compute two--sided p-values for the coefficients of the
+linear discriminant function, using the function "pt" which
+computes the cdf of a t-distribution. The degrees of freedom are N1+N2-p-1
+in each case.
+
+> pvalue <- 2 * (1 - pt(abs(tstat), N1 + N2 - p - 1))
+ 
+Now display the results; you should get the first part of 
+Table 6.5.1, plus p-values:
+
+> cbind(rep(1:p, 1), b, se, tstat, sqrt(d2minus), pvalue)
+
+For testing the hypothesis of simultaneous redundancy of several
+variables, you will need to compute the standard distance for both
+the model with all variables included and the reduced model, and
+use equation (14) to compute an F-statistic. This is straightforward
+and needs no special instructions.
+

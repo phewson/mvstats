@@ -1,0 +1,691 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+<meta name="generator" content="hypermail 2.2.0, see http://www.hypermail-project.org/" />
+<title>[R] Plotting an ellipse in 3D from John Fox on 2005-09-09 (2005-September.txt)</title>
+<meta name="Author" content="John Fox (jfox)" />
+<meta name="Subject" content="[R] Plotting an ellipse in 3D" />
+<meta name="Date" content="2005-09-09" />
+<style type="text/css">
+/*<![CDATA[*/
+/* To be incorporated in the main stylesheet, don't code it in hypermail! */
+body {color: black; background: #ffffff}
+dfn {font-weight: bold;}
+pre { background-color:inherit;}
+.head { border-bottom:1px solid black;}
+.foot { border-top:1px solid black;}
+th {font-style:italic;}
+table { margin-left:2em;}map ul {list-style:none;}
+#mid { font-size:0.9em;}
+#received { float:right;}
+address { font-style:inherit ;}
+/*]]>*/
+.quotelev1 {color : #990099}
+.quotelev2 {color : #ff7700}
+.quotelev3 {color : #007799}
+.quotelev4 {color : #95c500}
+</style>
+</head>
+<body>
+<div class="head">
+<h1>[R] Plotting an ellipse in 3D</h1>
+<!-- received="Sat Sep 10 04:33:15 2005" -->
+<!-- isoreceived="20050910083315" -->
+<!-- sent="Fri, 9 Sep 2005 22:33:15 -0400" -->
+<!-- isosent="20050910023315" -->
+<!-- name="John Fox" -->
+<!-- email="jfox" -->
+<!-- subject="[R] Plotting an ellipse in 3D" -->
+<!-- id="20050910023314.ZTTQ26550.tomts20-srv.bellnexxia.net_at_JohnDesktop8300" -->
+<!-- inreplyto="43218802.6090401&#64;stats.uwo.ca" -->
+<!-- expires="-1" -->
+<map id="navbar" name="navbar">
+<ul class="links">
+<li>
+<dfn>This message</dfn>:
+[ <a href="#start" name="options1" id="options1" tabindex="1">Message body</a> ]
+ [ <a href="#options2">More options</a> ]
+</li>
+<li>
+<dfn>Related messages</dfn>:
+<!-- unext="start" -->
+[ <a href="61157.html" title="Gabor Grothendieck: &quot;[R] PowerPoint graph insertion&quot;">Next message</a> ]
+[ <a href="61155.html" title="Deepayan Sarkar: &quot;[R] transparent backgound in lattice plots&quot;">Previous message</a> ]
+[ <a href="61110.html" title="Duncan Murdoch: &quot;[R] Plotting an ellipse in 3D&quot;">In reply to</a> ]
+<!-- unextthread="start" -->
+<!-- ureply="end" -->
+</li>
+</ul>
+</map>
+</div>
+<!-- body="start" -->
+<div class="mail">
+<address class="headers">
+<span id="from">
+<dfn>From</dfn>: John Fox &lt;<a href="mailto:jfox?Subject=Re:%20[R]%20Plotting%20an%20ellipse%20in%203D">jfox</a>&gt;
+</span><br />
+<span id="date"><dfn>Date</dfn>: Fri, 9 Sep 2005 22:33:15 -0400</span><br />
+</address>
+<p>
+Dear Duncan and Mike,
+<br />
+<p>For some time I've been meaning to add data (concentration) ellipsoids to
+<br />
+the scatter3d function in the Rcmdr package, which uses rgl.
+<br />
+<p>The functions below are a first crack at this. I'm pretty sure that the
+<br />
+approach I've taken is correct -- I deform a unit sphere, adapting a bit of
+<br />
+the code in the rgl demo to generate the sphere -- but I haven't checked it
+<br />
+carefully. As well, I'm sure that someone more conversant with the new tools
+<br />
+in rgl (like Duncan!) could render the ellipsoids better than I've done. You
+<br />
+can try the following examples to see how this works:
+<br />
+<p>library(rgl)
+<br />
+library(MASS)
+<br />
+<p>R &lt;- matrix(c(1, .5, .5, .5, 1, .5, .5, .5, 1), 3, 3)
+<br />
+data &lt;- mvrnorm(n=200, mu=c(0,0,0), Sigma=R)
+<br />
+scatter3d(data[,1], data[,2], data[,3], ellipsoid=TRUE)
+<br />
+<p>data1 &lt;- mvrnorm(n=100, mu=c(0,0,0), Sigma=R)
+<br />
+data2 &lt;- mvrnorm(n=100, mu=c(1,1,1), Sigma=R)
+<br />
+data &lt;- rbind(data1, data2)
+<br />
+groups &lt;- as.factor(c(rep(&quot;a&quot;, 100), rep(&quot;b&quot;, 100)))
+<br />
+scatter3d(data[,1], data[,2], data[,3], ellipsoid=TRUE, 
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;surface=FALSE, groups=groups)
+<br />
+<p><p>Regards,
+<br />
+&nbsp;John
+<br />
+<p>---------- snip ---------------
+<br />
+<p>ellipsoid &lt;- function(center=c(0, 0, 0), radius=1, shape=diag(3),
+<br />
+segments=51) {
+<br />
+&nbsp;&nbsp;angles &lt;- (0:segments)*2*pi/segments
+<br />
+&nbsp;&nbsp;ecoord2 &lt;- function(p) {
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;c(cos(p[1])*sin(p[2]), sin(p[1])*sin(p[2]), cos(p[2])) }
+<br />
+&nbsp;&nbsp;unit.sphere &lt;- t(apply(expand.grid(angles, angles), 1, ecoord2))
+<br />
+&nbsp;&nbsp;t(center + radius * t(unit.sphere %*% chol(shape))) 
+<br />
+}
+<br />
+<p><p>scatter3d &lt;- function(x, y, z, xlab=deparse(substitute(x)),
+<br />
+ylab=deparse(substitute(y)),
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;zlab=deparse(substitute(z)), revolutions=0,
+<br />
+bg.col=c(&quot;white&quot;, &quot;black&quot;), 
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;axis.col=if (bg.col == &quot;white&quot;) &quot;black&quot; else &quot;white&quot;,
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;surface.col=c(&quot;blue&quot;, &quot;green&quot;, &quot;orange&quot;, &quot;magenta&quot;,
+<br />
+&quot;cyan&quot;, &quot;red&quot;, &quot;yellow&quot;, &quot;gray&quot;),
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;neg.res.col=&quot;red&quot;, pos.res.col=&quot;green&quot;,
+<br />
+point.col=&quot;yellow&quot;,
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;text.col=axis.col, grid.col=if (bg.col == &quot;white&quot;)
+<br />
+&quot;black&quot; else &quot;gray&quot;,
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fogtype=c(&quot;exp2&quot;, &quot;linear&quot;, &quot;exp&quot;, &quot;none&quot;),
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;residuals=(length(fit) == 1), surface=TRUE, grid=TRUE,
+<br />
+grid.lines=26,
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;df.smooth=NULL, df.additive=NULL,
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sphere.size=1, threshold=0.01, speed=1, fov=60,
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fit=&quot;linear&quot;, groups=NULL, parallel=TRUE,
+<br />
+ellipsoid=FALSE, level=0.5, model.summary=FALSE){
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;require(rgl)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;require(mgcv)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;summaries &lt;- list()
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;if ((!is.null(groups)) &amp;&amp; (nlevels(groups) &gt; length(surface.col))) 
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stop(sprintf(gettextRcmdr(&quot;Number of groups (%d) exceeds number of
+<br />
+colors (%d).&quot;),
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nlevels(groups), length(surface.col)))
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;if ((!is.null(groups)) &amp;&amp; (!is.factor(groups)))
+<br />
+stop(gettextRcmdr(&quot;groups variable must be a factor.&quot;))
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;bg.col &lt;- match.arg(bg.col)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;fogtype &lt;- match.arg(fogtype)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;if ((length(fit) &gt; 1) &amp;&amp; residuals &amp;&amp; surface)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stop(gettextRcmdr(&quot;cannot plot both multiple surfaces and
+<br />
+residuals&quot;))
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;xlab  # cause these arguments to be evaluated
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;ylab
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;zlab
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;rgl.clear()
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;rgl.viewpoint(fov=fov)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;rgl.bg(col=bg.col, fogtype=fogtype)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;valid &lt;- if (is.null(groups)) complete.cases(x, y, z)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else complete.cases(x, y, z, groups)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;x &lt;- x[valid]
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;y &lt;- y[valid]
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;z &lt;- z[valid]
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;if (!is.null(groups)) groups &lt;- groups[valid]
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;x &lt;- (x - min(x))/(max(x) - min(x))
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;y &lt;- (y - min(y))/(max(y) - min(y))
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;z &lt;- (z - min(z))/(max(z) - min(z))
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;size &lt;- sphere.size*((100/length(x))^(1/3))*0.015
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;if (is.null(groups)){
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (size &gt; threshold) rgl.spheres(x, y, z, color=point.col,
+<br />
+radius=size)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else rgl.points(x, y, z, color=point.col)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;else {
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (size &gt; threshold) rgl.spheres(x, y, z,
+<br />
+color=surface.col[as.numeric(groups)], radius=size)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else rgl.points(x, y, z, color=surface.col[as.numeric(groups)])
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;rgl.lines(c(0,1), c(0,0), c(0,0), color=axis.col)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;rgl.lines(c(0,0), c(0,1), c(0,0), color=axis.col)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;rgl.lines(c(0,0), c(0,0), c(0,1), color=axis.col)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;rgl.texts(1, 0, 0, xlab, adj=1, color=text.col)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;rgl.texts(0, 1, 0, ylab, adj=1, color=text.col)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;rgl.texts(0, 0, 1, zlab, adj=1, color=text.col)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;if (ellipsoid) {
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dfn &lt;- 3
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (is.null(groups)){
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dfd &lt;- length(x) - 1
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;radius &lt;- sqrt(dfn * qf(level, dfn, dfd))
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ellips &lt;- ellipsoid(center=c(mean(x), mean(y), mean(z)),
+<br />
+shape=cov(cbind(x,y,z)), radius=radius)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;quads3d(ellips[,1], ellips[,2], ellips[,3], front=&quot;lines&quot;,
+<br />
+back=&quot;lines&quot;, alpha=.5, 
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lit=FALSE, col=surface.col[1])
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else{
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;levs &lt;- levels(groups)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (j in 1:length(levs)){
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;group &lt;- levs[j]
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;select.obs &lt;- groups == group
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;xx &lt;- x[select.obs]
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;yy &lt;- y[select.obs]
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;zz &lt;- z[select.obs]
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dfd &lt;- length(xx) - 1
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;radius &lt;- sqrt(dfn * qf(level, dfn, dfd))
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ellips &lt;- ellipsoid(center=c(mean(xx), mean(yy), mean(zz)),
+<br />
+shape=cov(cbind(xx,yy,zz)), radius=radius)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;quads3d(ellips[,1], ellips[,2], ellips[,3], front=&quot;lines&quot;,
+<br />
+back=&quot;lines&quot;, alpha=.5, 
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lit=FALSE, col=surface.col[j])
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}               
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;if (surface){
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vals &lt;- seq(0, 1, length=grid.lines)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dat &lt;- expand.grid(x=vals, z=vals)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (i in 1:length(fit)){
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;f &lt;- match.arg(fit[i], c(&quot;linear&quot;, &quot;quadratic&quot;, &quot;smooth&quot;,
+<br />
+&quot;additive&quot;))
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (is.null(groups)){
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mod &lt;- switch(f,
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;linear = lm(y ~ x + z),
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;quadratic = lm(y ~ (x + z)^2 + I(x^2) + I(z^2)),
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;smooth = if (is.null(df.smooth)) gam(y ~ s(x, z))
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else gam(y ~ s(x, z, fx=TRUE, k=df.smooth)),
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;additive = if (is.null(df.additive)) gam(y ~ s(x) +
+<br />
+s(z))
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else gam(y ~ s(x, fx=TRUE, k=df.additive[1]+1) +
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;s(z, fx=TRUE, k=(rev(df.additive+1)[1]+1)))
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (model.summary) summaries[[f]] &lt;- summary(mod)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;yhat &lt;- matrix(predict(mod, newdata=dat), grid.lines,
+<br />
+grid.lines)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rgl.surface(vals, vals, yhat, color=surface.col[i],
+<br />
+alpha=0.5, lit=FALSE)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if(grid) rgl.surface(vals, vals, yhat, color=grid.col,
+<br />
+alpha=0.5, lit=FALSE, front=&quot;lines&quot;, back=&quot;lines&quot;)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (residuals){
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;n &lt;- length(y)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fitted &lt;- fitted(mod)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;colors &lt;- ifelse(residuals(mod) &gt; 0, pos.res.col,
+<br />
+neg.res.col)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rgl.lines(as.vector(rbind(x,x)),
+<br />
+as.vector(rbind(y,fitted)), as.vector(rbind(z,z)),
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;color=as.vector(rbind(colors,colors)))
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else{
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (parallel){
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mod &lt;- switch(f,
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;linear = lm(y ~ x + z + groups),
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;quadratic = lm(y ~ (x + z)^2 + I(x^2) + I(z^2) +
+<br />
+groups),
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;smooth = if (is.null(df.smooth)) gam(y ~ s(x, z) +
+<br />
+groups)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else gam(y ~ s(x, z, fx=TRUE, k=df.smooth) +
+<br />
+groups),
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;additive = if (is.null(df.additive)) gam(y ~ s(x) +
+<br />
+s(z) + groups)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else gam(y ~ s(x, fx=TRUE, k=df.additive[1]+1) +
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;s(z, fx=TRUE, k=(rev(df.additive+1)[1]+1)) +
+<br />
+groups)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (model.summary) summaries[[f]] &lt;- summary(mod)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;levs &lt;- levels(groups)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (j in 1:length(levs)){
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;group &lt;- levs[j]
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;select.obs &lt;- groups == group
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;yhat &lt;- matrix(predict(mod, newdata=cbind(dat,
+<br />
+groups=group)), grid.lines, grid.lines)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rgl.surface(vals, vals, yhat, color=surface.col[j],
+<br />
+alpha=0.5, lit=FALSE)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (grid) rgl.surface(vals, vals, yhat,
+<br />
+color=grid.col, alpha=0.5, lit=FALSE, front=&quot;lines&quot;, back=&quot;lines&quot;)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rgl.texts(0, predict(mod, newdata=data.frame(x=0,
+<br />
+z=0, groups=group)), 0,
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;paste(group, &quot; &quot;), adj=1, color=surface.col[j])
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (residuals){
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;yy &lt;- y[select.obs]
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;xx &lt;- x[select.obs]
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;zz &lt;- z[select.obs]
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fitted &lt;- fitted(mod)[select.obs]
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rgl.lines(as.vector(rbind(xx,xx)),
+<br />
+as.vector(rbind(yy,fitted)), as.vector(rbind(zz,zz)),
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;col=surface.col[j])
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else {
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;levs &lt;- levels(groups)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (j in 1:length(levs)){
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;group &lt;- levs[j]
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;select.obs &lt;- groups == group
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mod &lt;- switch(f,
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;linear = lm(y ~ x + z, subset=select.obs),
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;quadratic = lm(y ~ (x + z)^2 + I(x^2) + I(z^2),
+<br />
+subset=select.obs),
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;smooth = if (is.null(df.smooth)) gam(y ~ s(x,
+<br />
+z), subset=select.obs)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else gam(y ~ s(x, z, fx=TRUE, k=df.smooth),
+<br />
+subset=select.obs),
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;additive = if (is.null(df.additive)) gam(y ~
+<br />
+s(x) + s(z), subset=select.obs)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else gam(y ~ s(x, fx=TRUE,
+<br />
+k=df.additive[1]+1) +
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;s(z, fx=TRUE,
+<br />
+k=(rev(df.additive+1)[1]+1)), subset=select.obs)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (model.summary) summaries[[paste(f, &quot;.&quot;, group,
+<br />
+sep=&quot;&quot;)]] &lt;- summary(mod)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;yhat &lt;- matrix(predict(mod, newdata=dat),
+<br />
+grid.lines, grid.lines)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rgl.surface(vals, vals, yhat, color=surface.col[j],
+<br />
+alpha=0.5, lit=FALSE)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rgl.surface(vals, vals, yhat, color=grid.col,
+<br />
+alpha=0.5, lit=FALSE, front=&quot;lines&quot;, back=&quot;lines&quot;)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rgl.texts(0, predict(mod, newdata=data.frame(x=0,
+<br />
+z=0, groups=group)), 0,
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;paste(group, &quot; &quot;), adj=1, color=surface.col[j])
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (residuals){
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;yy &lt;- y[select.obs]
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;xx &lt;- x[select.obs]
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;zz &lt;- z[select.obs]
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fitted &lt;- fitted(mod)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rgl.lines(as.vector(rbind(xx,xx)),
+<br />
+as.vector(rbind(yy,fitted)), as.vector(rbind(zz,zz)),
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;col=surface.col[j])
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;if (revolutions &gt; 0) {
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (i in 1:revolutions){
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (angle in seq(1, 360, length=360/speed))
+<br />
+rgl.viewpoint(-angle, fov=fov)
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;if (model.summary) return(summaries) else return(invisible(NULL))
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;}
+<br />
+<p>--------------------------------
+<br />
+John Fox
+<br />
+Department of Sociology
+<br />
+McMaster University
+<br />
+Hamilton, Ontario
+<br />
+Canada L8S 4M4
+<br />
+905-525-9140x23604
+<br />
+<a href="http://socserv.mcmaster.ca/jfox">http://socserv.mcmaster.ca/jfox</a> 
+<br />
+-------------------------------- 
+<br />
+<p><em class="quotelev1">&gt; -----Original Message-----
+</em><br />
+<em class="quotelev1">&gt; From: r-help-bounces at stat.math.ethz.ch 
+</em><br />
+<em class="quotelev1">&gt; [mailto:r-help-bounces at stat.math.ethz.ch] On Behalf Of Duncan Murdoch
+</em><br />
+<em class="quotelev1">&gt; Sent: Friday, September 09, 2005 8:03 AM
+</em><br />
+<em class="quotelev1">&gt; To: Mike White
+</em><br />
+<em class="quotelev1">&gt; Cc: R-help at stat.math.ethz.ch
+</em><br />
+<em class="quotelev1">&gt; Subject: Re: [R] Plotting an ellipse in 3D
+</em><br />
+<em class="quotelev1">&gt; 
+</em><br />
+<em class="quotelev1">&gt; Mike White wrote:
+</em><br />
+<em class="quotelev2">&gt; &gt; I have been using the ellipse function from the car package and the 
+</em><br />
+<em class="quotelev2">&gt; &gt; covariance matrix to draw an ellipse around a group of 
+</em><br />
+<em class="quotelev1">&gt; points to show 
+</em><br />
+<em class="quotelev2">&gt; &gt; the confidence limits.  However, the points are actually 
+</em><br />
+<em class="quotelev1">&gt; represented 
+</em><br />
+<em class="quotelev2">&gt; &gt; by 3 variables so rather than plot each pairwise combination of 
+</em><br />
+<em class="quotelev2">&gt; &gt; variables in 2D I would like to plot the 'ellipse' in 3D using the 
+</em><br />
+<em class="quotelev2">&gt; &gt; djmrgl package.  Can anyone offer advice on how I can plot 
+</em><br />
+<em class="quotelev1">&gt; the surface 
+</em><br />
+<em class="quotelev2">&gt; &gt; of  a 3D 'ellipse' using the covariance matrix to define 
+</em><br />
+<em class="quotelev1">&gt; the shape, so 
+</em><br />
+<em class="quotelev2">&gt; &gt; that the points inside can also be seen.
+</em><br />
+<em class="quotelev1">&gt; 
+</em><br />
+<em class="quotelev1">&gt; You should use rgl, rather than djmrgl.  It now has most of 
+</em><br />
+<em class="quotelev1">&gt; the same functions plus a lot more.
+</em><br />
+<em class="quotelev1">&gt; 
+</em><br />
+<em class="quotelev1">&gt; Then you can plot the ellipse as a wireframe or transparent 
+</em><br />
+<em class="quotelev1">&gt; object.  See the demo(regression) example for that kind of 
+</em><br />
+<em class="quotelev1">&gt; drawing; demo(shapes3d) for ellipses.  (The demo names are 
+</em><br />
+<em class="quotelev1">&gt; from memory, I don't have access to it right now.)
+</em><br />
+<em class="quotelev1">&gt; 
+</em><br />
+<em class="quotelev1">&gt; Duncan Murdoch
+</em><br />
+<em class="quotelev1">&gt; 
+</em><br />
+<em class="quotelev1">&gt; ______________________________________________
+</em><br />
+<em class="quotelev1">&gt; R-help at stat.math.ethz.ch mailing list
+</em><br />
+<em class="quotelev1">&gt; <a href="https://stat.ethz.ch/mailman/listinfo/r-help">https://stat.ethz.ch/mailman/listinfo/r-help</a>
+</em><br />
+<em class="quotelev1">&gt; PLEASE do read the posting guide! 
+</em><br />
+<em class="quotelev1">&gt; <a href="http://www.R-project.org/posting-guide.html">http://www.R-project.org/posting-guide.html</a>
+</em><br />
+<span id="received"><dfn>Received on</dfn> Sat Sep 10 2005 - 04:33:15 EDT</span>
+</div>
+<!-- body="end" -->
+<div class="foot">
+<map id="navbarfoot" name="navbarfoot" title="Related messages">
+<ul class="links">
+<li><dfn>This message</dfn>: [ <a href="#start">Message body</a> ]</li>
+<!-- lnext="start" -->
+<li><dfn>In reply to</dfn>: <a href="61110.html" title="Message to which this message replies">Duncan Murdoch: "[R] Plotting an ellipse in 3D"</a></li>
+<!-- lnextthread="start" -->
+<!-- lreply="end" -->
+</ul>
+<ul class="links">
+<li><a name="options2" id="options2"></a><dfn>Contemporary messages sorted</dfn>: [ <a href="date.html#61156" title="Contemporary messages by date">by date</a> ] [ <a href="index.html#61156" title="Contemporary discussion threads">by thread</a> ] [ <a href="subject.html#61156" title="Contemporary messages by subject">by subject</a> ] [ <a href="author.html#61156" title="Contemporary messages by author">by author</a> ] [ <a href="attachment.html" title="Contemporary messages by attachment">by messages with attachments</a> ]</li>
+</ul>
+</map>
+</div>
+<!-- trailer="footer" -->
+<p><small><em>
+This archive was generated by <a href="http://www.hypermail-project.org/">hypermail 2.2.0</a> 
+: Fri Sep 30 2005 - 21:10:30 EDT
+</em></small></p>
+</body>
+</html>
