@@ -1,0 +1,29 @@
+
+\begin{equation}
+\mathscr{L}(\mu, \sigma^{2}, \lambda | x^{(\lambda)}) \propto (2 \pi \sigma^{2})^{-n/2} 
+\exp(-\sum_{i=1}^{n} \frac{(x_{i}^{(\lambda)} - \mu)^{2}}{2 \sigma^{2}}
+\prod_{i=1}^{n}x_{i}^{\lambda-1}
+\end{equation}
+
+%the last term being the Jacobian
+
+If $\lambda$ is fixed, this likelihood is maximised at:
+
+\begin{equation}
+\bar{x}^{(\lambda)} = \frac{1}{n} \sum_{i=1}{n} x_{i}^{(\lambda)}
+\end{equation}
+and 
+\begin{equation}
+s^{2}(\lambda) = \frac{1}{n} \sum_{i=1}^{n}(x_{i}^{(\lambda)} - \bar{x}^{(\lambda)})^{2}
+\end{equation}
+
+which means that the value maximising the log-likelihood is proportional to:
+
+\begin{equation}
+\mathscr{L_{max}}(\lambda) = -\frac{n}{2} \log s^{2}(\lambda) + (\lambda - 1) \sum_{i=1}^{n} \log x_{i}
+\end{equation}
+
+It is possible to apply this transformation to each variable in turn to obtain marginal normality
+\cite{Gnanadesikan:1977} argues that this can be used satisfactorily in many cases.
+
+However, it may be preferable to carry out a multivariate optimisation of the transformation parameters.

@@ -1,0 +1,34 @@
+\begin{definition}
+
+[page 198] \cite{Seber:1984} gives a likelihood ratio test for partial sphericity.   In order to determine whether whether the last $p-q$ eigenvalues are equal can be specified as follows.   We wish to test $H_{0}: \lambda_{q+1} = \lambda_{q+2} = \ldots = \lambda_{p}$ versus $H_{a}: \lambda_{q+1} > \lambda_{q+2} > \ldots > \lambda_{p}$.
+
+\begin{equation}
+-2 \log \mathscr{l} = - n \log \left( \prod_{q=1}^{p} \frac{\lambda_{j}}{\bar{\lambda}} \right)
+\end{equation}
+where $\bar{lambda} = \frac{1}{p-q} \sum_{j=q}^{p} \lambda_{j}$.   Under the null hypothesis, the likelihood ratio statistic, $-2 \log \mathscr{l}$, of the eivenvalues derived from a covariance matrix is distributed as $\chi^{2}_{\frac{1}{2}(p-q-1)(p-q+2)}$.  The test can be applied to the correlation matrix but the asymptotic distribution is no longer chi-square.   The asymptotics can be improved with a correction proposed by \cite{Lawley:1956}:
+
+%this uses Anderson:1963 and Fujikoshi:1978 asymptotics on chisq.
+
+\begin{equation}
+- \left\{ n - 1 - q - \frac{2(p-q)^{2} + (p-q) + 2}{6(p-q)} + \sum_{j=1}^{q} \left(\frac{\bar{\lambda}}{\lambda_{j} - \bar{\lambda}} \right)^2 \right\}  \log \left( \prod_{q=1}^{p} \frac{\lambda_{j}}{\bar{\lambda}} \right)
+\end{equation}
+
+This test is however not robust to departures from normality.
+
+
+%\label{th:sphertest}
+%The likelihood ratio test for the hypothesis $\lambda_{q+1} = \cdots = \lambda_{p}$ versus the alternative $\lambda_{q+1} > \cdots \lambda_{p}$ is given by:
+
+%\begin{equation}
+%\varphi(q, p-q) = N(p-q) 
+%\frac{\frac{1}{p-q} \sum_{j=q=1}^{p} \lambda_{j}}
+%{(\prod_{j=q=1}^{p} \lambda_{j} )^{1/(p-q)}}
+%\end{equation}
+%\end{theorem}
+%Proof: \cite{Anderson:1984}
+
+%$\varphi \sim \chi_{((p-q)((p-q)+1)/2 - 1)}^{2} as N \rightarrow \inf$
+
+%It is therefore possible to test for sphericity of a $q$ dimensional solution, increasing this by one and not worrying about the multiple testing problem.
+
+\end{definition}

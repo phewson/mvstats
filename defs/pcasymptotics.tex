@@ -1,0 +1,23 @@
+\begin{theorem}
+\label{th:pcasymptotics}
+The asymptotic distribution of eigenvalues and eigenvectors can be expressed as follows:
+\begin{equation}
+\label{pcasymptotics}
+\sqrt{n}(\boldsymbol{\ell} - \boldsymbol{\lambda}) \sim MVN(\boldsymbol{0}, 2\boldsymbol{\Lambda}^{2})
+\end{equation}
+%\begin{equation}
+%\sqrt{n} \frac{\mathscr{l}_{i} - \lambda_{i}}{\sqrt{2}\mathscr{l}_{i}} \to^\infty N(0,1)
+%\end{equation}
+where $\Lambda$ is the diagonal matrix of eigenvalues.   This can be expressed equivalently as:
+\begin{equation}
+\label{pcaasymptoticslog}
+\sqrt{n}\left(\log(\boldsymbol{\ell}) - \log(\boldsymbol{\lambda})\right) \sim MVN(\boldsymbol{0}, 2)
+\end{equation}
+
+ and 
+\begin{equation}
+\sqrt{n}(\hat{\boldsymbol{e}}_{i} - \boldsymbol{e}_{i}) \sim MVN(\boldsymbol{0}, \boldsymbol{E}_{i})
+\end{equation}
+where $\boldsymbol{E}_{i} = \lambda_{i} \sum_{k = 1, k \neq i}^{p} \frac{\lambda_{k}}{(\lambda_{k} - \lambda_{i})^{2}} \boldsymbol{e}_{k}\boldsymbol{e}^{T}$
+\end{theorem}
+Proof: The proof for this has been restated in \cite{Flury:1988}.   These properties were established following work by \cite{Anderson:1963} and \cite{Girshink:1939}.

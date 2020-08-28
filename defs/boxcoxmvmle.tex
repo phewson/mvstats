@@ -1,0 +1,27 @@
+
+\begin{equation}
+\mathscr{L}(\boldsymbol{\mu, \Sigma, \lambda} | \boldsymbol{X^{(\lambda)}}) \propto -\frac{n}{2} \log \lvert \boldsymbol{\Sigma} \rvert - 
+\frac{1}{2} tr (\boldsymbol{\Sigma}^{-1} 
+(\boldsymbol{X}^{(\boldsymbol{\lambda})} - \boldsymbol{1}\boldsymbol{\mu}^{T})^{T}
+(\boldsymbol{X}^{(\boldsymbol{\lambda})} - \boldsymbol{1}\boldsymbol{\mu}^{T})
++ sum_{j=1}^{p} \left( (\lambda_{j} - 1) \sum_{i=1}^{n} \log x_{ij} \right)
+\end{equation}
+
+%the last term being the Jacobian
+
+If $\lambda$ is fixed, this likelihood is maximised at:
+
+\begin{equation}
+\bar{x}^{(\lambda)} = \frac{1}{n}  \boldsymbol{1}^{T} \boldsymbol{X}
+\end{equation}
+and 
+\begin{equation}
+s^{2}(\lambda) = (\boldsymbol{X}^{(\boldsymbol{\lambda})} - \boldsymbol{1}\boldsymbol{\mu}^{T})^{T}
+(\boldsymbol{X}^{(\boldsymbol{\lambda})} - \boldsymbol{1}\boldsymbol{\mu}^{T})
+\end{equation}
+
+which means that the value maximising the log-likelihood is proportional to:
+
+\begin{equation}
+\mathscr{L_{max}}(\lambda) = -\frac{n}{2} \log \lvert \hat{\boldsymbol{\Sigma}} \rvert + \sum_{j=1}^{p} \left( (\lambda_{j} - 1) \sum_{i=1}^{n} \log x_{ij} \right)
+\end{equation}

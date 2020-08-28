@@ -1,0 +1,31 @@
+\begin{definition}
+\label{def:mvexpectation}
+
+Given a multivariate distribution function for $p$ random variables $\boldsymbol{x} = (x_{1}, x_{2}, \ldots, x_{p})$ taking the form $P(\boldsymbol{x}\in A) = \int_{A} f(\boldsymbol{x})d\boldsymbol{x}$, expectation can be defined as:
+\begin{equation}
+\label{eq:mvexp}
+E(g(\boldsymbol{x})) = \int_{\mathscr{R^{p}}} g(\boldsymbol{x})f(\boldsymbol{x})d\boldsymbol{x}
+\end{equation}
+
+which gives rise to moments
+\begin{equation}
+E(\boldsymbol{x}) = \boldsymbol{\mu}
+\end{equation}
+
+as well as moment generating functions:
+
+\begin{equation}
+M_{x}\boldsymbol{t} = E e^{\boldsymbol{x}^{T}\boldsymbol{t}},
+\end{equation}
+cumulants:
+\begin{equation}
+K_{x}\boldsymbol{t} = \log( M_{x}\boldsymbol{t}), 
+\end{equation}
+and the characteristic function:
+\begin{equation}
+\phi_{x}\boldsymbol{t} = E( E e^{i\boldsymbol{x}^{T}\boldsymbol{t}})
+\end{equation}
+
+These generating functions have analogous properties to their univariate counterparts.
+
+\end{definition}

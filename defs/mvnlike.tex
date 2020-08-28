@@ -1,0 +1,47 @@
+\begin{theorem}
+\label{th:mvnlike}
+
+If $\boldsymbol{x} = (x_{1}, x_{2}, \ldots, x_{p})$ is a $p$ dimensional vector of random variables representing a sample from $MVN_{p}(\boldsymbol{\mu}, \boldsymbol{\Sigma})$, then the log-likelihood function can be given by $\mathscr{l}$ as follows:
+\begin{equation}
+\label{eq:mvnlike}
+\mathscr{l}(\boldsymbol{\mu}, \boldsymbol{\Sigma}| \boldsymbol{x}) = 
+- \frac{np}{2} \log(2 \pi) - \frac{n}{2} \log \lvert \boldsymbol{\Sigma} \rvert -
+\frac{1}{2} \sum_{i=1}^{n} \left( (\boldsymbol{x}_{i} - \boldsymbol{\mu})^{T} \boldsymbol{\Sigma}^{-1}(\boldsymbol{x}_{i} - \boldsymbol{\mu}) \right)
+\end{equation}
+
+which can be rewritten as:
+
+\begin{displaymath}
+\label{eq:mvnlike}
+\mathscr{l}(\boldsymbol{\mu}, \boldsymbol{\Sigma}| \boldsymbol{x}) = 
+- \frac{np}{2} \log(2 \pi) - \frac{n}{2} \log \lvert \boldsymbol{\Sigma} \rvert -
+\frac{1}{2} trace \left( \boldsymbol{\Sigma}^{-1} \sum_{i=1}^{n} (\boldsymbol{x}_{i} - \boldsymbol{\mu})^{T}(\boldsymbol{x}_{i} - \boldsymbol{\mu}) \right)
+\end{displaymath}
+
+adding and subtracting $\bar{\boldsymbol{x}}$ from each of the two brackets on the right, and setting $\boldsymbol{A} = \sum_{i=1}^{n}(\boldsymbol{x}_{i} - \bar{\boldsymbol{x}})(\boldsymbol{x}_{i} - \bar{\boldsymbol{x}})^{T}$ allows this to be rewritten as: 
+
+\begin{displaymath}
+\label{eq:mvnlike}
+%\mathscr{l}(\boldsymbol{\mu}, \boldsymbol{\Sigma}| \boldsymbol{x}) = 
+- \frac{np}{2} \log(2 \pi) - \frac{n}{2} \log \lvert \boldsymbol{\Sigma} \rvert -
+\frac{1}{2} trace \left( \boldsymbol{\Sigma}^{-1} \boldsymbol{A} + n \boldsymbol{\Sigma}^{-1} (\bar{\boldsymbol{x}} - \boldsymbol{\mu})(\bar{\boldsymbol{x}} - \boldsymbol{\mu})^{T} \right)
+\end{displaymath}
+
+The way to obtaining the maximum likelihood estimators for $\boldsymbol{\mu}$ is now fairly clear.   As $\boldsymbol{\Sigma}$ is positive definite, we require $(\bar{\boldsymbol{x}} - \boldsymbol{\mu})(\bar{\boldsymbol{x}} - \boldsymbol{\mu})^{T}$ to be greater than or equal to zero, hence $ \hat{\boldsymbol{\mu}} = \bar{\boldsymbol{x}}$ maximises the likelihood for all positive definite $\boldsymbol{\Sigma}$
+
+A number of derivations for Sigma are possible, essentially we need to minimise:
+\begin{equation}
+\mathscr{l}(\bar{\boldsymbol{x}}, \boldsymbol{\Sigma}) = \log \lvert \boldsymbol{\Sigma} \rvert + trace( \boldsymbol{\Sigma}^{-1} \boldsymbol{S}).
+\end{equation}
+with respect to $\boldsymbol{\Sigma}$.   This can be derived as a minimisation of $\mathscr{l}(\bar{\boldsymbol{x}},\boldsymbol{\Sigma})  - \log( \lvert \boldsymbol{S} \rvert) = trace( \boldsymbol{\Sigma}^{-1} \boldsymbol{S}) - \log \lvert \boldsymbol{\Sigma}^{-1} \boldsymbol{S} \rvert$.   If $\boldsymbol{S}^{1/2}$ is the positive definite symmetric square root of $\boldsymbol{S}$,  $trace( \boldsymbol{\Sigma}^{-1} \boldsymbol{S}) =  trace( \boldsymbol{S}^{1/2} \boldsymbol{\Sigma}^{-1} \boldsymbol{S}^{1/2})$, but given that $\boldsymbol{A} =  \boldsymbol{S}^{1/2} \boldsymbol{\Sigma}^{-1} \boldsymbol{S}^{1/2}$ is a symmetric matrix we know that $trace(\boldsymbol{A}) = \sum_{j=1}^{p} \lambda_{i}$ and $\lvert \boldsymbol{A} \rvert = \prod_{j=1}^{p} \lambda_{i}$ where $\lambda_{1}, \ldots, \lambda_{p}$ are the eigenvalues of $\boldsymbol{A}$, which must all be positive (because $\boldsymbol{A}$ is positive definite).   Hence we wish to minimise:
+\begin{equation}
+\mathscr{l}(\bar{\boldsymbol{x}},\boldsymbol{\Sigma})  - \log( \lvert \boldsymbol{S} \rvert) =  \sum_{j=1}^{p} \lambda_{i} - \log  \prod_{j=1}^{p} \lambda_{i}
+\end{equation}
+and given that $f(z) = z - \log(z)$ takes a unique mininum at $z=1$ we wish to find a matrix where all the eigenvalues equal 1, i.e. the identity matrix.   Consequently we wish to find:
+\begin{equation}
+ \boldsymbol{S}^{1/2} \boldsymbol{\Sigma}^{-1} \boldsymbol{S}^{1/2} = \boldsymbol{I}
+\end{equation}
+hence $\boldsymbol{S}$ is the maximum likelihood estimator of $\boldsymbol{\Sigma}$.   Do note that this requires $n>p$.
+
+
+\end{theorem}

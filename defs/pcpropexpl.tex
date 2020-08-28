@@ -1,0 +1,19 @@
+\begin{theorem}
+\label{th:propexpl}
+
+We denote our estimate of the proportion of variation explained by $\pi$:
+\begin{displaymath}
+\pi = f(\lambda) = \frac{ \sum_{i=1}^{q} \lambda_{i} }{ \sum_{i=1}^{p} \lambda_{i} }.
+\end{displaymath}
+
+If we also consider the corresponding sum of squares:
+\begin{displaymath}
+\zeta = \frac{\sum_{i=1}^{q} \lambda_{i}^{2}}{ \sum_{i=1}^{p} \lambda_{i}^{2}}
+\end{displaymath}
+
+Under conditions of multivariate normality, we can obtain an estimate of the variance associated $\pi$, the proportion of variance explained as follows:
+\begin{equation}
+\eta^{2} = \frac{2 trace(\Sigma)}{(n-1)  (trace(\Sigma))^{2}} = \pi^{2} - 2 \zeta \pi + \zeta^{2}
+\end{equation}
+\end{theorem}
+\textbf{Proof}: \cite{Sugiyama+Tong:1976} and [page 454] \cite{Kshinaragar:1972}
